@@ -2,7 +2,7 @@
 import { ref, defineProps, defineEmits, computed } from 'vue';
 import SearchIcon from './icons/SearchIcon.vue';
 
-const props = defineProps<{
+defineProps<{
   title: string;
   placeholder: string;
 }>();

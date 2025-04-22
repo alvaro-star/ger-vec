@@ -23,8 +23,19 @@ class VeiculoFactory extends Factory
             'placa' => $this->faker->unique()->regexify('[A-Z]{3}[0-9]{4}'),
             'renavam' => $this->faker->numberBetween(10000000000, 99999999999),
             'ano' => $this->faker->year,
-            'cor' => $this->faker->colorName,
-            'tipo_combustivel' => $this->faker->randomElement(['Gasolina', 'Álcool', 'Diesel', 'Elétrico', 'Flex']),
+            'cor' => $this->faker->randomElement([
+                'Branco',
+                'Preto',
+                'Cinza',
+                'Prata',
+                'Azul',
+                'Vermelho',
+                'Verde',
+                'Marrom',
+                'Bege',
+                'Dourado'
+            ]),
+            'tipo_combustivel' => $this->faker->randomElement(['Gasolina', 'Álcool', 'Diesel', 'Elétrico', 'Flex', 'Hibrido']),
             'pessoa_id' => Pessoa::inRandomOrder()->first()->id,
         ];
     }

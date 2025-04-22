@@ -7,11 +7,15 @@ import SelectInput from '@/components/form-components/SelectInput.vue';
 import TextInput from '@/components/form-components/TextInput.vue';
 import TrashIcon from '@/components/icons/TrashIcon.vue';
 import api from '@/plugins/api';
+import { useAlertStore } from '@/stores/alertState';
 import type IPessoa from '@/types/IPessoa';
 import { onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+const alertStore = useAlertStore();
+
 interface FormData {
+
     nome: string;
     telefone: string;
     cpf: string;
@@ -37,7 +41,6 @@ const form = reactive<FormData>({
 
 const errors = reactive<Record<string, string>>({});
 const loading = ref(false);
-const error = ref<string | null>(null);
 
 const fetchPessoa = async () => {
     try {
@@ -49,6 +52,7 @@ const fetchPessoa = async () => {
         form.sexo = response.data.is_masculino ? 'Masculino' : 'Feminino';
         form.idade = response.data.idade;
     } catch (error) {
+
         console.error((error as Error).message);
     }
 }
@@ -90,7 +94,6 @@ async function submitForm() {
     if (!validateForm()) return;
 
     loading.value = true;
-    error.value = null;
 
     try {
         const id = getIdByRoute() as string;
@@ -100,13 +103,13 @@ async function submitForm() {
             sexo: form.sexo === 'Masculino' ? 'M' : 'F'
         });
 
+        alertStore.setMessage('Pessoa editada com sucesso', null)
         router.back();
-
     } catch (erro: any) {
         if (erro.status === 422 && erro.response?.data?.errors) {
             Object.assign(errors, erro.response.data.errors);
         }
-        error.value = 'Erro ao realizar o cadastro.';
+        alertStore.setMessage('Erro ao realizar o cadastro.', 'danger')
     } finally {
         loading.value = false;
     }
@@ -128,18 +131,15 @@ const confirmDelete = async () => {
         const id = getIdByRoute();
         if (id) {
             await api.delete(`/pessoas/${id}`);
+            alertStore.setMessage('Pessoa deletada com sucesso', null)
             router.push({
                 name: 'pessoas.index',
-                query: {
-                    showToast: 'true',
-                    toastMessage: 'Pessoa deletada com sucesso!'
-                },
                 replace: true
             });
         }
     } catch (exception) {
         console.log(exception);
-        error.value = 'Erro ao excluir a pessoa.';
+        alertStore.setMessage('Nao foi possivel excluir o cliente.', 'danger')
     }
 }
 
@@ -150,7 +150,7 @@ onMounted(() => {
 
 <template class="mt-4">
     <main class="h-[calc(100vh-56px)]">
-        <HeaderModule>
+        <HeaderModule class="mb-4">
             <template #title>
                 <h1 class="text-3xl font-bold">Editar Pessoa</h1>
             </template>
@@ -198,7 +198,7 @@ onMounted(() => {
                             </button>
 
                             <div class="flex gap-4">
-                                <ButtonCancel label="Cancelar" @click="cancelarEdicao" />
+                                <ButtonCancel label="Cancelar" type="button" @click="cancelarEdicao" />
                                 <ButtonCadastrar type="submit" label="Salvar Alterações" />
                             </div>
                         </div>

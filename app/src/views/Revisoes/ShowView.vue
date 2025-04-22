@@ -40,7 +40,7 @@ onMounted(fetchRevisao);
 
 <template class="mt-4">
     <main class="h-[calc(100vh-56px)]">
-        <HeaderModule>
+        <HeaderModule class="mb-4">
             <template #title>
                 <h1 class="text-3xl font-bold">Detalhes da Revisão</h1>
             </template>
@@ -64,7 +64,9 @@ onMounted(fetchRevisao);
                                         :valor="formatarClassicData(revisao.data)" />
                                     <CampoShow class="md:w-1/3" titulo="Quilometragem" :valor="revisao.quilometragem" />
                                     <CampoShow class="md:w-1/3" titulo="Descrição" :valor="revisao.descricao" />
-                                    <CampoShow class="md:w-1/3" titulo="Valor" :valor="revisao.valor_total" />
+                                    <CampoShow class="md:w-1/3" titulo="Valor">
+                                        R$ {{ revisao.valor_total }}
+                                    </CampoShow>
                                     <CampoShow class="md:w-1/3" titulo="Placa do Veiculo">
                                         <router-link
                                             :to="{ name: 'veiculos.show', params: { id: revisao.veiculo?.id } }"

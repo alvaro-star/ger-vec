@@ -12,7 +12,7 @@ defineProps<{
   placeholder?: string,
   columns: IColumn[],
   rows: any[],
-  showActions?: boolean,
+  showActions?: 0 | 1,
   currentPage: number,
   totalRecords: number,
   pageSize: number,
@@ -42,8 +42,9 @@ const handlePageSizeChange = (size: number) => {
         <TabelaAcoes :title="title ?? 'Título Padrão'" :placeholder="placeholder ?? 'Digite sua pesquisa aqui'"
           @search="emitSearch" />
         <div class="overflow-x-auto">
+
           <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-            <Header :columns="columns" :showActions="showActions ?? true" />
+            <Header :columns="columns" :showActions="showActions === undefined || showActions == 1" />
 
             <tbody>
               <Row v-for="(row, index) in rows" :key="index" :columns="columns" :row="row" />

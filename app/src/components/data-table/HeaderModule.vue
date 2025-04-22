@@ -5,7 +5,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="max-w-screen py-4 bg-white border-b border-gray-300">
+  <div class="max-w-screen py-5 bg-white border-b border-gray-300">
     <div class="container flex justify-between items-center ">
       <div class="pl-4">
         <slot name="title">

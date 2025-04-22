@@ -8,7 +8,7 @@ export const useAlertStore = defineStore('message', {
     actions: {
         setMessage(mensagem: string, tipo: 'danger' | 'alert' | 'success' | null) {
             this.mensagem = mensagem
-            this.tipo = tipo ?? 'alert';
+            this.tipo = tipo ?? 'success';
         },
 
         clearMessage() {

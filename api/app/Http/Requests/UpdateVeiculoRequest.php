@@ -28,7 +28,7 @@ class UpdateVeiculoRequest extends FormRequest
             'renavam' => 'required|string|max:255',
             'ano' => 'required|integer|min:1900|max:' . (date('Y') + 1),
             'cor' => 'required|string|max:255',
-            'tipo_combustivel' => 'required|string|in:gasolina,diesel,eletrico,hibrido'
+            'tipo_combustivel' => 'required|string|max:255',
         ];
     }
 }

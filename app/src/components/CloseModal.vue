@@ -1,7 +1,6 @@
 <template>
-    <div v-if="isVisible" class="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center"
-        @click.self="closeModal">
-        <div class="bg-white p-6 rounded w-full max-w-[600px] shadow-lg">
+    <div v-show="isVisible" class="fixed inset-0  flex justify-center items-center" @click.self="closeModal">
+        <div class="bg-white p-6 rounded w-full max-w-[600px] shadow-2xl border border-gray-400">
             <div class="text-xl font-semibold">Confirmar Exclusão</div>
             <div class="mt-4 text-lg text-terciary">
                 <slot>

@@ -1,7 +1,7 @@
 <template>
   <div class="p-3 flex flex-row items-center justify-between">
     <div>
-      <select class="text-sm text-gray-700 bg-gray-50 border border-gray-300 rounded py-1.5 px-2"
+      <select class="w-14 text-sm text-gray-700 bg-gray-50 border border-gray-300 rounded py-1.5 px-2"
         v-model="localPageSize" @change="updatePageSize">
         <option v-for="size in pageSizeOptions" :key="size" :value="size">
           {{ size }}

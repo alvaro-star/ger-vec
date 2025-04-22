@@ -1,13 +1,16 @@
 <script lang="ts" setup>
-import { ref, reactive } from 'vue';
-import { useRouter } from 'vue-router';
-import api from '@/plugins/api';
 import HeaderModule from '@/components/data-table/HeaderModule.vue';
 import BackButton from '@/components/form-components/buttons/BackButton.vue';
-import TextInput from '@/components/form-components/TextInput.vue';
-import SelectInput from '@/components/form-components/SelectInput.vue';
-import ButtonCancel from '@/components/form-components/buttons/ButtonCancel.vue';
 import ButtonCadastrar from '@/components/form-components/buttons/ButtonCadastrar.vue';
+import ButtonCancel from '@/components/form-components/buttons/ButtonCancel.vue';
+import SelectInput from '@/components/form-components/SelectInput.vue';
+import TextInput from '@/components/form-components/TextInput.vue';
+import api from '@/plugins/api';
+import { useAlertStore } from '@/stores/alertState';
+import { reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+const alertStore = useAlertStore()
 
 interface FormData {
     nome: string;
@@ -74,14 +77,11 @@ async function submitForm() {
 
         const pessoaId = response.data.id;
 
+        alertStore.setMessage('O cliente foi cadastrado com sucesso!', null);
         router.push({
             name: 'pessoas.show',
             params: {
                 id: pessoaId // Este é o param, geralmente usado em rotas como /pessoa/:id
-            },
-            query: {
-                showToast: 'true',
-                toastMessage: 'Pessoa cadastrada com sucesso!'
             },
             replace: true
         });
@@ -104,7 +104,7 @@ function cancelarCadastro() {
 
 <template class="mt-4">
     <main class="h-[calc(100vh-56px)]">
-        <HeaderModule>
+        <HeaderModule classs="mb-4">>
             <template #title>
                 <h1 class="text-3xl font-bold">Cadastrar Pessoa</h1>
             </template>

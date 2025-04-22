@@ -1,22 +1,21 @@
 <script setup lang="ts">
+import Header from '@/components/data-table/Header.vue'
+import Pagination from '@/components/data-table/Pagination.vue'
+import Row from '@/components/data-table/Row.vue'
+import PrimaryButton from '@/components/form-components/buttons/PrimaryButton.vue'
+import { formatarClassicData } from '@/helpers/formatarData'
 import api from '@/plugins/api'
-import { computed, onMounted, ref, watch } from 'vue'
-import Table from '@/components/data-table/Table.vue'
 import type IColumn from '@/types/IColumn'
 import type IPageOutput from '@/types/IPageOutput'
 import type IRevisao from '@/types/IRevisao'
-import PrimaryButton from '@/components/form-components/buttons/PrimaryButton.vue'
-import Header from '@/components/data-table/Header.vue'
-import Row from '@/components/data-table/Row.vue'
-import Pagination from '@/components/data-table/Pagination.vue'
-import { formatarClassicData } from '@/helpers/formatarData'
+import { onMounted, ref, watch } from 'vue'
 
 const props = defineProps<{
     id: string[] | string
+    placa: string
     title: string
 }>()
 
-const query = ref<string>('')
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(10)
 const totalRecords = ref<number>(0)
@@ -102,9 +101,10 @@ onMounted(fetchData)
         </Suspense>
 
         <div class="flex justify-center py-7">
-            <RouterLink :to="`/veiculos/${props.id}/revisoes/create`">
+            <RouterLink :to="{ name: 'revisoes.create', query: { placa: props.placa } }">
                 <PrimaryButton label="Cadastrar Revisão" />
             </RouterLink>
+
         </div>
     </main>
 </template>

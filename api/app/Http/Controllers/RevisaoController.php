@@ -6,7 +6,7 @@ use App\DTOS\PageInput;
 use App\Models\Revisao;
 use App\Http\Requests\StoreRevisaoRequest;
 use App\Http\Requests\UpdateRevisaoRequest;
-
+use App\Models\Veiculo;
 use Illuminate\Http\Request;
 
 class RevisaoController extends Controller
@@ -30,7 +30,9 @@ class RevisaoController extends Controller
         $dados = $request->validated();
         $revisao = new Revisao();
         $revisao->fill($dados);
-        $revisao->veiculo_id = $dados->veiculo_id;
+        $veiculo = Veiculo::where('placa', $dados['placa'])->first();
+        $revisao->veiculo_id =  $veiculo->id;
+        $revisao->pessoa_id = $veiculo->pessoa_id;
         $revisao->save();
 
         return response()->json($revisao, 201);
@@ -42,16 +44,14 @@ class RevisaoController extends Controller
      */
     public function show(Revisao $reviso)
     {
+        $reviso->veiculo = Veiculo::find($reviso->veiculo_id);
         return response()->json($reviso, 200);
     }
 
     public function revisoesByVeiculo($id, Request $request)
     {
         $pageable = new PageInput($request);
-        $search = $request->query('query');
-
         $query = Revisao::where('veiculo_id', $id)->orderBy('data', 'desc');
-
         $response = $query->getByPageable($pageable);
         return response()->json($response, 200);
     }
@@ -63,7 +63,6 @@ class RevisaoController extends Controller
     {
         $reviso->fill($request->validated());
         $reviso->save();
-
         return response()->json($reviso, 200);
     }
 

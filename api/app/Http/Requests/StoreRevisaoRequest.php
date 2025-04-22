@@ -25,11 +25,9 @@ class StoreRevisaoRequest extends FormRequest
             'data' => 'required|date',
             'quilometragem' => 'required|integer|min:0',
             'tipo' => 'required|string|max:50',
-            'descricao' => 'required|string',
-            'observacoes' => 'required|string',
             'valor_total' => 'required|numeric|min:0',
             'garantia_meses' => 'required|numeric|min:0',
-            'veiculo_id' => 'required|exists:veiculos,id',
+            'placa' => 'required|exists:veiculos,placa',
         ];
     }
 }

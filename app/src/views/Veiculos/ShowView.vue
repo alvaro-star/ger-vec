@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-
 import HeaderModule from '@/components/data-table/HeaderModule.vue';
-
 import CampoShow from '@/components/form-components/CampoShow.vue';
 import formatarData from '@/helpers/formatarData';
 import api from '@/plugins/api';
@@ -42,7 +40,7 @@ onMounted(fetchVeiculo);
 
 <template class="mt-4">
     <main class="h-[calc(100vh-56px)]">
-        <HeaderModule>
+        <HeaderModule class="mb-4">
             <template #title>
                 <h1 class="text-3xl font-bold">Detalhes do Veículo</h1>
             </template>
@@ -87,7 +85,8 @@ onMounted(fetchVeiculo);
                         </div>
                     </section>
 
-                    <TableRevisoes title="Revisões do veículo" :id="route.params.id" />
+                    <TableRevisoes v-if="veiculo" title="Revisões do veículo" :id="route.params.id"
+                        :placa="veiculo?.placa" />
                 </div>
             </template>
             <template #fallback>

@@ -77,8 +77,7 @@ onMounted(() => {
 
 <template>
     <main class="h-[calc(100vh-56px)]">
-
-        <HeaderModule>
+        <HeaderModule class="mb-4">
             <template #title>
                 <h1 class="text-3xl font-bold">Pessoas</h1>
             </template>

@@ -11,9 +11,8 @@ const model = defineModel < string > ({ required: true });
 
 <template>
   <div>
-    <label :class="{ 'text-red-500': message }" class="block tracking-wide text-gray-700 text-sm font-semibold mb-2">
-      {{ label }}
-      <span class="text-red-500">*</span>
+    <label :class="{ 'text-red-500': message }" class="block tracking-wide text-gray-700 text-x font-semibold mb-2">
+      {{ label }} <span class="text-red-500">*</span>
     </label>
 
     <select v-model="model" :class="{ 'border-red-500': message }"

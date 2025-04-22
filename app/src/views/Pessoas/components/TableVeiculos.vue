@@ -85,7 +85,6 @@ onMounted(() => {
     <main class="w-full">
         <Suspense>
             <template #default>
-
                 <Table class="container" :title="title" :columns="columns" :rows="paginatedRecords"
                     :currentPage="currentPage" :totalRecords="totalRecords" :pageSize="pageSize"
                     :pageSizeOptions="[5, 10, 15, 20, 25]" @search="handleSearch" @page-changed="updatePage"
@@ -97,9 +96,10 @@ onMounted(() => {
 
         </Suspense>
         <div class="flex justify-center py-7">
-            <RouterLink to="/veiculos/create">
-                <PrimaryButton label="Cadastrar Veiculo" />
+            <RouterLink :to="{ name: 'veiculos.create' }">
+                <PrimaryButton label="Cadastrar Veículo" />
             </RouterLink>
+
         </div>
     </main>
 </template>

@@ -1,23 +1,40 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router';
-import Footer from './components/Footer.vue';
-import Header from './components/Header.vue';
 import { shallowRef } from 'vue';
+import { RouterView } from 'vue-router';
+import Header from './components/Header.vue';
+import SideBar from './components/SideBar.vue';
 
-const routes = shallowRef([
-    { name: 'home', title: 'Home', path: '/' },
-    { name: 'veiculo.index', title: 'Veículo', path: '/veiculo' },
-    { name: 'revisao.index', title: 'Revisão', path: '/revisao' },
-    { name: 'pessoa.index', title: 'Pessoa', path: '/pessoa' }
-])
+const isSidebarOpen = shallowRef(false);
+const toggleSidebar = () => {
+    isSidebarOpen.value = !isSidebarOpen.value;
+};
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50">
-        <Header :routes="routes" />
-        <main class="w-full">
+    <div :class="{ 'sidebar-open': isSidebarOpen, 'sidebar-closed': !isSidebarOpen }">
+        <SideBar :isSidebarOpen="isSidebarOpen" @toggle-sidebar="toggleSidebar"
+            class="fixed top-0 left-0 h-full z-10" />
+
+        <!-- Main Content -->
+        <main :class="{ 'expanded-main': isSidebarOpen, 'collapsed-main': !isSidebarOpen }" class=" bg-mainBackground">
             <RouterView />
         </main>
-    
     </div>
+
 </template>
+
+
+<style scoped>
+.bg-mainBackground {
+    background-color: #F9FBFE;
+}
+
+
+.sidebar-open .expanded-main {
+    margin-left: 16rem;
+}
+
+.sidebar-closed .collapsed-main {
+    margin-left: 5rem;
+}
+</style>

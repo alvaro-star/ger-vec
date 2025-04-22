@@ -17,15 +17,18 @@ class RevisaoFactory extends Factory
      */
     public function definition(): array
     {
+        $veiculo = Veiculo::inRandomOrder()->first();
+        
         return [
             'data' => $this->faker->date,
             'quilometragem' => $this->faker->numberBetween(1000, 500000),
-            'tipo' => $this->faker->randomElement(['preventiva', 'corretiva']),
+            'tipo' => $this->faker->randomElement(['Preventiva', 'Corretiva']),
             'descricao' => $this->faker->sentence,
             'observacoes' => $this->faker->paragraph,
             'valor_total' => $this->faker->randomFloat(2, 50, 1000),
             'garantia_meses' => $this->faker->numberBetween(1, 24),
-            'veiculo_id' => Veiculo::inRandomOrder()->first()->id,
+            'veiculo_id' => $veiculo->id,
+            'pessoa_id' => $veiculo->pessoa_id,
         ];
     }
 }

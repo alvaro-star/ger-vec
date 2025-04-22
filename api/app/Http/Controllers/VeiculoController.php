@@ -26,10 +26,11 @@ class VeiculoController extends Controller
      */
     public function store(StoreVeiculoRequest $request)
     {
+
         $data = $request->validated();
         $veiculo = new Veiculo();
         $veiculo->fill($data);
-        $veiculo->pessoa_id = $data->pessoa_id;
+        $veiculo->pessoa_id = $data["pessoa_id"];
         $veiculo->save();
 
         return response()->json($veiculo, 201);
@@ -50,15 +51,15 @@ class VeiculoController extends Controller
         $search = $request->query('query');
 
         $query = Veiculo::where('pessoa_id', $id);
-    
+
         if (!empty($search)) {
             $query->where('placa', 'like', '%' . $search . '%');
         }
-    
+
         $response = $query->getByPageable($pageable);
         return response()->json($response, 200);
     }
-    
+
 
 
     /**

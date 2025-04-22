@@ -1,11 +1,13 @@
 @import "tailwindcss";
 
 @import 'flowbite';
+@import "flowbite/src/themes/default";
+@plugin "flowbite/plugin";
+@source "../node_modules/flowbite";
 
 .container {
     @apply max-w-7xl mx-auto w-full;
 }
-
 
 @theme {
     --color-mint-500: oklch(0.72 0.11 178);
