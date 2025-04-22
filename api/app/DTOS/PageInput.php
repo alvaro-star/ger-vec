@@ -1,13 +1,12 @@
 <?php
 
 
-namespace App\Helpers\DTOS;
+namespace App\DTOS;
 
 use Illuminate\Http\Request;
 
 const PAGE_DEFAULT = 1;
 const SIZE_DEFAULT = 10;
-const QUERY_DEFAULT = '';
 
 class PageInput
 {
@@ -20,7 +19,7 @@ class PageInput
         $this->size  = $this->getDefaultIntValue($request->query('size'), SIZE_DEFAULT);
     }
 
-    private function getDefaultIntValue(string $value, int $default): int
+    private function getDefaultIntValue(?string $value, int $default): int
     {
         $int_value = intval($value);
         if ($int_value == 0) $int_value = $default;

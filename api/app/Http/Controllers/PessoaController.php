@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\DTOS\PageInput;
+use App\DTOS\PageInput;
 use App\Models\Pessoa;
 use App\Http\Requests\StorePessoaRequest;
 use App\Http\Requests\UpdatePessoaRequest;
@@ -17,9 +17,16 @@ class PessoaController extends Controller
     public function index(Request $request)
     {
         $pageable = new PageInput($request);
-        $response = Pessoa::findAllByPageable($pageable);
+        $query = $request->query('query') ?? '';
+    
+        if ($query != '')
+            $response = Pessoa::where('nome', 'like', '%' . $query . '%')->getByPageable($pageable);
+        else
+            $response = Pessoa::findAllByPageable($pageable);
+    
         return response()->json($response, 200);
     }
+    
 
     /**
      * Store a newly created resource in storage.
@@ -27,7 +34,7 @@ class PessoaController extends Controller
     public function store(StorePessoaRequest $request)
     {
         $pessoa = new Pessoa;
-        $pessoa->fill($request->validated()); // já validado
+        $pessoa->fill($request->validated());
         $pessoa->is_masculino = $request->sexo === 'M';
         $pessoa->save();
 

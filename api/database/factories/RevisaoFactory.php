@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Veiculo;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +18,14 @@ class RevisaoFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'data' => $this->faker->date,
+            'quilometragem' => $this->faker->numberBetween(1000, 500000),
+            'tipo' => $this->faker->randomElement(['preventiva', 'corretiva']),
+            'descricao' => $this->faker->sentence,
+            'observacoes' => $this->faker->paragraph,
+            'valor_total' => $this->faker->randomFloat(2, 50, 1000),
+            'garantia_meses' => $this->faker->numberBetween(1, 24),
+            'veiculo_id' => Veiculo::inRandomOrder()->first()->id,
         ];
     }
 }

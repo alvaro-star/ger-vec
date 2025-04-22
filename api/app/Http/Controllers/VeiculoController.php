@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\DTOS\PageInput;
+use App\DTOS\PageInput;
 use App\Models\Veiculo;
 use App\Http\Requests\StoreVeiculoRequest;
 use App\Http\Requests\UpdateVeiculoRequest;
@@ -40,8 +40,26 @@ class VeiculoController extends Controller
      */
     public function show(Veiculo $veiculo)
     {
+        $veiculo->pessoa = Pessoa::find($veiculo->pessoa_id);
         return response()->json($veiculo, 200);
     }
+
+    public function veiculosByPessoa($id, Request $request)
+    {
+        $pageable = new PageInput($request);
+        $search = $request->query('query');
+
+        $query = Veiculo::where('pessoa_id', $id);
+    
+        if (!empty($search)) {
+            $query->where('placa', 'like', '%' . $search . '%');
+        }
+    
+        $response = $query->getByPageable($pageable);
+        return response()->json($response, 200);
+    }
+    
+
 
     /**
      * Update the specified resource in storage.

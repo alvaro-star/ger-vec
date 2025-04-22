@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\DTOS\PageInput;
+use App\DTOS\PageInput;
 use App\Models\Revisao;
 use App\Http\Requests\StoreRevisaoRequest;
 use App\Http\Requests\UpdateRevisaoRequest;
-use App\Models\Veiculo;
+
 use Illuminate\Http\Request;
 
 class RevisaoController extends Controller
@@ -40,28 +40,39 @@ class RevisaoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Revisao $revisao)
+    public function show(Revisao $reviso)
     {
-        return response()->json($revisao, 200);
+        return response()->json($reviso, 200);
+    }
+
+    public function revisoesByVeiculo($id, Request $request)
+    {
+        $pageable = new PageInput($request);
+        $search = $request->query('query');
+
+        $query = Revisao::where('veiculo_id', $id)->orderBy('data', 'desc');
+
+        $response = $query->getByPageable($pageable);
+        return response()->json($response, 200);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateRevisaoRequest $request, Revisao $revisao)
+    public function update(UpdateRevisaoRequest $request, Revisao $reviso)
     {
-        $revisao->fill($request->validated());
-        $revisao->save();
+        $reviso->fill($request->validated());
+        $reviso->save();
 
-        return response()->json($revisao, 200);
+        return response()->json($reviso, 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Revisao $revisao)
+    public function destroy(Revisao $reviso)
     {
-        $revisao->delete();
+        $reviso->delete();
         return response()->json([], 204);
     }
 }

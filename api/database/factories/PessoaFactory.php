@@ -17,7 +17,11 @@ class PessoaFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'nome' => $this->faker->name,
+            'telefone' => $this->faker->phoneNumber,
+            'cpf' => $this->faker->unique()->numerify('###########'),
+            'is_masculino' => $this->faker->boolean,
+            'idade' => $this->faker->numberBetween(18, 65)
         ];
     }
 }

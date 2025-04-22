@@ -2,24 +2,24 @@
 
 namespace App\Models;
 
+use App\Config\CustomBuilder;
+use App\DTOS\PageInput;
 use App\DTOS\PageOutput;
-use App\Helpers\DTOS\PageInput;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class BaseModel extends Model
 {
+    public function newEloquentBuilder($query)
+    {
+        return new CustomBuilder($query);
+    }
     public static function findAllByPageable(PageInput $pageable): PageOutput
     {
+        $nElementos  = static::count();
         $data = static::offset($pageable->getOffset())
             ->limit($pageable->getLimit())
             ->get();
-        $hasNextPage = false;
-
-        if ($data->count() > $pageable->getLimit()) {
-            $data = $data->slice(0, $pageable->getLimit());
-            $hasNextPage = true;
-        }
-        
-        return new PageOutput($pageable, $data, $hasNextPage);
+        return new PageOutput($pageable, $data, $nElementos);
     }
 }

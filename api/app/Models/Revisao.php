@@ -9,6 +9,7 @@ class Revisao extends BaseModel
 {
     /** @use HasFactory<\Database\Factories\RevisaoFactory> */
     use HasFactory;
+    protected $table = 'revisoes';
     protected $fillable = [
         'data',
         'quilometragem',

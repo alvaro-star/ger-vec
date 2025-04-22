@@ -2,7 +2,7 @@
 
 namespace App\DTOS;
 
-use App\Helpers\Dtos\PageInput;
+
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -12,29 +12,23 @@ class PageOutput
 {
     public int $nPage;
     public int $size;
-    /** @var T[] */
-    public Collection $content;
+
+    public int $nElementos;
+    public int $nPages;
+
     public bool $hasNextPage;
 
-    public function __construct(PageInput $pageable, Collection $content, bool $hasNextPage)
+    /** @var T[] */
+    public Collection $content;
+
+    public function __construct(PageInput $pageable, Collection $content, int $nElementos)
     {
         $this->nPage = $pageable->page;
         $this->size = $pageable->size;
         $this->content = $content;
-        $this->hasNextPage = $hasNextPage;
-    }
+        $this->nElementos = $nElementos;
 
-    /**
-     * A funcao verifica se existe uma seguinte pagina
-     * com base no tamanho de uma colecao de uma requisicao
-     */
-    public static function generateResponseByCollection(PageInput $pageable, Collection $content)
-    {
-        $hasNextPage = false;
-        if ($content->count() > $pageable->getLimit()) {
-            $content = $content->slice(0, $pageable->getLimit());
-            $hasNextPage = true;
-        }
-        return new PageOutput($pageable, $content, $hasNextPage);
+        $this->nPages = (int) ceil($nElementos / $this->size);
+        $this->hasNextPage = ($this->nPage) < $this->nPages;
     }
 }
