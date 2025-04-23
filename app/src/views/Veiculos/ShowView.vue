@@ -59,26 +59,25 @@ onMounted(fetchVeiculo);
                             <div class="p-5 bg-white relative border border-gray-300 sm:rounded overflow-hidden">
                                 <h2 class="text-xl font-semibold mb-4">Dados do Veículo</h2>
                                 <div class="border-b border-colorline"></div>
-                                <div class="flex flex-wrap -mx-3 mt-4">
-                                    <CampoShow class="md:w-1/3" titulo="Marca" :valor="veiculo.marca" />
-                                    <CampoShow class="md:w-1/3" titulo="Modelo" :valor="veiculo.modelo" />
-                                    <CampoShow class="md:w-1/3" titulo="Placa" :valor="veiculo.placa" />
-                                    <CampoShow class="md:w-1/3" titulo="Proprietario">
+                                <div class="-mx-3 mt-4 grid-responsive">
+                                    <CampoShow class="" titulo="Marca" :valor="veiculo.marca" />
+                                    <CampoShow class="" titulo="Modelo" :valor="veiculo.modelo" />
+                                    <CampoShow class="" titulo="Placa" :valor="veiculo.placa" />
+                                    <CampoShow class="" titulo="Proprietario">
                                         <router-link :to="{ name: 'pessoas.show', params: { id: veiculo.pessoa?.id } }"
                                             class="text-blue-500 hover:underline">
                                             {{ veiculo.pessoa?.nome }}
                                         </router-link>
                                     </CampoShow>
-                                    <CampoShow class="md:w-1/3" titulo="Renavam" :valor="veiculo.renavam" />
-                                    <CampoShow class="md:w-1/3" titulo="Ano" :valor="veiculo.ano" />
-                                    <CampoShow class="md:w-1/3" titulo="Cor" :valor="veiculo.cor" />
-                                    <CampoShow class="md:w-1/3" titulo="Tipo de Combustível"
+                                    <CampoShow class="" titulo="Renavam" :valor="veiculo.renavam" />
+                                    <CampoShow class="" titulo="Ano" :valor="veiculo.ano" />
+                                    <CampoShow class="" titulo="Cor" :valor="veiculo.cor" />
+                                    <CampoShow class="" titulo="Tipo de Combustível"
                                         :valor="veiculo.tipo_combustivel" />
                                 </div>
                                 <div class="flex flex-wrap -mx-3 mt-4">
-                                    <CampoShow class="md:w-1/3" titulo="Criado em"
-                                        :valor="formatarData(veiculo.created_at)" />
-                                    <CampoShow class="md:w-1/3" titulo="Atualizado em"
+                                    <CampoShow class="" titulo="Criado em" :valor="formatarData(veiculo.created_at)" />
+                                    <CampoShow class="" titulo="Atualizado em"
                                         :valor="formatarData(veiculo.updated_at)" />
                                 </div>
                             </div>

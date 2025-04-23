@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('renavam')->nullable();
             $table->integer('ano');
 
+            $table->unsignedBigInteger('n_revisoes')->default(0);
+            
             $table->string('cor')->nullable();
             $table->string('tipo_combustivel')->nullable();
 

@@ -1,4 +1,4 @@
-const cores = [
+export const cores = [
     'Branco',
     'Preto',
     'Cinza',

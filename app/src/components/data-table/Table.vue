@@ -6,6 +6,8 @@ import Header from "./Header.vue";
 import Pagination from './Pagination.vue';
 import Row from './Row.vue';
 import TabelaAcoes from './TableActions.vue';
+import type { IFilters } from "@/types/IFilter";
+
 
 defineProps<{
   title?: string,
@@ -13,17 +15,23 @@ defineProps<{
   columns: IColumn[],
   rows: any[],
   showActions?: 0 | 1,
+  showFilters?: number,
+  filters?: IFilters,
   currentPage: number,
   totalRecords: number,
   pageSize: number,
   pageSizeOptions: number[]
 }>();
 
-const emit = defineEmits(['search', 'filter-users', 'page-changed', 'page-size-changed']);
+const emit = defineEmits(['search', 'page-changed', 'page-size-changed', 'update-filter']);
 
 const emitSearch = (query: string) => {
   emit('search', query);
 };
+
+const emitUpdateFilter = (label: string, values: string[]) => {
+  emit('update-filter', label, values);
+}
 
 const handlePageChange = (page: number) => {
   emit('page-changed', page);
@@ -40,7 +48,7 @@ const handlePageSizeChange = (size: number) => {
     <div class="mx-auto max-w-screen">
       <div class="bg-white relative border border-gray-300 sm:rounded overflow-hidden">
         <TabelaAcoes :title="title ?? 'Título Padrão'" :placeholder="placeholder ?? 'Digite sua pesquisa aqui'"
-          @search="emitSearch" />
+          @search="emitSearch" :filters="filters" @update-filter="emitUpdateFilter" :show-filters="showFilters" />
         <div class="overflow-x-auto">
 
           <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">

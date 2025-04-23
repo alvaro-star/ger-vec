@@ -57,21 +57,21 @@ onMounted(fetchPessoa);
                     <section v-if="pessoa" class="pt-3 pb-1.5 pr-3 pl-3">
                         <div class="mx-auto max-w-screen">
                             <div class="p-5 bg-white relative border border-gray-300 sm:rounded overflow-hidden">
-                                <h2 class="text-xl font-semibold mb-4">Dados da Pessoa</h2>
+                                <h2 class="text-xl font-semibold mb-4">Dados do Cliente</h2>
                                 <div class="border-b border-colorline"></div>
-                                <div class="flex flex-wrap -mx-3 mt-4">
-                                    <CampoShow class="md:w-1/3" titulo="Nome" :valor="pessoa.nome" />
-                                    <CampoShow class="md:w-1/3" titulo="Telefone" :valor="pessoa.telefone" />
-                                    <CampoShow class="md:w-1/3" titulo="CPF" :valor="pessoa.cpf" />
-                                    <CampoShow class="md:w-1/3" titulo="Sexo"
+                                <div class="-mx-3 mt-4 grid grid-cols-2 md:grid-cols-3 gap-3">
+                                    <CampoShow class="" titulo="Nome" :valor="pessoa.nome" />
+                                    <CampoShow class="" titulo="Telefone" :valor="pessoa.telefone" />
+                                    <CampoShow class="" titulo="CPF" :valor="pessoa.cpf" />
+                                    <CampoShow class="" titulo="Sexo"
                                         :valor="pessoa.is_masculino ? 'Masculino' : 'Feminino'" />
-                                    <CampoShow class="md:w-1/3" titulo="Idade" :valor="pessoa.idade" />
+                                    <CampoShow class="" titulo="Idade" :valor="pessoa.idade" />
 
                                 </div>
-                                <div class="flex flex-wrap -mx-3 mt-4">
-                                    <CampoShow class="md:w-1/3" titulo="Criado em"
-                                        :valor="formatarData(pessoa.created_at)" />
-                                    <CampoShow class="md:w-1/3" titulo="Atualizado em"
+                                <div class="-mx-3 mt-4 grid grid-cols-2 md:grid-cols-3 gap-3">
+                                    <CampoShow class="hidden md:block" titulo="" />
+                                    <CampoShow class="" titulo="Criado em" :valor="formatarData(pessoa.created_at)" />
+                                    <CampoShow class="" titulo="Atualizado em"
                                         :valor="formatarData(pessoa.updated_at)" />
                                 </div>
                             </div>

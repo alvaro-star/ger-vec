@@ -81,7 +81,7 @@ async function submitForm() {
         router.push({
             name: 'pessoas.show',
             params: {
-                id: pessoaId // Este é o param, geralmente usado em rotas como /pessoa/:id
+                id: pessoaId
             },
             replace: true
         });
@@ -122,22 +122,21 @@ function cancelarCadastro() {
                                 <h2 class="text-xl font-semibold mb-4">Dados da Pessoa</h2>
                                 <div class="border-b border-colorline"></div>
 
-                                <div class="flex flex-wrap -mx-3 mt-4">
-                                    <TextInput class="w-full md:w-1/3 px-3 py-3" label="Nome" v-model="form.nome"
-                                        :message="errors.nome" placeholder="Digite o nome da pessoa" />
+                                <div class="-mx-3 mt-4 grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-3">
+                                    <TextInput class="w-full px-3" label="Nome" v-model="form.nome"
+                                        :message="errors.nome" placeholder="Digite o nome do cliente" />
 
-                                    <TextInput class="w-full md:w-1/3 px-3 py-3" label="Telefone"
-                                        v-model="form.telefone" :message="errors.telefone"
-                                        placeholder="Digite o telefone" />
+                                    <TextInput class="w-full px-3" label="Telefone" v-model="form.telefone"
+                                        :message="errors.telefone" placeholder="Digite o telefone" />
 
-                                    <TextInput class="w-full md:w-1/3 px-3 py-3" label="CPF" v-model="form.cpf"
-                                        :message="errors.cpf" placeholder="Digite o CPF" />
+                                    <TextInput class="w-full px-3" label="CPF" v-model="form.cpf" :message="errors.cpf"
+                                        placeholder="Digite o CPF" />
 
-                                    <SelectInput class="w-full md:w-1/3 px-3 py-3" label="Sexo" v-model="form.sexo"
+                                    <SelectInput class="w-full px-3" label="Sexo" v-model="form.sexo"
                                         :options="['Masculino', 'Feminino']" :message="errors.is_masculino"
                                         placeholder="Selecione o sexo" />
 
-                                    <TextInput class="w-full md:w-1/3 px-3 py-3" label="Idade" v-model="form.idade"
+                                    <TextInput class="w-full px-3" label="Idade" v-model="form.idade"
                                         :message="errors.idade" placeholder="Digite a idade" type="number" />
                                 </div>
                             </div>

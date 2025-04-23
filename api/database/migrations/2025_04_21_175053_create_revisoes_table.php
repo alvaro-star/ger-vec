@@ -23,15 +23,13 @@ return new class extends Migration
             $table->decimal('valor_total', 10, 2)->nullable();
             $table->decimal('garantia_meses', 10, 2)->nullable(); // Em tempo
 
-            // Chave estrangeira para VEICULO
             $table->unsignedBigInteger('veiculo_id');
             $table->foreign('veiculo_id')->references('id')->on('veiculos');
             $table->index('veiculo_id', 'revisoes_idx_veiculo_id');
 
-            // Chave estrangeira para PESSOA
             $table->unsignedBigInteger('pessoa_id')->nullable();
             $table->foreign('pessoa_id')->references('id')->on('pessoas');
-            $table->index('pessoa_id', 'revisoes_idx_pessoa_id');
+            $table->index(['pessoa_id', 'data'], 'revisoes_idx_pessoa_id');
 
             $table->timestamps();
         });

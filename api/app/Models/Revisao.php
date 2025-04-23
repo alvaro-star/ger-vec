@@ -19,4 +19,13 @@ class Revisao extends BaseModel
         'valor_total',
         'garantia_meses'
     ];
+
+    public function pessoa()
+    {
+        return $this->belongsTo(Pessoa::class);
+    }
+    public function veiculo()
+    {
+        return $this->belongsTo(Veiculo::class);
+    }
 }

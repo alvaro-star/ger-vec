@@ -93,13 +93,11 @@ onMounted(() => {
             <template #fallback>
                 <div>Loading...</div>
             </template>
-
         </Suspense>
         <div class="flex justify-center py-7">
             <RouterLink :to="{ name: 'veiculos.create' }">
                 <PrimaryButton label="Cadastrar Veículo" />
             </RouterLink>
-
         </div>
     </main>
 </template>

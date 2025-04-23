@@ -13,7 +13,7 @@ defineProps<{
 
 const routes = [
     { icon: HomeIcon, name: 'home', title: 'Início', path: '/' },
-    { icon: PeapleIcon, name: 'pessoas.index', title: 'Pessoa', path: '/pessoa' },
+    { icon: PeapleIcon, name: 'pessoas.index', title: 'Clientes', path: '/pessoa' },
     { icon: CarIcon, name: 'veiculos.index', title: 'Veículo', path: '/veiculo' },
     { icon: RevistaIcon, name: 'revisoes.index', title: 'Revisão', path: '/revisao' },
 ];

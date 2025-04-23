@@ -1,5 +1,5 @@
 <template>
-    <div class="w-full md:w-1/3 px-3 py-3">
+    <div class="px-3 py-3">
         <p class="block tracking-wide text-171717 text-x font-semibold mb-2">
             {{ titulo }}
         </p>

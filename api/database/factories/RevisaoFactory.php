@@ -18,7 +18,11 @@ class RevisaoFactory extends Factory
     public function definition(): array
     {
         $veiculo = Veiculo::inRandomOrder()->first();
-        
+
+        // Incrementa o número de revisões no veículo e na pessoa
+        $veiculo->increment('n_revisoes');
+        $veiculo->pessoa()->increment('n_revisoes');
+
         return [
             'data' => $this->faker->date,
             'quilometragem' => $this->faker->numberBetween(1000, 500000),

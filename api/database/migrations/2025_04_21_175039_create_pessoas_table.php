@@ -18,7 +18,11 @@ return new class extends Migration
             $table->string('cpf');
             $table->boolean('is_masculino');
             $table->integer('idade');
+            $table->unsignedBigInteger('n_veiculos')->default(0);
+            $table->unsignedBigInteger('n_revisoes')->default(0);
             $table->timestamps();
+
+            $table->index('nome', 'pessoas_idx_nome');
         });
     }
 

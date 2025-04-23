@@ -21,17 +21,46 @@ class VeiculoController extends Controller
         return response()->json($response, 200);
     }
 
+    public function nVeiculosGroupByMarca(Request $request)
+    {
+        return Veiculo::selectRaw('marca, COUNT(*) as total')
+            ->groupBy('marca')
+            ->orderBy('total', 'desc')
+            ->get();
+    }
+
+    public function nVeiculosBySexoAndMarca(Request $request)
+    {
+        return Veiculo::join('pessoas', 'veiculos.pessoa_id', '=', 'pessoas.id')
+            ->selectRaw('pessoas.is_masculino, veiculos.marca, COUNT(*) as total')
+            ->groupBy('pessoas.is_masculino', 'veiculos.marca')
+            ->orderBy('pessoas.is_masculino', 'desc')
+            ->orderBy('total', 'desc')
+            ->get();
+    }
+
+    public function nRevisoesGroupByMarca(Request $request)
+    {
+        return Veiculo::selectRaw('marca, SUM(n_revisoes) as total')
+            ->groupBy('marca')
+            ->orderBy('total', 'desc')
+            ->get();
+    }
+
     /**
      * Store a newly created resource in storage.
      */
     public function store(StoreVeiculoRequest $request)
     {
-
         $data = $request->validated();
         $veiculo = new Veiculo();
         $veiculo->fill($data);
         $veiculo->pessoa_id = $data["pessoa_id"];
         $veiculo->save();
+
+        $pessoa = Pessoa::find($data["pessoa_id"]);
+        $pessoa->n_veiculos++;
+        $pessoa->save();
 
         return response()->json($veiculo, 201);
     }
@@ -73,7 +102,7 @@ class VeiculoController extends Controller
             return response()->json([
                 'message' => 'Erros no formulario',
                 'errors' => [
-                    'placa' => 'A placa já cadastrada'
+                    'placa' => ['A placa já cadastrada']
                 ]
             ], 422);
         }

@@ -17,8 +17,22 @@ class VeiculoFactory extends Factory
      */
     public function definition(): array
     {
+        $pessoa = Pessoa::inRandomOrder()->first();
+        $pessoa->increment('n_veiculos');
+
         return [
-            'marca' => $this->faker->company,
+            'marca' => $this->faker->randomElement([
+                'Toyota',
+                'Honda',
+                'Ford',
+                'Chevrolet',
+                'Volkswagen',
+                'Fiat',
+                'Hyundai',
+                'Nissan',
+                'Renault',
+                'Jeep'
+            ]),
             'modelo' => $this->faker->word,
             'placa' => $this->faker->unique()->regexify('[A-Z]{3}[0-9]{4}'),
             'renavam' => $this->faker->numberBetween(10000000000, 99999999999),
@@ -35,8 +49,15 @@ class VeiculoFactory extends Factory
                 'Bege',
                 'Dourado'
             ]),
-            'tipo_combustivel' => $this->faker->randomElement(['Gasolina', 'Álcool', 'Diesel', 'Elétrico', 'Flex', 'Hibrido']),
-            'pessoa_id' => Pessoa::inRandomOrder()->first()->id,
+            'tipo_combustivel' => $this->faker->randomElement([
+                'Gasolina',
+                'Álcool',
+                'Diesel',
+                'Elétrico',
+                'Flex',
+                'Hibrido'
+            ]),
+            'pessoa_id' => $pessoa->id,
         ];
     }
 }

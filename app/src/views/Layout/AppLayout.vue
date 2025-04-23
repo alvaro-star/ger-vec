@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { shallowRef } from 'vue';
 import { RouterView } from 'vue-router';
-import Header from './components/Header.vue';
 import SideBar from './components/SideBar.vue';
 
 const isSidebarOpen = shallowRef(false);

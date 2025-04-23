@@ -15,7 +15,7 @@ const model = defineModel<string | number>({ required: true });
 </script>
 
 <template>
-  <div>
+  <div class="">
     <label :class="{ 'text-red-500': message }" class="block tracking-wide text-gray-700 text-x font-semibold mb-2">
       {{ label }} <span v-if="required === undefined || required === 1" class="text-red-500">*</span>
     </label>

@@ -17,4 +17,9 @@ class Veiculo extends BaseModel
         'cor',
         'tipo_combustivel'
     ];
+
+    public function pessoa()
+    {
+        return $this->belongsTo(Pessoa::class);
+    }
 }
