@@ -40,7 +40,7 @@ onMounted(fetchRevisao);
 
 <template class="mt-4">
     <main class="h-[calc(100vh-56px)]">
-        <HeaderModule class="mb-4">
+        <HeaderModule class="mb-7">
             <template #title>
                 <h1 class="text-3xl font-bold">Detalhes da Revisão</h1>
             </template>
@@ -59,15 +59,14 @@ onMounted(fetchRevisao);
                             <div class="p-5 bg-white relative border border-gray-300 sm:rounded overflow-hidden">
                                 <h2 class="text-xl font-semibold mb-4">Dados da Revisão</h2>
                                 <div class="border-b border-colorline"></div>
-                                <div class="flex flex-wrap -mx-3 mt-4">
-                                    <CampoShow class="md:w-1/3" titulo="Data"
-                                        :valor="formatarClassicData(revisao.data)" />
-                                    <CampoShow class="md:w-1/3" titulo="Quilometragem" :valor="revisao.quilometragem" />
-                                    <CampoShow class="md:w-1/3" titulo="Descrição" :valor="revisao.descricao" />
-                                    <CampoShow class="md:w-1/3" titulo="Valor">
+                                <div class="-mx-3 mt-4 grid grid-cols-2 md:grid-cols-3 gap-3">
+                                    <CampoShow titulo="Data" :valor="formatarClassicData(revisao.data)" />
+                                    <CampoShow titulo="Quilometragem" :valor="revisao.quilometragem" />
+                                    <CampoShow titulo="Descrição" :valor="revisao.descricao" />
+                                    <CampoShow titulo="Valor">
                                         R$ {{ revisao.valor_total }}
                                     </CampoShow>
-                                    <CampoShow class="md:w-1/3" titulo="Placa do Veiculo">
+                                    <CampoShow titulo="Placa do Veiculo">
                                         <router-link
                                             :to="{ name: 'veiculos.show', params: { id: revisao.veiculo?.id } }"
                                             class="text-blue-500 hover:underline">
@@ -76,10 +75,8 @@ onMounted(fetchRevisao);
                                     </CampoShow>
                                 </div>
                                 <div class="flex flex-wrap -mx-3 mt-4">
-                                    <CampoShow class="md:w-1/3" titulo="Criado em"
-                                        :valor="formatarData(revisao.created_at)" />
-                                    <CampoShow class="md:w-1/3" titulo="Atualizado em"
-                                        :valor="formatarData(revisao.updated_at)" />
+                                    <CampoShow titulo="Criado em" :valor="formatarData(revisao.created_at)" />
+                                    <CampoShow titulo="Atualizado em" :valor="formatarData(revisao.updated_at)" />
                                 </div>
                             </div>
                         </div>

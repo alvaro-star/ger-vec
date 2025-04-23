@@ -17,7 +17,26 @@ class VeiculoController extends Controller
     public function index(Request $request)
     {
         $pageable = new PageInput($request);
-        $response = Veiculo::findAllByPageable($pageable);
+
+        $sort = $request->query('sort') ?? '';
+
+        $queryBuilder = Veiculo::join('pessoas', 'veiculos.pessoa_id', '=', 'pessoas.id');
+
+        if (!empty($sort) && $sort == 'Proprietario') {
+            $queryBuilder->orderBy('pessoas.nome', 'asc');
+        }
+
+        $response = $queryBuilder->getByPageable($pageable);
+
+        return response()->json($response, 200);
+    }
+
+    public function findAllOrderByPessoa(Request $request)
+    {
+        $pageable = new PageInput($request);
+        $response = Veiculo::join('pessoas', 'veiculos.pessoa_id', '=', 'pessoas.id')
+            ->orderBy('pessoas.nome', 'asc')
+            ->getByPageable($pageable);
         return response()->json($response, 200);
     }
 

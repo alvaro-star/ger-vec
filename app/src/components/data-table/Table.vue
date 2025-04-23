@@ -6,7 +6,7 @@ import Header from "./Header.vue";
 import Pagination from './Pagination.vue';
 import Row from './Row.vue';
 import TabelaAcoes from './TableActions.vue';
-import type { IFilters } from "@/types/IFilter";
+import type { IFilters, ISort } from "@/types/IFilter";
 
 
 defineProps<{
@@ -15,6 +15,8 @@ defineProps<{
   columns: IColumn[],
   rows: any[],
   showActions?: 0 | 1,
+  sorters?: ISort;
+  showSearch?: number,
   showFilters?: number,
   filters?: IFilters,
   currentPage: number,
@@ -23,7 +25,7 @@ defineProps<{
   pageSizeOptions: number[]
 }>();
 
-const emit = defineEmits(['search', 'page-changed', 'page-size-changed', 'update-filter']);
+const emit = defineEmits(['search', 'page-changed', 'page-size-changed', 'update-filter', 'update-sort']);
 
 const emitSearch = (query: string) => {
   emit('search', query);
@@ -31,6 +33,10 @@ const emitSearch = (query: string) => {
 
 const emitUpdateFilter = (label: string, values: string[]) => {
   emit('update-filter', label, values);
+}
+
+const emitUpdateSort = (value: string) => {
+  emit('update-sort', value);
 }
 
 const handlePageChange = (page: number) => {
@@ -47,10 +53,11 @@ const handlePageSizeChange = (size: number) => {
   <section class="px-3">
     <div class="mx-auto max-w-screen">
       <div class="bg-white relative border border-gray-300 sm:rounded overflow-hidden">
-        <TabelaAcoes :title="title ?? 'Título Padrão'" :placeholder="placeholder ?? 'Digite sua pesquisa aqui'"
-          @search="emitSearch" :filters="filters" @update-filter="emitUpdateFilter" :show-filters="showFilters" />
+        <TabelaAcoes :sorters="sorters" :show-search="showSearch == undefined || showSearch === 1" :title="title ?? 'Título Padrão'"
+          :placeholder="placeholder ?? 'Digite sua pesquisa aqui'" @search="emitSearch" :filters="filters"
+          @update-filter="emitUpdateFilter" @update-sort="emitUpdateSort"
+          :show-filters="showFilters == undefined || showFilters === 1" />
         <div class="overflow-x-auto">
-
           <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
             <Header :columns="columns" :showActions="showActions === undefined || showActions == 1" />
 

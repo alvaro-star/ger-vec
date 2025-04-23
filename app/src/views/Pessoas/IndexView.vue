@@ -9,8 +9,8 @@ import type IColumn from '@/types/IColumn'
 import type { IFilters } from '@/types/IFilter'
 import type IPageOutput from '@/types/IPageOutput'
 import type IPessoa from '@/types/IPessoa'
-import Pie from '../../plugins/chartjs/Pie.vue'
 import type IStatisticPessoa from '@/types/IStatisticPessoa'
+import StatisticPessoaGraphic from './components/graphics/StatisticPessoaGraphic.vue'
 
 const query = ref<string>('')
 const currentPage = ref<number>(1)
@@ -126,7 +126,7 @@ onMounted(() => {
 
 <template>
     <main class="h-[calc(100vh-56px)]">
-        <HeaderModule class="mb-4">
+        <HeaderModule class="mb-7">
             <template #title>
                 <h1 class="text-3xl font-bold">Pessoas</h1>
             </template>
@@ -138,16 +138,8 @@ onMounted(() => {
             </template>
         </HeaderModule>
 
-        <Suspense>
-            <template #default>
-                <h2>
-                    Dados Estatisticos
-                </h2>
-                <div class="grid grid-cols-3">
-                    <Pie :labels="['A', 'B', 'C']" :values="[10, 20, 30]" />
-                </div>
-            </template>
-        </Suspense>
+        <StatisticPessoaGraphic class="mb-7" :sexo="filters['Sexo'].value" :statistics="statistics" />
+
         <Suspense>
             <template #default>
                 <Table class="container" :columns="columns" :rows="paginatedRecords" :currentPage="currentPage"

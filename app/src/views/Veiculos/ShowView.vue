@@ -40,7 +40,7 @@ onMounted(fetchVeiculo);
 
 <template class="mt-4">
     <main class="h-[calc(100vh-56px)]">
-        <HeaderModule class="mb-4">
+        <HeaderModule class="mb-7">
             <template #title>
                 <h1 class="text-3xl font-bold">Detalhes do Veículo</h1>
             </template>
@@ -59,7 +59,7 @@ onMounted(fetchVeiculo);
                             <div class="p-5 bg-white relative border border-gray-300 sm:rounded overflow-hidden">
                                 <h2 class="text-xl font-semibold mb-4">Dados do Veículo</h2>
                                 <div class="border-b border-colorline"></div>
-                                <div class="-mx-3 mt-4 grid-responsive">
+                                <div class="-mx-3 mt-4 grid grid-cols-2 md:grid-cols-3 gap-3">
                                     <CampoShow class="" titulo="Marca" :valor="veiculo.marca" />
                                     <CampoShow class="" titulo="Modelo" :valor="veiculo.modelo" />
                                     <CampoShow class="" titulo="Placa" :valor="veiculo.placa" />

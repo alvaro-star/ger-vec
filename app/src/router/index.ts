@@ -21,7 +21,7 @@ const router = createRouter({
           children: [
             {
               path: '', name: 'veiculos.index',
-              component: () => import('@/views/Veiculos/IndexView.vue'),
+              component: () => import('@/views/Veiculos/IndexPage/IndexView.vue'),
             },
             {
               path: ':id', name: 'veiculos.show',

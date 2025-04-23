@@ -40,34 +40,72 @@ class PessoaController extends Controller
 
     public function statistics()
     {
-        $result = Pessoa::selectRaw('is_masculino,
-        SUM(n_veiculos) as n_veiculos,
-        SUM(n_revisoes) as n_revisoes,
-        COUNT(*) as n_elementos,
-        SUM(idade) as soma_idades')
+        $result = Pessoa::selectRaw('
+            is_masculino,
+            SUM(n_veiculos) as n_veiculos,
+            MIN(n_veiculos) as min_veiculos,
+            MAX(n_veiculos) as max_veiculos,
+
+            SUM(n_revisoes) as n_revisoes,
+            MIN(n_revisoes) as min_revisoes,
+            MAX(n_revisoes) as max_revisoes,
+
+            COUNT(*) as n_elementos,
+            SUM(idade) as soma_idades,
+            MIN(idade) as min_idade,
+            MAX(idade) as max_idade
+        ')
             ->groupBy('is_masculino')
             ->get();
 
+        $initStats = fn() => [
+            'n_veiculos' => 0,
+            'min_veiculos' => PHP_INT_MAX,
+            'max_veiculos' => PHP_INT_MIN,
+            'n_revisoes' => 0,
+            'min_revisoes' => PHP_INT_MAX,
+            'max_revisoes' => PHP_INT_MIN,
+            'n_elementos' => 0,
+            'soma_idades' => 0,
+            'min_idade' => PHP_INT_MAX,
+            'max_idade' => PHP_INT_MIN
+        ];
 
-        $response['M'] = ['n_veiculos' => 0, 'n_revisoes' => 0, 'n_elementos' => 0, 'soma_idades' => 0];
-        $response['F'] = ['n_veiculos' => 0, 'n_revisoes' => 0, 'n_elementos' => 0, 'soma_idades' => 0];
-        $response['Ambos'] = ['n_veiculos' => 0, 'n_revisoes' => 0, 'n_elementos' => 0, 'soma_idades' => 0];
+        $response = [
+            'M' => $initStats(),
+            'F' => $initStats(),
+            'Ambos' => $initStats()
+        ];
 
         foreach ($result as $item) {
-            $key  = $this->getSexoKey($item->is_masculino);
+            $key = $this->getSexoKey($item->is_masculino);
+
             $response[$key]['n_veiculos'] += $item->n_veiculos;
+            $response[$key]['min_veiculos'] = min($response[$key]['min_veiculos'], $item->min_veiculos);
+            $response[$key]['max_veiculos'] = max($response[$key]['max_veiculos'], $item->max_veiculos);
+
             $response[$key]['n_revisoes'] += $item->n_revisoes;
+            $response[$key]['min_revisoes'] = min($response[$key]['min_revisoes'], $item->min_revisoes);
+            $response[$key]['max_revisoes'] = max($response[$key]['max_revisoes'], $item->max_revisoes);
+
             $response[$key]['n_elementos'] += $item->n_elementos;
             $response[$key]['soma_idades'] += $item->soma_idades;
+            $response[$key]['min_idade'] = min($response[$key]['min_idade'], $item->min_idade);
+            $response[$key]['max_idade'] = max($response[$key]['max_idade'], $item->max_idade);
         }
 
+        // Calcular estatísticas para "Ambos"
+        foreach (['n_veiculos', 'n_revisoes', 'n_elementos', 'soma_idades'] as $campo) {
+            $response['Ambos'][$campo] = $response['M'][$campo] + $response['F'][$campo];
+        }
+        foreach (['min_veiculos', 'min_revisoes', 'min_idade'] as $campo) {
+            $response['Ambos'][$campo] = min($response['M'][$campo], $response['F'][$campo]);
+        }
+        foreach (['max_veiculos', 'max_revisoes', 'max_idade'] as $campo) {
+            $response['Ambos'][$campo] = max($response['M'][$campo], $response['F'][$campo]);
+        }
 
-        $response['Ambos']['n_veiculos'] = $response['M']['n_veiculos'] + $response['F']['n_veiculos'];
-        $response['Ambos']['n_revisoes'] = $response['M']['n_revisoes'] + $response['F']['n_revisoes'];
-        $response['Ambos']['n_elementos'] = $response['M']['n_elementos'] + $response['F']['n_elementos'];
-        $response['Ambos']['soma_idades'] = $response['M']['soma_idades'] + $response['F']['soma_idades'];
-
-
+        // Calcular médias
         foreach (['M', 'F', 'Ambos'] as $key) {
             if ($response[$key]['n_elementos'] > 0) {
                 $response[$key]['media_veiculos'] = round($response[$key]['n_veiculos'] / $response[$key]['n_elementos'], 2);
@@ -78,6 +116,7 @@ class PessoaController extends Controller
 
         return response()->json($response, 200);
     }
+
 
     private function getSexoKey($is_masculino)
     {

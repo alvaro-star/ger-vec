@@ -11,7 +11,6 @@ const props = defineProps<{
   columns: IColumn[];
 }>();
 
-
 function goToDetails() {
   const id = props.row.id;
   const routeName = props.row.routeName;
@@ -22,8 +21,8 @@ function goToDetails() {
   }
 
   console.log(routeName, id);
-  
-  router.push({ name: routeName, params: { id:id } });
+
+  router.push({ name: routeName, params: { id: id } });
 }
 </script>
 
@@ -33,7 +32,8 @@ function goToDetails() {
       {{ row[column.field] }}
     </td>
     <td v-if="row.routeName" class="border-t border-gray-300">
-      <button @click="goToDetails" class="h-full w-full px-3 py-3 flex items-center justify-center" type="button">
+      <button @click="goToDetails" class="cursor-pointer h-full w-full px-3 py-3 flex items-center justify-center"
+        type="button">
         <GoToDetailsIcon />
       </button>
     </td>
