@@ -1,31 +1,28 @@
-# Etapa 1: build
-FROM node:22 AS build
+# Usa a imagem oficial do PHP 8.3 com FPM
+FROM php:8.3-fpm
 
-WORKDIR /app
+# Instala extensões necessárias para Laravel com PostgreSQL
+RUN apt-get update && apt-get install -y \
+    libpng-dev libjpeg-dev libfreetype6-dev \
+    zip unzip git curl \
+    libpq-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd pdo pdo_pgsql
 
-# Copia os arquivos de dependências (package.json e package-lock.json)
-COPY package*.json ./
-RUN npm install
+# Instala o Composer (pego da imagem oficial mais atual)
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copia o restante do código do projeto
+# Define o diretório de trabalho
+WORKDIR /var/www
+
+# Copia os arquivos do projeto
 COPY . .
 
-# Executa o build do Vue.js
-RUN npm run build
+# Instala as dependências do Laravel
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
-# Etapa 2: servidor NGINX
-FROM nginx:alpine
+# Expõe a porta do PHP-FPM
+EXPOSE 9000
 
-# Copia os arquivos gerados pelo build para o diretório do NGINX
-COPY --from=build /app/dist /usr/share/nginx/html
-
-# Remove o arquivo de configuração padrão do NGINX
-RUN rm /etc/nginx/conf.d/default.conf
-
-# Copia a configuração customizada do NGINX
-COPY nginx.conf /etc/nginx/conf.d/
-
-EXPOSE 80
-
-# Comando para iniciar o NGINX
-CMD ["nginx", "-g", "daemon off;"]
+# Comando padrão para iniciar o FPM
+CMD ["php-fpm"]
