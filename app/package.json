@@ -17,6 +17,7 @@
     "flowbite": "^3.1.2",
     "flowbite-vue": "^0.2.1",
     "pinia": "^3.0.1",
+    "swiper": "^11.2.6",
     "tailwindcss": "^4.1.4",
     "vue": "^3.5.13",
     "vue-chartjs": "^5.3.2",
