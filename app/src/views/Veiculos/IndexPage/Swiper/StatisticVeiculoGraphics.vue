@@ -2,10 +2,8 @@
 import SectionComponent from '@/components/SectionComponent.vue';
 import type { Swiper as SwiperClass } from 'swiper';
 import 'swiper/css';
-import { Swiper, SwiperSlide } from 'swiper/vue';
 import { ref } from 'vue';
 import BarBySexo from './BarBySexo.vue';
-import MarcasSwiper from './MarcasSwiper.vue';
 
 
 const swiperInstance = ref<SwiperClass | null>(null)

@@ -74,11 +74,13 @@ onMounted(fetchVeiculo);
                                     <CampoShow class="" titulo="Cor" :valor="veiculo.cor" />
                                     <CampoShow class="" titulo="Tipo de Combustível"
                                         :valor="veiculo.tipo_combustivel" />
+                                    <CampoShow class="" titulo="N Revisoes"
+                                        :valor="veiculo.n_revisoes" />
                                 </div>
-                                <div class="flex flex-wrap -mx-3 mt-4">
-                                    <CampoShow class="" titulo="Criado em" :valor="formatarData(veiculo.created_at)" />
-                                    <CampoShow class="" titulo="Atualizado em"
-                                        :valor="formatarData(veiculo.updated_at)" />
+                                <div class="-mx-3 mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    <CampoShow class="hidden md:block" titulo="" />
+                                    <CampoShow titulo="Criado em" :valor="formatarData(veiculo.created_at)" />
+                                    <CampoShow titulo="Atualizado em" :valor="formatarData(veiculo.updated_at)" />
                                 </div>
                             </div>
                         </div>

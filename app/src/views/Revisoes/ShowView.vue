@@ -61,7 +61,7 @@ onMounted(fetchRevisao);
                                 <div class="border-b border-colorline"></div>
                                 <div class="-mx-3 mt-4 grid grid-cols-2 md:grid-cols-3 gap-3">
                                     <CampoShow titulo="Data" :valor="formatarClassicData(revisao.data)" />
-                                    <CampoShow titulo="Quilometragem" :valor="revisao.quilometragem" />
+                                    <CampoShow titulo="Quilometragem" :valor="revisao.quilometragem + ' km'" />
                                     <CampoShow titulo="Descrição" :valor="revisao.descricao" />
                                     <CampoShow titulo="Valor">
                                         R$ {{ revisao.valor_total }}
@@ -74,7 +74,7 @@ onMounted(fetchRevisao);
                                         </router-link>
                                     </CampoShow>
                                 </div>
-                                <div class="flex flex-wrap -mx-3 mt-4">
+                                <div class="-mx-3 mt-4 grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-3">
                                     <CampoShow titulo="Criado em" :valor="formatarData(revisao.created_at)" />
                                     <CampoShow titulo="Atualizado em" :valor="formatarData(revisao.updated_at)" />
                                 </div>

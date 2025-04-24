@@ -3,7 +3,7 @@ import { defineModel } from 'vue';
 import InputError from './InputError.vue';
 
 defineProps<{
-  label: string;
+  label?: string;
   message?: string;
   placeholder?: string;
   required?: 0 | 1
@@ -16,7 +16,8 @@ const model = defineModel<string | number>({ required: true });
 
 <template>
   <div class="">
-    <label :class="{ 'text-red-500': message }" class="block tracking-wide text-gray-700 text-x font-semibold mb-2">
+    <label v-if="label" :class="{ 'text-red-500': message }"
+      class="block tracking-wide text-gray-700 text-x font-semibold mb-2">
       {{ label }} <span v-if="required === undefined || required === 1" class="text-red-500">*</span>
     </label>
     <input v-model="model" :type="type ?? 'text'" :step="step ?? 1" :class="{ 'border-red-500': message }" class="appearance-none block w-full bg-inputBg  text-gray-700 border

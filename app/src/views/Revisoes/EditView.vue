@@ -100,7 +100,6 @@ const confirmDelete = async () => {
             window.history.go(-2);
         }
     } catch (exception) {
-        console.log(exception);
         alertStore.setMessage('Não foi possível excluir a revisão.', 'danger');
     }
 };
@@ -123,7 +122,7 @@ onMounted(fetchRevisao);
             <section class="pb-3">
                 <div class="p-5 bg-white border border-gray-300 sm:rounded">
                     <h2 class="text-xl font-semibold mb-4">Dados da Revisão</h2>
-                    <div class="flex flex-wrap -mx-3 mt-4">
+                    <div class="-mx-3 mt-4 grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-3">
                         <TextInput class="w-full md:w-1/3 px-3 py-3" label="Data" v-model="form.data"
                             :message="errors.data" placeholder="AAAA-MM-DD" type="date" />
 

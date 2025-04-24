@@ -116,7 +116,7 @@ function cancelarCadastro() {
                         <h2 class="text-xl font-semibold mb-4">Dados do Veículo</h2>
                         <div class="border-b border-colorline"></div>
 
-                        <div class="flex flex-wrap -mx-3 mt-4">
+                        <div class="-mx-3 mt-4 grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-3">
                             <TextInput class="w-full md:w-1/3 px-3 py-3" label="Marca" v-model="form.marca"
                                 :message="errors.marca" placeholder="Digite a marca do veículo" />
 

@@ -43,8 +43,6 @@ const fetchData = async () => {
     try {
         const response = await api.get<IPageOutput<IVeiculo>>(`/pessoas/${props.id}/veiculos`, { params })
         const data = response.data
-        console.log(data);
-
 
         rows.value = data.content.map((item: any) => ({
             ...item,
@@ -85,7 +83,7 @@ onMounted(() => {
     <main class="w-full">
         <Suspense>
             <template #default>
-                <Table class="container" :title="title" :columns="columns" :rows="paginatedRecords"
+                <Table class="container" :show-filters="0" :title="title" :columns="columns" :rows="paginatedRecords"
                     :currentPage="currentPage" :totalRecords="totalRecords" :pageSize="pageSize"
                     :pageSizeOptions="[5, 10, 15, 20, 25]" @search="handleSearch" @page-changed="updatePage"
                     @page-size-changed="updatePageSize" placeholder="Pesquise pelo numero da placa" />

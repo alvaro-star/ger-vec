@@ -4,17 +4,17 @@ import HorizontalNavBar from '@/components/data-table/HorizontalNavBar.vue'
 import SectionComponent from '@/components/SectionComponent.vue'
 import HorizontalBar from '@/plugins/chartjs/HorizontalBar.vue'
 import Pie from '@/plugins/chartjs/Pie.vue'
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import MarcasGroupSexo from './tables/MarcasGroupSexo.vue'
 import MarcasTable from './tables/MarcasTable.vue'
 import VeiculosTable from './tables/VeiculosTable.vue'
 
-const marcasRef = ref()
-const marcasGroupSexoRef = ref()
+
 
 const marcasGeral = ref<any[]>([])
 const marcasGroupFeminino = ref<any[]>([])
 const marcasGroupMasculino = ref<any[]>([])
+
 const abaAtual = ref<string>('Todos os Veiculos')
 const opcoesAba = ['Todos os Veiculos', 'Marcas', 'Marcas (Agrupados por sexo)']
 
@@ -39,22 +39,18 @@ function escolherTop5(items: any[]) {
     return [...principais, { marca: 'Outros', total: totalOutros }]
 }
 
-const fetchAll = async () => {
-    const marasGeralData = await marcasRef.value?.fetchData()
-    const [groupMasculinos, groupFemininos] = await marcasGroupSexoRef.value?.fetchData()
+const updateMarcasGeral = (marcasGeralData: any[]) => {
+    marcasGeral.value = escolherTop5(marcasGeralData)
+    totaisPorGrupo.value.Geral = calcularTotal(marcasGeralData)
+}
 
-    totaisPorGrupo.value.Geral = calcularTotal(marasGeralData)
+const updateMarcasSexo = (groupMasculinos: any[], groupFemininos: any[]) => {
     totaisPorGrupo.value.Feminino = calcularTotal(groupFemininos)
     totaisPorGrupo.value.Masculino = calcularTotal(groupMasculinos)
 
     marcasGroupFeminino.value = escolherTop5(groupFemininos)
     marcasGroupMasculino.value = escolherTop5(groupMasculinos)
-    marcasGeral.value = escolherTop5(marasGeralData)
 }
-
-onMounted(() => {
-    fetchAll()
-})
 </script>
 
 <template>
@@ -113,7 +109,7 @@ onMounted(() => {
         <HorizontalNavBar v-model="abaAtual" :tabs="opcoesAba" class="my-6" />
 
         <VeiculosTable :show="abaAtual === 'Todos os Veiculos'" />
-        <MarcasTable ref="marcasRef" :show="abaAtual === 'Marcas'" />
-        <MarcasGroupSexo ref="marcasGroupSexoRef" :show="abaAtual === 'Marcas (Agrupados por sexo)'" />
+        <MarcasTable @update-data="updateMarcasGeral" :show="abaAtual === 'Marcas'" />
+        <MarcasGroupSexo @update-data="updateMarcasSexo" :show="abaAtual === 'Marcas (Agrupados por sexo)'" />
     </main>
 </template>

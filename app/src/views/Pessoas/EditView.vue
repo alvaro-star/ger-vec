@@ -9,6 +9,7 @@ import TrashIcon from '@/components/icons/TrashIcon.vue';
 import api from '@/plugins/api';
 import { useAlertStore } from '@/stores/alertState';
 import type IPessoa from '@/types/IPessoa';
+import type { AxiosError } from 'axios';
 import { onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -137,10 +138,14 @@ const confirmDelete = async () => {
                 replace: true
             });
         }
-    } catch (exception) {
-        console.log(exception);
-        alertStore.setMessage('Nao foi possivel excluir o cliente.', 'danger')
-    }
+    } catch (exception: AxiosError | any) {
+        if (exception.response?.status === 400 && exception.response?.data?.message) {
+            const message = exception.response?.data?.message
+            alertStore.setMessage(message, 'danger');
+        } else {
+            alertStore.setMessage('Não foi possível excluir o veículo.', 'danger');
+        }
+    };
 }
 
 onMounted(() => {

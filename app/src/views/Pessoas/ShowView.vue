@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-
 import HeaderModule from '@/components/data-table/HeaderModule.vue';
 import BackButton from '@/components/form-components/buttons/BackButton.vue';
 import ButtonEdit from '@/components/form-components/buttons/ButtonEdit.vue';
@@ -65,7 +64,7 @@ onMounted(fetchPessoa);
                                     <CampoShow class="" titulo="CPF" :valor="pessoa.cpf" />
                                     <CampoShow class="" titulo="Sexo"
                                         :valor="pessoa.is_masculino ? 'Masculino' : 'Feminino'" />
-                                    <CampoShow class="" titulo="Idade" :valor="pessoa.idade" />
+                                    <CampoShow class="" titulo="Idade" :valor="pessoa.idade + ' anos'" />
 
                                 </div>
                                 <div class="-mx-3 mt-4 grid grid-cols-2 md:grid-cols-3 gap-3">

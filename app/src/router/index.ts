@@ -38,7 +38,7 @@ const router = createRouter({
           children: [
             {
               path: '', name: 'revisoes.index',
-              component: () => import('@/views/Revisoes/IndexView.vue'),
+              component: () => import('@/views/Revisoes/IndexPage/IndexView.vue'),
             },
             {
               path: 'create', name: 'revisoes.create',

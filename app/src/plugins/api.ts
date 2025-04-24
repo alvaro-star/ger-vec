@@ -33,6 +33,17 @@ api.interceptors.response.use(
             CookieUserLogued.remove()
             window.location.replace("/login")
         }
+        if (error.response && error.response.status === 422) {
+            if (error.response.data.errors) {
+                const errors = error.response.data.errors
+                const key = Object.keys(errors)
+                key.forEach(key => {
+                    errors[key] = errors[key][0]
+                })
+                error.response.data.errors = errors
+            }
+
+        }
         return Promise.reject(error)
     }
 )

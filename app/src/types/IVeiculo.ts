@@ -10,6 +10,7 @@ export default interface IVeiculo {
     cor: string
     tipo_combustivel: string
     pessoa_id: number
+    n_revisoes: number
     pessoa: IPessoa | null;
     created_at: string
     updated_at: string

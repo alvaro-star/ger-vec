@@ -20,8 +20,6 @@ function goToDetails() {
     return;
   }
 
-  console.log(routeName, id);
-
   router.push({ name: routeName, params: { id: id } });
 }
 </script>

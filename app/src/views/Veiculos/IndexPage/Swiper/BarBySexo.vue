@@ -13,8 +13,6 @@ const fetchCountBySex = async () => {
             total: item.total
         }))
         nVeiculosBySexo.value = dataFormat
-        console.log('teste');
-
     } catch (error) {
         console.error('Erro ao buscar dados:', error)
     }

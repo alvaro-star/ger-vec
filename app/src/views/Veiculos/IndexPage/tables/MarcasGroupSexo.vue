@@ -11,12 +11,13 @@ defineProps<{ show: boolean }>()
 
 const columns = ref<IColumn[]>([
     { label: 'Marca', field: 'marca' },
-    { label: 'Total', field: 'total' }
+    { label: 'N Veiculos', field: 'total' }
 ])
 
 const masculinos = ref<any[]>([])
 const femininos = ref<any[]>([])
 
+const emit = defineEmits(['update-data'])
 
 const fetchData = async () => {
     try {
@@ -30,7 +31,7 @@ const fetchData = async () => {
         femininos.value = data
             .filter((item: any) => !item.is_masculino)
             .map((item: any) => ({ ...item }))
-        return [masculinos.value, femininos.value]
+        emit('update-data', masculinos.value, femininos.value)
     } catch (error) {
         masculinos.value = []
         femininos.value = []
@@ -38,10 +39,9 @@ const fetchData = async () => {
     }
 }
 
-defineExpose({
-    fetchData
+onMounted(() => {
+    fetchData()
 })
-
 </script>
 
 <template>

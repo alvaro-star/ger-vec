@@ -11,15 +11,18 @@ defineProps<{ show: boolean }>()
 
 const columns = ref<IColumn[]>([
     { label: 'Marca', field: 'marca' },
-    { label: 'N Veiculos', field: 'total' }
+    { label: 'N Revisoes', field: 'total' }
 ])
 
+
+
 const rows = ref<any[]>([])
+
 
 const emit = defineEmits(['update-data'])
 const fetchData = async () => {
     try {
-        const response = await api.get('/veiculos/statistics/marcas/n_veiculos')
+        const response = await api.get('/veiculos/statistics/marcas/revisoes')
         rows.value = response.data
         emit('update-data', response.data)
     } catch (error) {
@@ -27,6 +30,7 @@ const fetchData = async () => {
         console.error('Erro ao buscar estatísticas de veículos por marca:', error)
     }
 }
+
 
 onMounted(() => {
     fetchData()
@@ -40,7 +44,7 @@ onMounted(() => {
                 <section class="px-3">
                     <div class="mx-auto max-w-screen">
                         <div class="bg-white relative border border-gray-300 sm:rounded overflow-hidden">
-                            <TableActions placeholder="" :show-search="false" title="Quantidade de Veiculos por Marca"
+                            <TableActions placeholder="" :show-search="false" title="Quantidade de Revisoes por Marca"
                                 :show-filters="false" />
                             <div class="overflow-x-auto">
                                 <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">

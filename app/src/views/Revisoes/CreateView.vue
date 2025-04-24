@@ -115,32 +115,31 @@ onMounted(() => {
                     <div class="p-5 bg-white relative border border-gray-300 sm:rounded overflow-hidden">
                         <h2 class="text-xl font-semibold mb-4">Dados da Revisão</h2>
                         <div class="border-b border-colorline"></div>
-
-                        <div class="flex flex-wrap -mx-3 mt-4">
-                            <TextInput v-if="!veiculoPlaca" class="w-full md:w-1/3 px-3 py-3" label="Placa"
+                        <div class="-mx-3 mt-4 grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-3">
+                            <TextInput v-if="!veiculoPlaca" class="py-3" label="Placa"
                                 v-model="form.placa" :message="errors.placa" placeholder="Digite a placa do veículo" />
 
-                            <TextInput class="w-full md:w-1/3 px-3 py-3" label="Data" v-model="form.data"
+                            <TextInput class="py-3" label="Data" v-model="form.data"
                                 :message="errors.data" placeholder="Digite a data da revisão" type="date" />
 
-                            <TextInput class="w-full md:w-1/3 px-3 py-3" label="Quilometragem"
+                            <TextInput class="py-3" label="Quilometragem"
                                 v-model="form.quilometragem" :message="errors.quilometragem"
                                 placeholder="Digite a quilometragem" type="number" />
-                            <SelectInput class="w-full md:w-1/3 px-3 py-3" label="Tipo de Revisão" v-model="form.tipo"
+                            <SelectInput class="py-3" label="Tipo de Revisão" v-model="form.tipo"
                                 :options="tipo_revisao" :message="errors.is_masculino"
                                 placeholder="Selecione o tipo" />
-                            <TextInput class="w-full md:w-1/3 px-3 py-3" label="Descrição" v-model="form.descricao"
+                            <TextInput class="py-3" label="Descrição" v-model="form.descricao"
                                 :message="errors.descricao" :required="0"
                                 placeholder="Descrição detalhada da revisão" />
-                            <TextInput class="w-full md:w-1/3 px-3 py-3" label="Garantia (meses)"
+                            <TextInput class="py-3" label="Garantia (meses)"
                                 v-model="form.garantia_meses" :message="errors.garantia_meses"
                                 placeholder="Digite o número de meses de garantia" type="number" />
 
-                            <TextInput class="w-full md:w-1/3 px-3 py-3" label="Valor Total (R$)"
+                            <TextInput class="py-3" label="Valor Total (R$)"
                                 v-model="form.valor_total" :message="errors.valor_total"
                                 placeholder="Digite o valor total" type="number" />
 
-                            <TextInput class="w-full md:w-1/3 px-3 py-3" label="Observações" v-model="form.observacoes"
+                            <TextInput class="py-3" label="Observações" v-model="form.observacoes"
                                 :required="0" :message="errors.observacoes" placeholder="Observações adicionais" />
                         </div>
                     </div>

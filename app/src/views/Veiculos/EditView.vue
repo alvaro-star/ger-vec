@@ -10,6 +10,7 @@ import { cores, tipo_combustivel } from '@/data/options_selects';
 import api from '@/plugins/api';
 import { useAlertStore } from '@/stores/alertState';
 import type IVeiculo from '@/types/IVeiculo';
+import type { AxiosError } from 'axios';
 import { onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -128,13 +129,16 @@ const confirmDelete = async () => {
             alertStore.setMessage('Veículo deletado com sucesso', null);
             window.history.go(-2);
         }
-    } catch (exception) {
-        console.log(exception);
-        alertStore.setMessage('Não foi possível excluir o veículo.', 'danger');
-    }
-};
+    } catch (exception: AxiosError | any) {
+        if (exception.response?.status === 400 && exception.response?.data?.message) {
+            const message = exception.response?.data?.message
+            alertStore.setMessage(message, 'danger');
+        } else {
+            alertStore.setMessage('Não foi possível excluir o veículo.', 'danger');
+        }
+    };
 
-
+}
 
 
 onMounted(fetchVeiculo);
@@ -160,7 +164,7 @@ onMounted(fetchVeiculo);
                                 <h2 class="text-xl font-semibold mb-4">Dados do Veículo</h2>
                                 <div class="border-b border-colorline"></div>
 
-                                <div class="flex flex-wrap -mx-3 mt-4">
+                                <div class="-mx-3 mt-4 grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-3">
                                     <!-- Marca -->
                                     <TextInput class="w-full md:w-1/3 px-3 py-3" label="Marca" v-model="form.marca"
                                         :message="errors.marca" placeholder="Digite a marca" />
