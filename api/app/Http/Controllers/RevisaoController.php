@@ -21,6 +21,7 @@ class RevisaoController extends Controller
     {
 
         $pageable = new PageInput($request);
+
         $data_start = $request->query('data_start');
         $data_start = TransformData::stringToDateTime($data_start);
         $data_end = $request->query('data_end');
@@ -40,11 +41,11 @@ class RevisaoController extends Controller
 
 
         if ($data_start !== null && $data_end !== null) {
-            $queryBuilder = Revisao::whereBetween('data', [$data_start, $data_end]);
+            $queryBuilder = $queryBuilder->whereBetween('data', [$data_start->format('Y-m-d'), $data_end->format('Y-m-d')]);
         } else if ($data_start !== null) {
-            $queryBuilder = Revisao::where('data', '>=', $data_start);
+            $queryBuilder = $queryBuilder->where('data', '>=', $data_start->format('Y-m-d'));
         } else if ($data_end !== null) {
-            $queryBuilder = Revisao::where('data', '<=', $data_end);
+            $queryBuilder = $queryBuilder->where('data', '<=', $data_end->format('Y-m-d'));
         }
 
         $response = $queryBuilder->getByPageable($pageable);
@@ -68,9 +69,9 @@ class RevisaoController extends Controller
         $revisao->save();
 
         $veiculo->n_revisoes++;
-        $veiculo->pessoa()->n_revisoes++;
+        $veiculo->pessoa->n_revisoes++;
 
-        $veiculo->pessoa()->save();
+        $veiculo->pessoa->save();
         $veiculo->save();
 
         return response()->json($revisao, 201);
@@ -78,34 +79,55 @@ class RevisaoController extends Controller
 
     public function countRevisoesByPessoa(Request $request)
     {
+
         $pageable = new PageInput($request);
-        $response = Pessoa::orderBy('n_revisoes', 'desc')->getByPageable($pageable);
+        $query = $request->query('query') ?? '';
+
+        $queryBuilder = Pessoa::orderBy('n_revisoes', 'desc');
+        if ($query !== '')
+            $queryBuilder->where('nome', 'like', $query . '%');
+        $response =  $queryBuilder->getByPageable($pageable);
+
+
         $pessoaIds = $response->content->pluck('id')->toArray();
 
         $placeholders = implode(',', array_fill(0, count($pessoaIds), '?'));
-        $query = "SELECT pessoa_id, AVG(diferenca_segundos) AS media_diferenca
+
+        $query = "SELECT
+            pessoa_id,
+            MAX(data) AS last_revisao,
+            AVG(diferenca_segundos) AS media_diferenca
         FROM (
             SELECT
                 pessoa_id,
+                data,
                 EXTRACT(EPOCH FROM (data::timestamp - LAG(data::timestamp) OVER (PARTITION BY pessoa_id ORDER BY data))) AS diferenca_segundos
             FROM alvaro_vargas_alvarez.revisoes
-                WHERE pessoa_id IN ($placeholders)
+            WHERE pessoa_id IN ($placeholders)
         ) AS sub
-        WHERE diferenca_segundos IS NOT NULL
         GROUP BY pessoa_id;";
 
         $result = DB::select($query, $pessoaIds);
 
+
         //Merging result
-        $mapIdMedia = [];
+        $mapIdData = [];
         foreach ($result as $item) {
             $key = $this->generateHashKey($item->pessoa_id);
-            $mapIdMedia[$key] = $item->media_diferenca;
+            $mapIdData[$key] = ['media' => $item->media_diferenca, 'last_revisao' => $item->last_revisao];
         }
 
         foreach ($response->content as $item) {
             $key = $this->generateHashKey($item->id);
-            $item->avg_tempo_revisoes = $mapIdMedia[$key];
+
+            if (isset($mapIdData[$key])) {
+                $mediaSegundos = $mapIdData[$key]['media'] ?? null;
+                $item->avg_tempo_revisoes = $mediaSegundos !== null ? round($mediaSegundos / 86400, 2) : 0;
+                $item->last_revisao = $mapIdData[$key]['last_revisao'] ?? '';
+            } else {
+                $item->avg_tempo_revisoes = 0;
+                $item->last_revisao = '';
+            }
         }
 
         return response()->json($response, 200);
@@ -115,7 +137,6 @@ class RevisaoController extends Controller
     {
         return 'KEY' . strval($int);
     }
-
 
     /**
      * Display the specified resource.
@@ -149,6 +170,8 @@ class RevisaoController extends Controller
      */
     public function destroy(Revisao $reviso)
     {
+        Veiculo::find($reviso->veiculo_id)->decrement('n_revisoes');
+        Pessoa::find($reviso->pessoa_id)->decrement('n_revisoes');
         $reviso->delete();
         return response()->json([], 204);
     }

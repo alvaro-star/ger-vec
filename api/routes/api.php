@@ -14,6 +14,7 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 Route::get('/pessoas/{id}/veiculos', [VeiculoController::class, 'veiculosByPessoa']);
 Route::get('/pessoas/statistics', [PessoaController::class, 'statistics']);
 Route::get('/pessoas/statistics/sexo/n_veiculos', [PessoaController::class, 'countVeiculosBySexo']);
+Route::get('/pessoas/statistics/revisoes/quantidade-media-tempo', [RevisaoController::class, 'countRevisoesByPessoa']);
 
 Route::apiResource('pessoas', PessoaController::class);
 
@@ -27,4 +28,3 @@ Route::get('veiculos/{id}/revisoes', [RevisaoController::class, 'revisoesByVeicu
 
 
 Route::apiResource('revisoes', RevisaoController::class);
-Route::get('/pessoas/statistics/revisoes/quantidade-media-tempo', [RevisaoController::class, 'countRevisoesByPessoa']);

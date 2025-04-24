@@ -17,11 +17,11 @@ return new class extends Migration
             $table->date('data');
             $table->index('data', 'revisoes_idx_data');
             $table->integer('quilometragem');
-            $table->string('tipo', 50)->nullable(); // preventiva, corretiva, etc.
+            $table->string('tipo', 50)->nullable();
             $table->text('descricao')->nullable();
             $table->text('observacoes')->nullable();
             $table->decimal('valor_total', 10, 2)->nullable();
-            $table->decimal('garantia_meses', 10, 2)->nullable(); // Em tempo
+            $table->decimal('garantia_meses', 10, 2)->nullable();
 
             $table->unsignedBigInteger('veiculo_id');
             $table->foreign('veiculo_id')->references('id')->on('veiculos');

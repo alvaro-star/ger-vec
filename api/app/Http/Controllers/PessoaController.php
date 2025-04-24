@@ -6,25 +6,27 @@ use App\DTOS\PageInput;
 use App\Models\Pessoa;
 use App\Http\Requests\StorePessoaRequest;
 use App\Http\Requests\UpdatePessoaRequest;
-
+use App\Models\Revisao;
+use App\Models\Veiculo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Controlador responsável por gerenciar os dados da entidade Pessoa.
+ */
 class PessoaController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Lista os registros de pessoas com suporte a paginação, filtro por nome e sexo.
      */
     public function index(Request $request)
     {
         $pageable = new PageInput($request);
-
         $query = $request->query('query') ?? '';
         $sexo = $request->query('sexo') ?? '';
 
         if (!in_array($sexo, ['M', 'F']))
             $sexo = '';
-
 
         $queryBuilder = Pessoa::orderBy('nome', 'asc');
 
@@ -34,10 +36,13 @@ class PessoaController extends Controller
         if ($sexo !== '')
             $queryBuilder->where('is_masculino', $sexo === 'M');
 
-        $response = $queryBuilder->getByPageable($pageable);
+        $response = $queryBuilder->getByPageable($pageable); // Certifique-se de que este método está implementado corretamente.
         return response()->json($response, 200);
     }
 
+    /**
+     * Retorna estatísticas agregadas das pessoas por sexo e no total.
+     */
     public function statistics()
     {
         $result = Pessoa::selectRaw('
@@ -58,6 +63,7 @@ class PessoaController extends Controller
             ->groupBy('is_masculino')
             ->get();
 
+        // Inicializa os dados estatísticos com valores padrões
         $initStats = fn() => [
             'n_veiculos' => 0,
             'min_veiculos' => PHP_INT_MAX,
@@ -77,6 +83,7 @@ class PessoaController extends Controller
             'Ambos' => $initStats()
         ];
 
+        // Acumula os dados por sexo
         foreach ($result as $item) {
             $key = $this->getSexoKey($item->is_masculino);
 
@@ -94,18 +101,21 @@ class PessoaController extends Controller
             $response[$key]['max_idade'] = max($response[$key]['max_idade'], $item->max_idade);
         }
 
-        // Calcular estatísticas para "Ambos"
+        // Calcula os totais agregados
         foreach (['n_veiculos', 'n_revisoes', 'n_elementos', 'soma_idades'] as $campo) {
             $response['Ambos'][$campo] = $response['M'][$campo] + $response['F'][$campo];
         }
+
+        // Cálculo de mínimos e máximos agregados
         foreach (['min_veiculos', 'min_revisoes', 'min_idade'] as $campo) {
             $response['Ambos'][$campo] = min($response['M'][$campo], $response['F'][$campo]);
         }
+
         foreach (['max_veiculos', 'max_revisoes', 'max_idade'] as $campo) {
             $response['Ambos'][$campo] = max($response['M'][$campo], $response['F'][$campo]);
         }
 
-        // Calcular médias
+        // Calcula as médias por grupo
         foreach (['M', 'F', 'Ambos'] as $key) {
             if ($response[$key]['n_elementos'] > 0) {
                 $response[$key]['media_veiculos'] = round($response[$key]['n_veiculos'] / $response[$key]['n_elementos'], 2);
@@ -117,26 +127,28 @@ class PessoaController extends Controller
         return response()->json($response, 200);
     }
 
-
+    /**
+     * Auxiliar para converter is_masculino em 'M' ou 'F'.
+     */
     private function getSexoKey($is_masculino)
     {
         return $is_masculino ? 'M' : 'F';
     }
 
     /**
-     * List n_veiculos by sexo.
+     * Retorna a soma total de veículos agrupada por sexo.
      */
     public function countVeiculosBySexo()
     {
-        return Pessoa::selectRaw('SUM(n_veiculos) as total, is_masculino')
+        $response = Pessoa::selectRaw('SUM(n_veiculos) as total, is_masculino')
             ->groupBy('is_masculino')
             ->orderBy('total')
             ->get();
+        return response()->json($response, 200);
     }
 
-
     /**
-     * Store a newly created resource in storage.
+     * Cadastra uma nova pessoa no banco de dados.
      */
     public function store(StorePessoaRequest $request)
     {
@@ -149,7 +161,7 @@ class PessoaController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Retorna os dados de uma pessoa específica.
      */
     public function show(Pessoa $pessoa)
     {
@@ -157,11 +169,11 @@ class PessoaController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Atualiza os dados de uma pessoa existente.
      */
     public function update(UpdatePessoaRequest $request, Pessoa $pessoa)
     {
-        $pessoa->fill($request->validated()); // já validado
+        $pessoa->fill($request->validated());
         $pessoa->is_masculino = $request->sexo === 'M';
         $pessoa->save();
 
@@ -169,10 +181,19 @@ class PessoaController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove uma pessoa, desde que não existam veículos ou revisões associadas.
      */
     public function destroy(Pessoa $pessoa)
     {
+        $veiculos = Veiculo::where('pessoa_id', $pessoa->id)->limit(1)->get();
+        $revisoes = Revisao::where('pessoa_id', $pessoa->id)->limit(1)->get();
+
+        if ($veiculos->isNotEmpty() || $revisoes->isNotEmpty()) {
+            return response()->json([
+                'message' => 'Não é possível excluir. Existem veículos ou revisões associadas a esta pessoa.'
+            ], 400);
+        }
+
         $pessoa->delete();
         return response()->json([], 204);
     }

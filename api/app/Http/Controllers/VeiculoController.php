@@ -7,6 +7,7 @@ use App\Models\Veiculo;
 use App\Http\Requests\StoreVeiculoRequest;
 use App\Http\Requests\UpdateVeiculoRequest;
 use App\Models\Pessoa;
+use App\Models\Revisao;
 use Illuminate\Http\Request;
 
 class VeiculoController extends Controller
@@ -17,29 +18,31 @@ class VeiculoController extends Controller
     public function index(Request $request)
     {
         $pageable = new PageInput($request);
-
-        $sort = $request->query('sort') ?? '';
+        $sort = $request->query('sort') ?? ''; // Obtém o critério de ordenação
 
         $queryBuilder = Veiculo::join('pessoas', 'veiculos.pessoa_id', '=', 'pessoas.id');
 
         if (!empty($sort) && $sort == 'Proprietario') {
-            $queryBuilder->orderBy('pessoas.nome', 'asc');
+            $queryBuilder->orderBy('pessoas.nome', 'asc'); // Ordena por nome do proprietário
         }
 
-        $response = $queryBuilder->getByPageable($pageable);
+        $response = $queryBuilder->getByPageable($pageable); // Aplica paginação
 
         return response()->json($response, 200);
     }
 
+    // Exibe veículos ordenados por nome do proprietário
     public function findAllOrderByPessoa(Request $request)
     {
         $pageable = new PageInput($request);
         $response = Veiculo::join('pessoas', 'veiculos.pessoa_id', '=', 'pessoas.id')
             ->orderBy('pessoas.nome', 'asc')
             ->getByPageable($pageable);
+
         return response()->json($response, 200);
     }
 
+    // Exibe a quantidade de veículos agrupados por marca
     public function nVeiculosGroupByMarca(Request $request)
     {
         return Veiculo::selectRaw('marca, COUNT(*) as total')
@@ -48,6 +51,7 @@ class VeiculoController extends Controller
             ->get();
     }
 
+    // Exibe a quantidade de veículos agrupados por sexo do proprietário e marca
     public function nVeiculosBySexoAndMarca(Request $request)
     {
         return Veiculo::join('pessoas', 'veiculos.pessoa_id', '=', 'pessoas.id')
@@ -58,6 +62,7 @@ class VeiculoController extends Controller
             ->get();
     }
 
+    // Exibe a quantidade de revisões agrupadas por marca de veículo
     public function nRevisoesGroupByMarca(Request $request)
     {
         return Veiculo::selectRaw('marca, SUM(n_revisoes) as total')
@@ -93,6 +98,7 @@ class VeiculoController extends Controller
         return response()->json($veiculo, 200);
     }
 
+    // Exibe veículos de uma pessoa específica, com possibilidade de busca por placa
     public function veiculosByPessoa($id, Request $request)
     {
         $pageable = new PageInput($request);
@@ -121,7 +127,7 @@ class VeiculoController extends Controller
             return response()->json([
                 'message' => 'Erros no formulario',
                 'errors' => [
-                    'placa' => ['A placa já cadastrada']
+                    'placa' => ['A placa já esta cadastrada']
                 ]
             ], 422);
         }
@@ -136,7 +142,19 @@ class VeiculoController extends Controller
      */
     public function destroy(Veiculo $veiculo)
     {
+        $revisoes = Revisao::where('veiculo_id', $veiculo->id)->limit(1)->get();
+
+        if ($revisoes->isNotEmpty()) {
+            return response()->json([
+                'message' => 'Não é possível excluir este veículo. Existem revisões associadas a ele.'
+            ], 400);
+        }
+
+        $pessoa_id = $veiculo->pessoa_id;
         $veiculo->delete();
+
+        Pessoa::find($pessoa_id)?->decrement('n_veiculos');
+
         return response()->json([], 204);
     }
 }

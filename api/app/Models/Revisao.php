@@ -17,15 +17,16 @@ class Revisao extends BaseModel
         'descricao',
         'observacoes',
         'valor_total',
-        'garantia_meses'
+        'garantia_meses',
     ];
 
     public function pessoa()
     {
-        return $this->belongsTo(Pessoa::class);
+        return $this->belongsTo(Pessoa::class, 'pessoa_id');
     }
+
     public function veiculo()
     {
-        return $this->belongsTo(Veiculo::class);
+        return $this->belongsTo(Veiculo::class, 'veiculo_id');
     }
 }
