@@ -46,7 +46,7 @@ class StoreVeiculoRequest extends FormRequest
 
             'renavam.required' => 'O campo Renavam é obrigatório.',
             'renavam.string' => 'O campo Renavam deve ser uma sequência de caracteres.',
-            'placa.unique' => 'Já existe um veículo cadastrado com esta renavam.',
+            'renavam.unique' => 'Já existe um veículo cadastrado com esta renavam.',
             'renavam.max' => 'O Renavam deve ter no máximo 11 caracteres.',
 
             'ano.required' => 'O campo Ano é obrigatório.',
