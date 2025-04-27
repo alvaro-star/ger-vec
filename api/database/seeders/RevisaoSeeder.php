@@ -14,6 +14,6 @@ class RevisaoSeeder extends Seeder
      */
     public function run(): void
     {
-        Revisao::factory(10000)->create();
+        Revisao::factory(20000)->create();
     }
 }

@@ -159,7 +159,8 @@ onMounted(fetchData)
                             </tbody>
                         </table>
 
-                        <div v-if="!rows.length" class="w-full text-base text-center py-4 text-gray-500 border-y">
+                        <div v-if="!rows.length"
+                            class="min-w-[800px] w-full text-base text-center py-4 text-gray-500 border-y">
                             Não encontramos nenhum registro.
                         </div>
                     </div>

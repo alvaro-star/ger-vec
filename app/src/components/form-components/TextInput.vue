@@ -147,7 +147,7 @@ const focusWithin = ref(false);
       {{ label }} <span v-if="required" class="text-red-500">*</span>
     </label>
     <div :class="['flex items-center transition duration-300 rounded', 'w-full bg-inputBg text-gray-700',
-      focusWithin ? (messageDefault !== '' ? 'ring-1 ring-red-500 border-red-600' : 'ring-1 ring-blue-500 border-blue-500')
+      focusWithin ? (messageDefault !== '' ? 'ring-1 ring-red-500 border-red-600' : 'ring-1 ring-blue-500 border-blue-600')
         : (messageDefault !== '' ? 'border border-red-600' : 'border')
     ]">
 
