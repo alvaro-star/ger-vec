@@ -51,7 +51,6 @@ const fetchData = async () => {
             routeName: 'veiculos.show',
         }))
         totalRecords.value = data.nElementos
-        console.log(data);
 
     } catch (error) {
         rows.value = []

@@ -113,7 +113,6 @@ const submitForm = async () => {
             await createPessoa(formData);
         }
     } catch (erro: any) {
-        console.log(erro);
         if (erro.status === 422 && erro.response?.data?.errors) {
             Object.assign(errors.value, erro.response.data.errors);
         }

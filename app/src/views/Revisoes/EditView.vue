@@ -50,9 +50,6 @@ const fetchRevisao = async () => {
     try {
         const id = getIdByRoute();
         const { data } = await api.get<IRevisao>(`/revisoes/${id}`);
-
-        console.log(data);
-
         Object.assign(form, data);
         form.observacoes = data.observacoes || '';
         form.descricao = data.descricao || '';
@@ -78,7 +75,6 @@ function validateForm(): boolean {
         formErrors['data'] = 'A data ainda não ocorreu';
 
     errors.value = formErrors;
-    console.log(formErrors);
 
     return Object.keys(formErrors).length === 0;
 }
