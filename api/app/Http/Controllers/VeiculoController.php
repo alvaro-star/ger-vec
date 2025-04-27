@@ -156,7 +156,7 @@ class VeiculoController extends Controller
             ], 422);
         }
 
-        $errors = $veiculo->uniqueKeyIsOcuped('renavam', $request->placa);
+        $errors = $veiculo->uniqueKeyIsOcuped('renavam', $request->renavam);
         if (count($errors)  > 0) {
             return response()->json([
                 'message' => 'Erros no formulario',
