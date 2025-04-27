@@ -154,15 +154,15 @@ onMounted(() => {
 </script>
 
 <template>
+    <HeaderModule class="mb-7">
+        <template #title>
+            <h1 class="text-3xl font-bold">Editar Veículo</h1>
+        </template>
+        <template #actions>
+            <BackButton label="Voltar" @click="voltar" />
+        </template>
+    </HeaderModule>
     <main class="min-h-[calc(100vh-56px)] pb-10">
-        <HeaderModule class="mb-7">
-            <template #title>
-                <h1 class="text-3xl font-bold">Editar Veículo</h1>
-            </template>
-            <template #actions>
-                <BackButton label="Voltar" @click="voltar" />
-            </template>
-        </HeaderModule>
 
         <FormTemplate class="container" header="Dados do Veículo" :create="false" @submit.prevent="submitForm"
             :cancelar-processo="cancelarEdicao" :open-delete-modal="openDeleteModal">

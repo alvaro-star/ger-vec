@@ -97,15 +97,15 @@ onMounted(() => {
 </script>
 
 <template>
+    <HeaderModule class="mb-7">
+        <template #title>
+            <h1 class="text-3xl font-bold">Cadastrar Revisão</h1>
+        </template>
+        <template #actions>
+            <BackButton label="Voltar" @click="voltar" />
+        </template>
+    </HeaderModule>
     <main class="min-h-[calc(100vh-56px)] pb-10">
-        <HeaderModule class="mb-7">
-            <template #title>
-                <h1 class="text-3xl font-bold">Cadastrar Revisão</h1>
-            </template>
-            <template #actions>
-                <BackButton label="Voltar" @click="voltar" />
-            </template>
-        </HeaderModule>
         <FormTemplate class="container" :create="true" header="Dados da Revisão" @submit.prevent="submitForm"
             :cancelar-processo="cancelarCadastro">
             <TextInput type="placa" v-if="!veiculoPlaca" class="px-3" label="Placa" v-model="form.placa"

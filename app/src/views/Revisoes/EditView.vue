@@ -120,15 +120,15 @@ onMounted(fetchRevisao);
 </script>
 
 <template>
+    <HeaderModule class="mb-7">
+        <template #title>
+            <h1 class="text-3xl font-bold">Editar Revisão</h1>
+        </template>
+        <template #actions>
+            <BackButton label="Voltar" @click="voltar" />
+        </template>
+    </HeaderModule>
     <main class="min-h-[calc(100vh-56px)] pb-10">
-        <HeaderModule class="mb-7">
-            <template #title>
-                <h1 class="text-3xl font-bold">Editar Revisão</h1>
-            </template>
-            <template #actions>
-                <BackButton label="Voltar" @click="voltar" />
-            </template>
-        </HeaderModule>
         <FormTemplate class="container" :create="false" :open-delete-modal="openDeleteModal" header="Dados da Revisão" @submit.prevent="submitForm"
             :cancelar-processo="cancelarEdicao">
 

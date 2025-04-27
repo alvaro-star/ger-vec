@@ -159,15 +159,15 @@ onMounted(() => {
 
 
 <template class="mt-4">
+    <HeaderModule classs="mb-4">
+        <template #title>
+            <h1 class="text-3xl font-bold">{{ !getIdByRoute() ? 'Cadastrar' : 'Editar' }} Pessoa</h1>
+        </template>
+        <template #actions>
+            <BackButton label="Voltar" @click="voltar" />
+        </template>
+    </HeaderModule>
     <main class="min-h-[calc(100vh-56px)] pb-10">
-        <HeaderModule classs="mb-4">
-            <template #title>
-                <h1 class="text-3xl font-bold">{{ !getIdByRoute() ? 'Cadastrar' : 'Editar' }} Pessoa</h1>
-            </template>
-            <template #actions>
-                <BackButton label="Voltar" @click="voltar" />
-            </template>
-        </HeaderModule>
         <Suspense>
             <template #default>
                 <FormTemplate :open-delete-modal="openDeleteModal" :create="!getIdByRoute()" header="Dados do Cliente"
