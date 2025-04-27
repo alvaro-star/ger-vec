@@ -30,4 +30,31 @@ class StoreRevisaoRequest extends FormRequest
             'placa' => 'required|exists:veiculos,placa',
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'data.required' => 'O campo Data é obrigatório.',
+            'data.date' => 'O campo Data deve ser uma data válida.',
+
+            'quilometragem.required' => 'O campo Quilometragem é obrigatório.',
+            'quilometragem.numeric' => 'O campo Quilometragem deve ser um número.',
+            'quilometragem.min' => 'A Quilometragem deve ser maior ou igual a zero.',
+
+            'tipo.required' => 'O campo Tipo é obrigatório.',
+            'tipo.string' => 'O campo Tipo deve ser uma sequência de caracteres.',
+            'tipo.max' => 'O campo Tipo deve ter no máximo 50 caracteres.',
+
+            'valor_total.required' => 'O campo Valor Total é obrigatório.',
+            'valor_total.numeric' => 'O campo Valor Total deve ser um número.',
+            'valor_total.min' => 'O Valor Total deve ser maior ou igual a zero.',
+
+            'garantia_meses.required' => 'O campo Garantia (Meses) é obrigatório.',
+            'garantia_meses.numeric' => 'O campo Garantia (Meses) deve ser um número.',
+            'garantia_meses.min' => 'A Garantia (Meses) deve ser maior ou igual a zero.',
+
+            'placa.required' => 'O campo Placa é obrigatório.',
+            'placa.exists' => 'A Placa informada não foi encontrada entre os veículos cadastrados.',
+        ];
+    }
 }

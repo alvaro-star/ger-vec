@@ -6,6 +6,8 @@ import FormTemplate from '@/components/form-components/form/FormTemplate.vue';
 import SelectInput from '@/components/form-components/SelectInput.vue';
 import TextInput from '@/components/form-components/TextInput.vue';
 import { tipo_revisao } from '@/data/options_selects';
+import { validEmptyFieldsForm } from '@/helpers/functions/validFormData';
+import patterns, { isDateInFuture } from '@/helpers/regexp/patterns';
 import api from '@/plugins/api';
 import { useAlertStore } from '@/stores/alertState';
 import type IRevisao from '@/types/IRevisao';
@@ -38,9 +40,12 @@ const form = reactive<FormData>({
     garantia_meses: ''
 });
 
-const errors = reactive<Record<string, string>>({});
+const errors = ref<Record<string, string>>({});
 const loading = ref(false);
 
+function voltar() {
+    router.back();
+}
 const fetchRevisao = async () => {
     try {
         const id = getIdByRoute();
@@ -52,17 +57,25 @@ const fetchRevisao = async () => {
 };
 
 function validateForm(): boolean {
-    Object.keys(errors).forEach((key) => delete errors[key]);
-    const requiredFields = ['data', 'quilometragem', 'tipo', 'descricao', 'valor_total', 'garantia_meses'];
+    const requiredFields = ['data', 'quilometragem', 'tipo', 'valor_total', 'garantia_meses', 'placa'];
 
-    for (const field of requiredFields) {
+    const formErrors: Record<string, string> = validEmptyFieldsForm(form, requiredFields);
+
+    if (!patterns.placa.valid((form as any).placa))
+        formErrors.placa = 'Insira uma placa válida';
+
+    for (const field of ["quilometragem", 'valor_total', 'garantia_meses']) {
         const value = (form as any)[field];
-        if (!value && value !== 0) {
-            errors[field] = 'Campo obrigatório';
+        if (!patterns.float.valid(value)) {
+            formErrors[field] = 'Insira um valor válido';
         }
     }
 
-    return Object.keys(errors).length === 0;
+    if (isDateInFuture(form.data))
+        formErrors['data'] = 'A data ainda não ocorreu';
+
+    errors.value = formErrors;
+    return Object.keys(formErrors).length === 0;
 }
 
 async function submitForm() {
@@ -77,7 +90,7 @@ async function submitForm() {
         router.back();
     } catch (erro: any) {
         if (erro.status === 422 && erro.response?.data?.errors) {
-            Object.assign(errors, erro.response.data.errors);
+            Object.assign(errors.value, erro.response.data.errors);
         }
         alertStore.setMessage('Erro ao salvar alterações.', 'danger');
     } finally {
@@ -107,18 +120,18 @@ onMounted(fetchRevisao);
 </script>
 
 <template>
-    <HeaderModule class="mb-7">
-        <template #title>
-            <h1 class="text-3xl font-bold">Editar Revisão</h1>
-        </template>
-        <template #actions>
-            <BackButton label="Voltar" @click="cancelarEdicao" />
-        </template>
-    </HeaderModule>
     <main class="min-h-[calc(100vh-56px)] pb-10">
+        <HeaderModule class="mb-7">
+            <template #title>
+                <h1 class="text-3xl font-bold">Editar Revisão</h1>
+            </template>
+            <template #actions>
+                <BackButton label="Voltar" @click="voltar" />
+            </template>
+        </HeaderModule>
+        <FormTemplate class="container" :create="false" :open-delete-modal="openDeleteModal" header="Dados da Revisão" @submit.prevent="submitForm"
+            :cancelar-processo="cancelarEdicao">
 
-        <FormTemplate class="container" :create="false" header="Dados da Revisão" @submit.prevent="submitForm"
-            :cancelar-processo="cancelarEdicao" :open-delete-modal="openDeleteModal">
             <TextInput class="px-3" label="Data" v-model="form.data" :message="errors.data"
                 placeholder="Digite a data da revisão" type="date" :required="true" />
 
@@ -127,7 +140,7 @@ onMounted(fetchRevisao);
                 :required="true" :max-value="999999.99" />
 
             <SelectInput class="px-3" label="Tipo de Revisão" v-model="form.tipo" :options="tipo_revisao"
-                :message="errors.is_masculino" placeholder="Selecione o tipo" :required="true" :show-max-size="true" />
+                :message="errors.tipo" placeholder="Selecione o tipo" :required="true" :show-max-size="true" />
 
             <TextInput class="px-3" label="Descrição" v-model="form.descricao" :message="errors.descricao"
                 :required="false" placeholder="Descrição detalhada da revisão" :show-max-size="true" :max-size="200" />
@@ -143,9 +156,7 @@ onMounted(fetchRevisao);
             <TextInput class="px-3" label="Observações" v-model="form.observacoes" :required="false"
                 :message="errors.observacoes" placeholder="Observações adicionais" :show-max-size="true"
                 :max-size="200" />
-
         </FormTemplate>
-
         <CloseModal ref="deleteModal" :confirm-delete="confirmDelete">
             Deseja realmente excluir esta revisão? Esta ação é irreversível.
         </CloseModal>

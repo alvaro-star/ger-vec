@@ -63,7 +63,7 @@ onMounted(fetchMarca)
                             <CampoShow class="" titulo="Atualizado em" :valor="formatarData(marca.updated_at)" />
                         </template>
                     </ShowTemplate>
-                    <VeiculosTable :id="id"  title="Veiculos da Marca"/>
+                    <VeiculosTable :id="id"  title="Veículos da Marca"/>
                 </div>
             </template>
             <template #fallback>

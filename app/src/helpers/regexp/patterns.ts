@@ -11,6 +11,7 @@ type KeysValidator =
     | 'cpf'
     | 'cep'
     | 'letter_only'
+    | "letter_and_number_only"
     | 'phone'
 
 export type InputType = KeysValidator | 'date'
@@ -53,12 +54,12 @@ const patterns: Record<KeysValidator, IValidator> = {
     integer: {
         valid: (input) => /^\d+$/.test(input),
         semiValid: (input) => /^\d*$/.test(input),
-        message: "Por favor, insira um número válido"
+        message: "O valor deve ser um número"
     },
     float: {
         valid: (input) => /^\d+(\.\d+)?$/.test(input),
         semiValid: (input) => /^(\d+\.)?\d*?$/.test(input),
-        message: "Por favor, insira um numero float válido"
+        message: "O valor deve ser um número"
     },
     text: {
         valid: (input) => true,
@@ -95,10 +96,16 @@ const patterns: Record<KeysValidator, IValidator> = {
         message: "O formato deve ser 00000-000"
     },
     letter_only: {
-        valid: (input) => /^[A-Za-zÀ-ÿ\s]+$/.test(input),
-        semiValid: (input) => /^[A-Za-zÀ-ÿ\s]*$/.test(input),
+        valid: (input) => /^[A-Za-zÀ-ÿ\s\.]+$/.test(input),
+        semiValid: (input) => /^[A-Za-zÀ-ÿ\s\.]*$/.test(input),
         message: "Devem ser apenas letras e espacos"
     },
+    letter_and_number_only: {
+        valid: (input) => /^[A-Za-zÀ-ÿ\s]+$/.test(input),
+        semiValid: (input) => /^[A-Za-zÀ-ÿ\s\.]*$/.test(input),
+        message: "Devem ser apenas letras e espacos"
+    },
+
     phone: {
         valid: (input) => /^\(\d{2}\)\s\d{5}-\d{4}$/.test(input),
         semiValid: (input) => {
@@ -142,6 +149,17 @@ export function isInteger(ng: string) {
 export function isFloat(ng: string) {
     return /^\d+(\.\d+)?$/.test(ng);
 }
+
+export function isDateInFuture(dateString: string) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Zera horas, minutos, segundos e milissegundos
+
+    const inputDate = new Date(dateString);
+    inputDate.setHours(0, 0, 0, 0); // Também zera para comparar apenas a data
+
+    return inputDate > today;
+}
+
 
 export function formatarCPF(numeros: string) {
     const apenasNumeros = numeros.replace(/\D/g, '').slice(0, 11);

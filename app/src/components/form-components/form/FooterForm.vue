@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import ButtonCancel from '../buttons/ButtonCancel.vue';
 import ButtonCadastrar from '../buttons/ButtonCadastrar.vue';
 import TrashIcon from '@/components/icons/TrashIcon.vue';

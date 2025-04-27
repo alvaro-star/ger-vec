@@ -42,7 +42,7 @@ const updateMarcasGeral = (marcasGeralData: any[]) => {
         </template>
     </HeaderModule>
     <main class="min-h-[calc(100vh-56px)] pb-10">
-        <SectionComponent titulo="Dados Estatisticos" class="container">
+        <SectionComponent titulo="Dados Estatistícos" class="container">
             <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 px-4 py-5">
                 <div class="flex flex-col items-center justify-center">
                     <div class="text-xl text-center font-semibold pt-2  max-w-96">

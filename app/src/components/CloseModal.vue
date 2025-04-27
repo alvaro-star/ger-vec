@@ -19,7 +19,6 @@
 import { ref, defineExpose } from 'vue';
 import ButtonCancel from '@/components/form-components/buttons/ButtonCancel.vue';
 import ButtonOption from '@/components/form-components/buttons/ButtonOption.vue';
-import { defineProps } from 'vue';
 
 const isVisible = ref(false);
 

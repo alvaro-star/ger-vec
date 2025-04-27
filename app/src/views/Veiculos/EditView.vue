@@ -76,7 +76,7 @@ function validateForm(): boolean {
 
     if (!patterns.placa.valid(form.placa))
         formErrors.placa = 'Insira uma placa válida';
-    if (!patterns.integer.valid(form.renavam))  
+    if (!patterns.integer.valid(form.renavam))
         formErrors.renavam = 'O renavam deve conter apenas números';
     else if (form.renavam.length != 11)
         formErrors.renavam = 'O renavam deve conter 11 digitos';
@@ -98,7 +98,7 @@ const fetchMarcas = async () => {
         alertStore.setMessage('Não foi possível carregar as marcas', 'danger');
     }
 }
-onMounted
+
 async function submitForm() {
     if (!validateForm()) return;
     loading.value = true;
@@ -164,7 +164,7 @@ onMounted(() => {
             </template>
         </HeaderModule>
 
-        <FormTemplate header="Dados do Veículo" :create="false" @submit.prevent="submitForm"
+        <FormTemplate class="container" header="Dados do Veículo" :create="false" @submit.prevent="submitForm"
             :cancelar-processo="cancelarEdicao" :open-delete-modal="openDeleteModal">
             <SelectInput class="px-3" label="Marca" v-model="form.marca" :message="errors.marca" required>
                 <option v-for="marca in marcas" :value="marca.id" :key="marca.id">

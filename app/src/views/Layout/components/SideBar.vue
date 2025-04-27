@@ -5,6 +5,7 @@ import PeapleIcon from './icons/PeapleIcon.vue';
 import RevistaIcon from './icons/RevistaIcon.vue';
 import HomeIcon from './icons/HomeIcon.vue';
 import CarIcon from './icons/CarIcon.vue';
+import MarcasIcon from './icons/MarcasIcon.vue';
 defineProps<{
     isSidebarOpen: boolean;
 }>();
@@ -16,7 +17,7 @@ const routes = [
     { icon: PeapleIcon, name: 'pessoas.index', title: 'Clientes', path: '/pessoa' },
     { icon: CarIcon, name: 'veiculos.index', title: 'Veículo', path: '/veiculo' },
     { icon: RevistaIcon, name: 'revisoes.index', title: 'Revisão', path: '/revisao' },
-    { icon: RevistaIcon, name: 'marcas.index', title: 'Marcas', path: '/marca' },
+    { icon: MarcasIcon, name: 'marcas.index', title: 'Marcas', path: '/marca' },
 ];
 const emit = defineEmits(['toggleSidebar']);
 

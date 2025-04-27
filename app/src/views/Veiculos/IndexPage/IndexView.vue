@@ -12,8 +12,8 @@ const marcasGeral = ref<any[]>([])
 const marcasGroupFeminino = ref<any[]>([])
 const marcasGroupMasculino = ref<any[]>([])
 
-const abaAtual = ref<string>('Todos os Veiculos')
-const opcoesAba = ['Todos os Veiculos', 'Marcas']
+const abaAtual = ref<string>('Todos os Veículos')
+const opcoesAba = ['Todos os Veículos', 'Marcas']
 const selecionado = ref<string>('todos')
 
 const totaisPorGrupo = ref<Record<'Geral' | 'Feminino' | 'Masculino', number>>({
@@ -54,14 +54,14 @@ const updateData = (marcasGeralData: any[], groupMasculinos: any[], groupFeminin
     </HeaderModule>
     <main class="min-min-h-[calc(100vh)] pb-10">
 
-        <SectionComponent titulo="Dados Estatisticos" class="container">
+        <SectionComponent titulo="Dados Estatistícos" class="container">
             <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 px-4 py-5">
                 <div class="flex flex-col items-center justify-center">
                     <div class="text-xl text-center font-semibold pt-2  max-w-96">
-                        <p v-if="selecionado === 'todos'">Qtd de Veiculos agrupado por marca</p>
-                        <p v-if="selecionado === 'feminino'">Qtd de Veiculos por marca das Proprietaritarias Femininas
+                        <p v-if="selecionado === 'todos'">Qtd de Veículos agrupado por marca</p>
+                        <p v-if="selecionado === 'feminino'">Qtd de Veículos por marca das Proprietaritarias Femininas
                         </p>
-                        <p v-if="selecionado === 'masculino'">Qtd de Veiculos por marca dos Proprietaritarios Masculinos
+                        <p v-if="selecionado === 'masculino'">Qtd de Veículos por marca dos Proprietaritarios Masculinos
                         </p>
                     </div>
                     <div class="flex space-x-5 mb-6 w-full justify-center">
@@ -101,7 +101,7 @@ const updateData = (marcasGeralData: any[], groupMasculinos: any[], groupFeminin
 
         <HorizontalNavBar v-model="abaAtual" :tabs="opcoesAba" class="my-6" />
 
-        <VeiculosTable :show="abaAtual === 'Todos os Veiculos'" />
+        <VeiculosTable :show="abaAtual === 'Todos os Veículos'" />
         <MarcasTable @update-data="updateData" :show="abaAtual === 'Marcas'" />
     </main>
 </template>

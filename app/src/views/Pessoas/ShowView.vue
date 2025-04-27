@@ -68,7 +68,7 @@ onMounted(fetchPessoa);
                             <CampoShow class="" titulo="Atualizado em" :valor="formatarData(pessoa.updated_at)" />
                         </template>
                     </ShowTemplate>
-                    <TableVeiculos title="Veiculos da pessoa" :id="route.params.id" />
+                    <TableVeiculos title="Veículos da pessoa" :id="route.params.id" />
                 </div>
             </template>
             <template #fallback>

@@ -136,6 +136,8 @@ const updateValue = (event: Event) => {
   emit('update:modelValue', valueTarget);
 }
 
+
+const focusWithin = ref(false);
 </script>
 
 <template>
@@ -144,16 +146,27 @@ const updateValue = (event: Event) => {
       class="block tracking-wide text-gray-700 text-x font-semibold mb-2">
       {{ label }} <span v-if="required" class="text-red-500">*</span>
     </label>
-    <div :class="['relative flex items-center transition duration-300 text-gray-700']">
-      <p v-if="prefix" :class="['absolute left-0 ml-3', messageDefault != '' && 'text-red-700']">{{ props.prefix }}</p>
-      <input v-model="value" @input="updateValue" :type="typeLocal" :placeholder="placeholder" :class="[
-        'appearance-none block w-full bg-inputBg  focus:shadow-none focus:ring-1 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white transition duration-300',
-        messageDefault !== '' && 'border-red-600 focus:border-red-700 focus:ring-red-500  transition duration-300',
-        prefix ? 'pl-10' : '',
-      ]" />
-      <p v-if="showMaxSize" :class="['absolute right-0 mr-3', messageDefault != '' && 'text-red-700']">{{ maxSize -
-        props.modelValue.length }}</p>
+    <div :class="['flex items-center transition duration-300 rounded', 'w-full bg-inputBg text-gray-700',
+      focusWithin ? (messageDefault !== '' ? 'ring-1 ring-red-500 border-red-600' : 'ring-1 ring-blue-500 border-blue-500')
+        : (messageDefault !== '' ? 'border border-red-600' : 'border')
+    ]">
+
+      <p v-show="prefix" :class="['pl-4', messageDefault !== '' && 'text-red-700']">
+        {{ prefix }}
+      </p>
+
+      <input v-model="value" @input="updateValue" @focus="focusWithin = true" @blur="focusWithin = false"
+        :type="typeLocal" :placeholder="placeholder" :class="['appearance-none block w-full bg-transparent outline-none border-none ring-0 py-3 leading-tight',
+          prefix ? 'pl-2' : 'pl-4',
+          showMaxSize ? 'pr-1' : 'pr-4'
+        ]" />
+
+      <p v-show="showMaxSize" :class="['pr-4', messageDefault !== '' && 'text-red-700']">
+        {{ maxSize - props.modelValue.length }}
+      </p>
     </div>
+
+
     <InputError :message="messageDefault" />
   </div>
 </template>

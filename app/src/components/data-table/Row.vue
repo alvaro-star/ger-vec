@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { defineProps } from 'vue';
 import type IColumn from '@/types/IColumn';
 import GoToDetailsIcon from './icons/GoToDetailsIcon.vue';
 

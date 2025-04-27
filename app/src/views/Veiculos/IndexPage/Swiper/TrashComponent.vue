@@ -25,7 +25,7 @@ const prevSlide = () => {
 
 
 <template>
-    <SectionComponent titulo="Dados Estatisticos" class="container">
+    <SectionComponent titulo="Dados Estatistícos" class="container">
         <Swiper :slides-per-view="1" :loop="true" @swiper="onSwiper" class="mx-auto">
             <SwiperSlide>
                 <BarBySexo class="h-[400px]" />

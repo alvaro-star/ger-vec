@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string("nome", 20)->unique();
             $table->string("pais", 20);
-            $table->integer("ano_fundacao");
+            $table->string("ano_fundacao", 4);
             $table->timestamps();
         });
     }

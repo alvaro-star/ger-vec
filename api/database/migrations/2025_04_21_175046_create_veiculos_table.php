@@ -15,16 +15,16 @@ return new class extends Migration
             $table->id();
 
 
-            $table->string('modelo');
+            $table->string('modelo', 50);
 
-            $table->string('placa')->unique();
+            $table->string('placa', 7)->unique();
             $table->string('renavam', 11)->unique();
-            $table->integer('ano');
+            $table->string('ano', 4);
 
             $table->unsignedBigInteger('n_revisoes')->default(0);
 
-            $table->string('cor')->nullable();
-            $table->string('tipo_combustivel')->nullable();
+            $table->string('cor', 50)->nullable();
+            $table->string('tipo_combustivel', 50)->nullable();
 
             $table->unsignedBigInteger('pessoa_id')->nullable();
             $table->foreign('pessoa_id')->references('id')->on('pessoas');

@@ -39,7 +39,7 @@ const temEstatisticas = computed(() => {
 
 
 <template>
-    <SectionComponent titulo="Dados Estatisticos" v-if="temEstatisticas" class="container">
+    <SectionComponent titulo="Dados Estatistícos" v-if="temEstatisticas" class="container">
         <div v-if="loading" class="flex justify-center items-center h-60">
             <SpinerAnimation />
         </div>
@@ -53,7 +53,7 @@ const temEstatisticas = computed(() => {
             </div>
             <div class="w-full flex justify-center">
                 <div class="space-y-2 max-w-[500px] w-full">
-                    <h3 class="w-full text-center font-semibold text-lg">Média, minimo e maximo</h3>
+                    <h3 class="w-full text-center font-semibold text-lg">Média, mínimo e maximo</h3>
                     <div class="flex justify-center items-center space-x-4">
                         <label class="mr-4">
                             <input type="radio" value="idade" v-model="campoSelecionado" />

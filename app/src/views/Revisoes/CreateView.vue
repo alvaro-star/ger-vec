@@ -6,7 +6,7 @@ import SelectInput from '@/components/form-components/SelectInput.vue';
 import TextInput from '@/components/form-components/TextInput.vue';
 import { tipo_revisao } from '@/data/options_selects';
 import { validEmptyFieldsForm } from '@/helpers/functions/validFormData';
-import patterns from '@/helpers/regexp/patterns';
+import patterns, { isDateInFuture } from '@/helpers/regexp/patterns';
 import api from '@/plugins/api';
 import { useAlertStore } from '@/stores/alertState';
 import { onMounted, reactive, ref } from 'vue';
@@ -63,6 +63,8 @@ function validateForm(): boolean {
             formErrors[field] = 'Insira um valor válido';
         }
     }
+    if (isDateInFuture(form.data))
+        formErrors['data'] = 'A data ainda não ocorreu';
 
     errors.value = formErrors;
     return Object.keys(formErrors).length === 0;
