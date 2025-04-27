@@ -50,7 +50,11 @@ const fetchRevisao = async () => {
     try {
         const id = getIdByRoute();
         const { data } = await api.get<IRevisao>(`/revisoes/${id}`);
+
         Object.assign(form, data);
+        form.observacoes = data.observacoes ||'';
+        form.descricao = data.descricao ||'';
+        
     } catch (error) {
         console.error((error as Error).message);
     }
