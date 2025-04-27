@@ -51,22 +51,21 @@ const fetchRevisao = async () => {
         const id = getIdByRoute();
         const { data } = await api.get<IRevisao>(`/revisoes/${id}`);
 
+        console.log(data);
+
         Object.assign(form, data);
-        form.observacoes = data.observacoes ||'';
-        form.descricao = data.descricao ||'';
-        
+        form.observacoes = data.observacoes || '';
+        form.descricao = data.descricao || '';
+
     } catch (error) {
         console.error((error as Error).message);
     }
 };
 
 function validateForm(): boolean {
-    const requiredFields = ['data', 'quilometragem', 'tipo', 'valor_total', 'garantia_meses', 'placa'];
+    const requiredFields = ['data', 'quilometragem', 'tipo', 'valor_total', 'garantia_meses'];
 
     const formErrors: Record<string, string> = validEmptyFieldsForm(form, requiredFields);
-
-    if (!patterns.placa.valid((form as any).placa))
-        formErrors.placa = 'Insira uma placa válida';
 
     for (const field of ["quilometragem", 'valor_total', 'garantia_meses']) {
         const value = (form as any)[field];
@@ -79,6 +78,8 @@ function validateForm(): boolean {
         formErrors['data'] = 'A data ainda não ocorreu';
 
     errors.value = formErrors;
+    console.log(formErrors);
+
     return Object.keys(formErrors).length === 0;
 }
 
@@ -133,8 +134,8 @@ onMounted(fetchRevisao);
         </template>
     </HeaderModule>
     <main class="min-h-[calc(100vh-56px)] pb-10">
-        <FormTemplate class="container" :create="false" :open-delete-modal="openDeleteModal" header="Dados da Revisão" @submit.prevent="submitForm"
-            :cancelar-processo="cancelarEdicao">
+        <FormTemplate class="container" :create="false" :open-delete-modal="openDeleteModal" header="Dados da Revisão"
+            @submit.prevent="submitForm" :cancelar-processo="cancelarEdicao">
 
             <TextInput class="px-3" label="Data" v-model="form.data" :message="errors.data"
                 placeholder="Digite a data da revisão" type="date" :required="true" />
