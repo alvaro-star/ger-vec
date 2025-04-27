@@ -24,7 +24,7 @@ class StoreVeiculoRequest extends FormRequest
         return [
             'modelo' => 'required|string|max:50',
             'placa' => 'required|string|unique:veiculos,placa|max:7',
-            'renavam' => 'required|string|regex:/^\d{11}$/',
+            'renavam' => 'required|string|unique:veiculos,renavam|regex:/^\d{11}$/',
             'ano' => 'required|integer|min:1800|max:' . (date('Y') + 1),
             'cor' => 'required|string|max:50',
             'tipo_combustivel' => 'required|string|max:50',
@@ -46,6 +46,7 @@ class StoreVeiculoRequest extends FormRequest
 
             'renavam.required' => 'O campo Renavam é obrigatório.',
             'renavam.string' => 'O campo Renavam deve ser uma sequência de caracteres.',
+            'placa.unique' => 'Já existe um veículo cadastrado com esta renavam.',
             'renavam.max' => 'O Renavam deve ter no máximo 11 caracteres.',
 
             'ano.required' => 'O campo Ano é obrigatório.',

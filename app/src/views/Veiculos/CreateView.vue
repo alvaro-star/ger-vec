@@ -96,9 +96,12 @@ async function submitForm() {
         });
     } catch (erro: any) {
         if (erro.status === 422 && erro.response?.data?.errors) {
-            Object.assign(errors, erro.response.data.errors);
+
+            Object.assign(errors.value, erro.response.data.errors);
+        } else {
+            alertStore.setMessage('Nao foi possivel cadastrar o veiculo', 'danger');
         }
-        alertStore.setMessage('Nao foi possivel cadastrar o veiculo', 'danger');
+
     } finally {
         loading.value = false;
     }
