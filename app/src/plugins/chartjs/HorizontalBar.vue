@@ -9,6 +9,7 @@ import {
 } from 'chart.js'
 import { Bar } from 'vue-chartjs'
 import { computed } from 'vue'
+import ChartDataLabels from 'chartjs-plugin-datalabels'
 import defaultColors from './defaultColors'
 
 const props = defineProps<{
@@ -18,7 +19,7 @@ const props = defineProps<{
     options?: object
 }>()
 
-ChartJS.register(BarElement, Tooltip, Legend, CategoryScale, LinearScale)
+ChartJS.register(BarElement, Tooltip, Legend, CategoryScale, LinearScale, ChartDataLabels)
 
 const backgroundColors = computed(() =>
     props.colors && props.colors.length === props.values.length
@@ -41,6 +42,19 @@ const defaultOptions = {
     indexAxis: 'y',
     responsive: true,
     maintainAspectRatio: false,
+    plugins: {
+        datalabels: {
+            display: true,
+            anchor: 'center',
+            align: 'center',
+            color: 'white',
+            font: {
+                weight: 'bold',
+                size: 12
+            },
+            formatter: (value: number) => value.toLocaleString()
+        }
+    },
     scales: {
         x: {
             beginAtZero: true
@@ -48,13 +62,14 @@ const defaultOptions = {
     }
 }
 
+
 const chartOptions = computed(() => {
     return props.options ?? defaultOptions
 })
 </script>
 
 <template>
-    <div class="chart-container">
+    <div class="chart-container" style="position: relative; height: 300px;">
         <Bar :data="data" :options="chartOptions" />
     </div>
 </template>

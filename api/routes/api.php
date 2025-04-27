@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\PessoaController;
 use App\Http\Controllers\RevisaoController;
 use App\Http\Controllers\VeiculoController;
@@ -26,5 +27,6 @@ Route::get('veiculos/order-by-pessoa', [VeiculoController::class, 'findAllOrderB
 Route::apiResource('veiculos', VeiculoController::class);
 Route::get('veiculos/{id}/revisoes', [RevisaoController::class, 'revisoesByVeiculo']);
 
+Route::apiResource('marcas', MarcaController::class);
 
 Route::apiResource('revisoes', RevisaoController::class);

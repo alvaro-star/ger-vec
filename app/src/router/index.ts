@@ -9,6 +9,10 @@ const router = createRouter({
       component: AppLayout,
       children: [
         {
+          path: 'lab', name: 'lab',
+          component: () => import('@/views/LabView.vue'),
+        },
+        {
           path: '', name: 'home',
           component: () => import('@/views/HomeView.vue'),
         },
@@ -63,7 +67,7 @@ const router = createRouter({
             },
             {
               path: 'create', name: 'pessoas.create',
-              component: () => import('@/views/Pessoas/CreateView.vue'),
+              component: () => import('@/views/Pessoas/FormView.vue'),
             },
             {
               path: ':id', name: 'pessoas.show',
@@ -71,16 +75,36 @@ const router = createRouter({
             },
             {
               path: ':id/edit', name: 'pessoas.edit',
-              component: () => import('@/views/Pessoas/EditView.vue'),
+              component: () => import('@/views/Pessoas/FormView.vue'),
             },
             {
               path: ':id/veiculos/create', name: 'veiculos.create',
               component: () => import('@/views/Veiculos/CreateView.vue'),
-            },
+            }
           ]
-        }
+        }, {
+          path: 'marca',
+          children: [
+            {
+              path: '', name: 'marcas.index',
+              component: () => import('@/views/Marcas/IndexView.vue'),
+            },
+            {
+              path: 'create', name: 'marcas.create',
+              component: () => import('@/views/Marcas/FormView.vue'),
+            },
+            {
+              path: ':id', name: 'marcas.show',
+              component: () => import('@/views/Marcas/ShowView.vue'),
+            },
+            {
+              path: ':id/edit', name: 'marcas.edit',
+              component: () => import('@/views/Marcas/FormView.vue'),
+            }
+          ]
+        },
       ]
-    }
+    },
   ]
 })
 

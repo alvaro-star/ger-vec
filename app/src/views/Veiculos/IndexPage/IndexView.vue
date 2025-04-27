@@ -5,21 +5,16 @@ import SectionComponent from '@/components/SectionComponent.vue'
 import HorizontalBar from '@/plugins/chartjs/HorizontalBar.vue'
 import Pie from '@/plugins/chartjs/Pie.vue'
 import { ref } from 'vue'
-import MarcasGroupSexo from './tables/MarcasGroupSexo.vue'
 import MarcasTable from './tables/MarcasTable.vue'
 import VeiculosTable from './tables/VeiculosTable.vue'
-
-
 
 const marcasGeral = ref<any[]>([])
 const marcasGroupFeminino = ref<any[]>([])
 const marcasGroupMasculino = ref<any[]>([])
 
 const abaAtual = ref<string>('Todos os Veiculos')
-const opcoesAba = ['Todos os Veiculos', 'Marcas', 'Marcas (Agrupados por sexo)']
-
+const opcoesAba = ['Todos os Veiculos', 'Marcas']
 const selecionado = ref<string>('todos')
-
 
 const totaisPorGrupo = ref<Record<'Geral' | 'Feminino' | 'Masculino', number>>({
     Geral: 0,
@@ -39,27 +34,25 @@ function escolherTop5(items: any[]) {
     return [...principais, { marca: 'Outros', total: totalOutros }]
 }
 
-const updateMarcasGeral = (marcasGeralData: any[]) => {
+const updateData = (marcasGeralData: any[], groupMasculinos: any[], groupFemininos: any[]) => {
     marcasGeral.value = escolherTop5(marcasGeralData)
     totaisPorGrupo.value.Geral = calcularTotal(marcasGeralData)
-}
-
-const updateMarcasSexo = (groupMasculinos: any[], groupFemininos: any[]) => {
     totaisPorGrupo.value.Feminino = calcularTotal(groupFemininos)
     totaisPorGrupo.value.Masculino = calcularTotal(groupMasculinos)
 
     marcasGroupFeminino.value = escolherTop5(groupFemininos)
     marcasGroupMasculino.value = escolherTop5(groupMasculinos)
 }
+
 </script>
 
 <template>
-    <main class="h-[calc(100vh)]">
-        <HeaderModule class="mb-7">
-            <template #title>
-                <h1 class="text-3xl font-bold">Veículos</h1>
-            </template>
-        </HeaderModule>
+    <HeaderModule class="mb-7">
+        <template #title>
+            <h1 class="text-3xl font-bold">Veículos</h1>
+        </template>
+    </HeaderModule>
+    <main class="min-min-h-[calc(100vh)] pb-10">
 
         <SectionComponent titulo="Dados Estatisticos" class="container">
             <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 px-4 py-5">
@@ -109,7 +102,6 @@ const updateMarcasSexo = (groupMasculinos: any[], groupFemininos: any[]) => {
         <HorizontalNavBar v-model="abaAtual" :tabs="opcoesAba" class="my-6" />
 
         <VeiculosTable :show="abaAtual === 'Todos os Veiculos'" />
-        <MarcasTable @update-data="updateMarcasGeral" :show="abaAtual === 'Marcas'" />
-        <MarcasGroupSexo @update-data="updateMarcasSexo" :show="abaAtual === 'Marcas (Agrupados por sexo)'" />
+        <MarcasTable @update-data="updateData" :show="abaAtual === 'Marcas'" />
     </main>
 </template>

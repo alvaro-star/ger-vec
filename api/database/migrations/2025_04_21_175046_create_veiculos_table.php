@@ -13,22 +13,26 @@ return new class extends Migration
     {
         Schema::create('veiculos', function (Blueprint $table) {
             $table->id();
-            $table->string('marca');
-            $table->index('marca', 'veiculos_idx_marca');
+
+
             $table->string('modelo');
 
             $table->string('placa')->unique();
-            $table->string('renavam')->nullable();
+            $table->string('renavam', 11)->unique();
             $table->integer('ano');
 
             $table->unsignedBigInteger('n_revisoes')->default(0);
-            
+
             $table->string('cor')->nullable();
             $table->string('tipo_combustivel')->nullable();
 
             $table->unsignedBigInteger('pessoa_id')->nullable();
             $table->foreign('pessoa_id')->references('id')->on('pessoas');
             $table->index('pessoa_id', 'veiculos_idx_pessoa_id');
+
+            $table->unsignedBigInteger('marca_id');
+            $table->foreign('marca_id')->references('id')->on('marcas');
+            $table->index('marca_id', 'veiculos_idx_marca_id');
 
             $table->timestamps();
         });

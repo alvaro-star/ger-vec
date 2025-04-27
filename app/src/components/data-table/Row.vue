@@ -25,8 +25,8 @@ function goToDetails() {
 </script>
 
 <template class="flex justify-center">
-  <tr class="border-b hover:bg-gray-50">
-    <td v-for="(column, index) in columns" :key="index" class="px-4 py-4 border-r border-gray-300">
+  <tr class="border-b border-gray-300 hover:bg-gray-50">
+    <td v-for="(column, index) in columns" :key="index" :class="['px-4 py-4 border-r border-gray-300', column.class]">
       {{ row[column.field] }}
     </td>
     <td v-if="row.routeName" class="border-t border-gray-300">

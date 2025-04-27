@@ -1,8 +1,9 @@
+import type IMarca from "./IMarca"
 import type IPessoa from "./IPessoa"
 
 export default interface IVeiculo {
     id: number
-    marca: string
+    
     modelo: string
     placa: string
     renavam: string
@@ -12,6 +13,7 @@ export default interface IVeiculo {
     pessoa_id: number
     n_revisoes: number
     pessoa: IPessoa | null;
+    marca: IMarca | null;
     created_at: string
     updated_at: string
 }

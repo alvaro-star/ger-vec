@@ -22,11 +22,11 @@ class StorePessoaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nome' => 'required|string|max:255',
-            'telefone' => 'required|string|max:15',
-            'cpf' => 'required|string|size:11|regex:/^\d{11}$/',
+            'nome' => 'required|string|max:60',
+            'celular' => 'required|string|regex:/^\d{10,11}$/',
+            'cpf' => 'required|string|regex:/^\d{11}$/|unique:pessoas,cpf',
             'sexo' => 'required|string|in:F,M',
-            'idade' => 'required|integer|min:0|max:150',
+            'idade' => 'required|integer|between:18,100',
         ];
     }
 }

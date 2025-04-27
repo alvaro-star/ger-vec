@@ -2,7 +2,6 @@
 import PrimaryButton from '@/components/form-components/buttons/PrimaryButton.vue'
 import api from '@/plugins/api'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-
 import HeaderModule from '@/components/data-table/HeaderModule.vue'
 import Table from '@/components/data-table/Table.vue'
 import type IColumn from '@/types/IColumn'
@@ -11,23 +10,28 @@ import type IPageOutput from '@/types/IPageOutput'
 import type IPessoa from '@/types/IPessoa'
 import type IStatisticPessoa from '@/types/IStatisticPessoa'
 import StatisticPessoaGraphic from './components/graphics/StatisticPessoaGraphic.vue'
+import { formatarCelular, formatarCPF } from '@/helpers/regexp/patterns'
 
 const query = ref<string>('')
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(10)
 const totalRecords = ref<number>(0)
+const loadingTable = ref<boolean>(false)
+const loadingStatistics = ref<boolean>(false)
+const sort = ref<string>('nome')
+const asc = ref(true)
+
 type IStatistics = Record<string, IStatisticPessoa>
 const statistics = ref<IStatistics>({})
 
 const columns = ref<IColumn[]>([
-    { label: 'Nome', field: 'nome' },
-    { label: 'Telefone', field: 'telefone' },
-    { label: 'CPF', field: 'cpf' },
+    { label: 'Nome', field: 'nome', sorteable: true },
+    { label: 'Celular', field: 'celular', sorteable: true },
+    { label: 'CPF', field: 'cpf', sorteable: true },
     { label: 'Sexo', field: 'sexo' },
-    { label: 'Idade', field: 'idade' }
+    { label: 'Idade', field: 'idade', sorteable: true }
 ])
 
-// Torna os filtros reativos com reactive
 const filters = reactive<IFilters>({
     Sexo: {
         options: ['Ambos', 'Masculino', 'Feminino'],
@@ -40,7 +44,7 @@ const rows = ref<any[]>([])
 
 const paginatedRecords = computed(() => rows.value)
 
-// Função para obter o valor do filtro de sexo
+
 const getSexoFiltro = () => {
     const selected = filters.Sexo?.value?.[0] || ''
     const firstChar = selected.charAt(0).toUpperCase()
@@ -51,14 +55,16 @@ const getSexoFiltro = () => {
     }
 }
 
-// Função para buscar os dados com base no filtro
 const fetchData = async () => {
+    loadingTable.value = true
     const sexo = getSexoFiltro()
 
     const params = {
         page: currentPage.value,
         size: pageSize.value,
         query: query.value,
+        sort: sort.value,
+        asc: asc.value,
         sexo
     }
 
@@ -69,22 +75,29 @@ const fetchData = async () => {
         rows.value = data.content.map((item: any) => ({
             ...item,
             sexo: item.is_masculino ? 'Masculino' : 'Feminino',
+            idade: item.idade + ' anos',
+            cpf: formatarCPF(item.cpf),
+            celular: formatarCelular(item.celular),
             routeName: 'pessoas.show'
         }))
         totalRecords.value = data.nElementos
     } catch (error) {
         rows.value = []
         console.error('Erro ao buscar dados:', error)
+    } finally {
+        loadingTable.value = false
     }
 }
 
-
 const fetchStatistics = async () => {
+    loadingStatistics.value = true
     try {
         const response = await api.get<IStatistics>('/pessoas/statistics')
         statistics.value = response.data
     } catch (error) {
         console.error('Erro ao buscar dados:', error)
+    } finally {
+        loadingStatistics.value = false
     }
 }
 
@@ -92,6 +105,8 @@ const fetchStatistics = async () => {
 // Watchers para atualizar os dados quando as variáveis mudarem
 watch(currentPage, fetchData)
 watch(pageSize, fetchData)
+watch(asc, fetchData)
+watch(sort, fetchData)
 watch(() => filters.Sexo.value, fetchData)
 
 const updatePage = (page: number) => {
@@ -104,6 +119,16 @@ const updatePageSize = (size: number) => {
     currentPage.value = 1
 }
 
+const updateSort = (field: string) => {
+    if (sort.value == field) {
+        asc.value = !asc.value
+    } else {
+        sort.value = field
+        asc.value = true
+    }
+    fetchData()
+}
+
 // Atualiza a busca
 const handleSearch = async (newQuery: string) => {
     query.value = newQuery
@@ -113,9 +138,8 @@ const handleSearch = async (newQuery: string) => {
 
 // Atualiza os filtros quando um filho emite
 const updateFilter = (label: string, value: string | string[]) => {
-    if (filters[label]) {
+    if (filters[label])
         filters[label].value = Array.isArray(value) ? value : [value]
-    }
 }
 
 onMounted(() => {
@@ -125,28 +149,30 @@ onMounted(() => {
 </script>
 
 <template>
-    <main class="h-[calc(100vh-56px)]">
-        <HeaderModule class="mb-7">
-            <template #title>
-                <h1 class="text-3xl font-bold">Pessoas</h1>
-            </template>
+    <HeaderModule class="mb-7">
+        <template #title>
+            <h1 class="text-3xl font-bold">Pessoas</h1>
+        </template>
 
-            <template #actions>
-                <router-link to="/pessoa/create">
-                    <PrimaryButton label="Cadastrar Pessoa" />
-                </router-link>
-            </template>
-        </HeaderModule>
+        <template #actions>
+            <router-link to="/pessoa/create">
+                <PrimaryButton label="Cadastrar Pessoa" />
+            </router-link>
+        </template>
+    </HeaderModule>
+    <main class="min-h-[calc(100vh-56px)] pb-10">
 
-        <StatisticPessoaGraphic class="mb-7" :sexo="filters['Sexo'].value" :statistics="statistics" />
+        <StatisticPessoaGraphic :loading="loadingStatistics" class="mb-7" :sexo="filters['Sexo'].value"
+            :statistics="statistics" />
 
         <Suspense>
             <template #default>
-                <Table class="container" :columns="columns" :rows="paginatedRecords" :currentPage="currentPage"
-                    :filters="filters" :totalRecords="totalRecords" :pageSize="pageSize" @update-filter="updateFilter"
+                <Table v-model:asc="asc" v-model:sort="sort" show-order-info :loading="loadingTable" class="container"
+                    :columns="columns" :rows="paginatedRecords" :currentPage="currentPage" :filters="filters"
+                    :totalRecords="totalRecords" :pageSize="pageSize" @update-filter="updateFilter"
                     :pageSizeOptions="[5, 10, 15, 20, 25]" @search="handleSearch" @page-changed="updatePage"
                     @page-size-changed="updatePageSize" title="Lista de Pessoas"
-                    placeholder="Pesquise pelo nome da pessoa" />
+                    placeholder="Pesquise pelo nome, cpf ou celular da pessoa" />
             </template>
 
             <template #fallback>

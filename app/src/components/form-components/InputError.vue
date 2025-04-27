@@ -6,7 +6,7 @@ const props = defineProps<{
 }>();
 
 const shouldShowMessage = computed(() => {
-  return props.message !== undefined && props.message !== null && props.message !== false;
+  return props.message !== undefined && props.message !== null && props.message !== false && props.message !== '';
 });
 </script>
 

@@ -8,6 +8,7 @@ use App\Http\Requests\StorePessoaRequest;
 use App\Http\Requests\UpdatePessoaRequest;
 use App\Models\Revisao;
 use App\Models\Veiculo;
+use App\Utils\TransformData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -16,27 +17,38 @@ use Illuminate\Support\Facades\DB;
  */
 class PessoaController extends Controller
 {
+    protected array $sorter = ['nome', 'celular', 'cpf', 'idade'];
     /**
      * Lista os registros de pessoas com suporte a paginação, filtro por nome e sexo.
      */
     public function index(Request $request)
     {
-        $pageable = new PageInput($request);
-        $query = $request->query('query') ?? '';
-        $sexo = $request->query('sexo') ?? '';
 
+        $pageable = new PageInput($request);
+        $query = $pageable->getQuery();
+
+
+        $sexo = $request->query('sexo') ?? '';
         if (!in_array($sexo, ['M', 'F']))
             $sexo = '';
 
-        $queryBuilder = Pessoa::orderBy('nome', 'asc');
+        $queryBuilder =  null;
+        if (in_array($pageable->getSort(), $this->sorter))
+            $queryBuilder = Pessoa::orderBy($pageable->getSort(), $pageable->getDirection());
+        else
+            $queryBuilder = Pessoa::orderBy('nome', 'asc');
 
+
+        $query_numbers = TransformData::extractNumbers($query);
         if ($query !== '')
-            $queryBuilder->where('nome', 'like', $query . '%');
+            $queryBuilder->whereRaw('LOWER(nome) LIKE ?', ['%' . strtolower($query) . '%'])
+                ->orWhereRaw('cpf LIKE ?', ['%' . $query_numbers . '%'])
+                ->orWhereRaw('celular LIKE ?', ['%' . $query_numbers . '%']);;
 
         if ($sexo !== '')
             $queryBuilder->where('is_masculino', $sexo === 'M');
 
-        $response = $queryBuilder->getByPageable($pageable); // Certifique-se de que este método está implementado corretamente.
+        $response = $queryBuilder->getByPageable($pageable);
         return response()->json($response, 200);
     }
 
@@ -174,6 +186,14 @@ class PessoaController extends Controller
     public function update(UpdatePessoaRequest $request, Pessoa $pessoa)
     {
         $pessoa->fill($request->validated());
+        $pessoa_with_cpf = Pessoa::where('cpf', $request->cpf)->first();
+        if ($pessoa_with_cpf != null && $pessoa_with_cpf->id != $pessoa->id) {
+            return response()->json([
+                'message' => 'Erros no formulario',
+                'errors' => ['cpf' => ['O cpf já está cadastrado']]
+            ], 422);
+        }
+
         $pessoa->is_masculino = $request->sexo === 'M';
         $pessoa->save();
 

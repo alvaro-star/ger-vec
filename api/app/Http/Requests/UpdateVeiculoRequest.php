@@ -13,7 +13,7 @@ class UpdateVeiculoRequest extends FormRequest
     {
         return true;
     }
-    
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -22,7 +22,6 @@ class UpdateVeiculoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'marca' => 'required|string|max:255',
             'modelo' => 'required|string|max:255',
             'placa' => 'required|string|max:255',
             'renavam' => 'required|string|max:255',

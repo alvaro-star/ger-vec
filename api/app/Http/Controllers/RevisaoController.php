@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class RevisaoController extends Controller
 {
+    private array $sorter = ['data', 'veiculo', 'quilometragem', 'valor_total'];
     /**
      * Display a listing of the resource.
      */
@@ -21,13 +22,20 @@ class RevisaoController extends Controller
     {
 
         $pageable = new PageInput($request);
-
         $data_start = $request->query('data_start');
         $data_start = TransformData::stringToDateTime($data_start);
         $data_end = $request->query('data_end');
         $data_end = TransformData::stringToDateTime($data_end);
 
-        $queryBuilder = Revisao::orderBy('data', 'desc');
+        $queryBuilder = Revisao::query();
+        if (in_array($pageable->getSort(), $this->sorter))
+            $queryBuilder->orderBy($pageable->getSort(), $pageable->getDirection());
+        else
+            $queryBuilder->orderBy('data', 'desc');
+        $queryBuilder
+            ->join('veiculos', 'veiculos.id', '=', 'revisoes.veiculo_id')
+            ->addSelect('revisoes.*')
+            ->addSelect('veiculos.placa as veiculo');
 
         $pessoa_id = $request->query('pessoa_id') ?? '';
         $pessoa_id = TransformData::stringInteger($pessoa_id, 0);
@@ -35,17 +43,17 @@ class RevisaoController extends Controller
         $veiculo_id = TransformData::stringInteger($veiculo_id, 0);
 
         if ($pessoa_id > 0)
-            $queryBuilder->where('pessoa_id', $pessoa_id);
+            $queryBuilder->where('revisoes.pessoa_id', $pessoa_id);
         if ($veiculo_id > 0)
-            $queryBuilder->where('veiculo_id', $veiculo_id);
+            $queryBuilder->where('revisoes.veiculo_id', $veiculo_id);
 
 
         if ($data_start !== null && $data_end !== null) {
-            $queryBuilder = $queryBuilder->whereBetween('data', [$data_start->format('Y-m-d'), $data_end->format('Y-m-d')]);
+            $queryBuilder = $queryBuilder->whereBetween('data', [$data_start, $data_end]);
         } else if ($data_start !== null) {
-            $queryBuilder = $queryBuilder->where('data', '>=', $data_start->format('Y-m-d'));
+            $queryBuilder = $queryBuilder->where('data', '>=', $data_start);
         } else if ($data_end !== null) {
-            $queryBuilder = $queryBuilder->where('data', '<=', $data_end->format('Y-m-d'));
+            $queryBuilder = $queryBuilder->where('data', '<=', $data_end);
         }
 
         $response = $queryBuilder->getByPageable($pageable);
@@ -81,14 +89,21 @@ class RevisaoController extends Controller
     {
 
         $pageable = new PageInput($request);
-        $query = $request->query('query') ?? '';
+        $query = $pageable->getQuery();
 
-        $queryBuilder = Pessoa::orderBy('n_revisoes', 'desc');
+        $queryBuilder = Pessoa::query();
+        if (in_array($pageable->getSort(), ['nome', 'cpf', 'n_revisoes']))
+            $queryBuilder->orderBy($pageable->getSort(), $pageable->getDirection());
+        else
+            $queryBuilder->orderBy('n_revisoes', 'desc');
+
+
+        $query_numbers = TransformData::extractNumbers($query);
         if ($query !== '')
-            $queryBuilder->where('nome', 'like', $query . '%');
+            $queryBuilder->whereRaw('LOWER(nome) LIKE ?', ['%' . strtolower($query) . '%'])
+                ->orWhereRaw('cpf LIKE ?', ['%' . $query_numbers . '%']);
+
         $response =  $queryBuilder->getByPageable($pageable);
-
-
         $pessoaIds = $response->content->pluck('id')->toArray();
 
         $placeholders = implode(',', array_fill(0, count($pessoaIds), '?'));

@@ -14,8 +14,7 @@ const toggleSidebar = () => {
         <SideBar :isSidebarOpen="isSidebarOpen" @toggle-sidebar="toggleSidebar"
             class="fixed top-0 left-0 h-full z-10" />
 
-        <!-- Main Content -->
-        <main :class="{ 'expanded-main': isSidebarOpen, 'collapsed-main': !isSidebarOpen }" class=" bg-mainBackground">
+        <main :class="{ 'expanded-main': isSidebarOpen, 'collapsed-main': !isSidebarOpen }" class="bg-mainBackground">
             <RouterView />
         </main>
     </div>

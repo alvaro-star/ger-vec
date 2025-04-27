@@ -2,7 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\Marca;
+use App\Utils\PreValues;
+
 use App\Models\Pessoa;
+use App\Utils\Enums;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,42 +25,13 @@ class VeiculoFactory extends Factory
         $pessoa->increment('n_veiculos');
 
         return [
-            'marca' => $this->faker->randomElement([
-                'Toyota',
-                'Honda',
-                'Ford',
-                'Chevrolet',
-                'Volkswagen',
-                'Fiat',
-                'Hyundai',
-                'Nissan',
-                'Renault',
-                'Jeep'
-            ]),
-            'modelo' => $this->faker->word,
-            'placa' => $this->faker->unique()->regexify('[A-Z]{3}[0-9]{4}'),
-            'renavam' => $this->faker->numberBetween(10000000000, 99999999999),
+            'marca_id' =>  Marca::inRandomOrder()->first()->id,
+            'modelo' => strtoupper($this->faker->word),
+            'placa' => $this->faker->unique()->regexify('[A-Z]{3}[0-9]{1}[A-Z]{1}[0-9]{2}'),
+            'renavam' => $this->faker->unique()->numerify('###########'),
             'ano' => $this->faker->year,
-            'cor' => $this->faker->randomElement([
-                'Branco',
-                'Preto',
-                'Cinza',
-                'Prata',
-                'Azul',
-                'Vermelho',
-                'Verde',
-                'Marrom',
-                'Bege',
-                'Dourado'
-            ]),
-            'tipo_combustivel' => $this->faker->randomElement([
-                'Gasolina',
-                'Álcool',
-                'Diesel',
-                'Elétrico',
-                'Flex',
-                'Hibrido'
-            ]),
+            'cor' => $this->faker->randomElement(Enums::getRandomColors()),
+            'tipo_combustivel' => $this->faker->randomElement(Enums::getFuelTypes()),
             'pessoa_id' => $pessoa->id,
         ];
     }

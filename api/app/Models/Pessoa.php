@@ -10,7 +10,7 @@ class Pessoa extends BaseModel
     use HasFactory;
     protected $fillable = [
         'nome',
-        'telefone',
+        'celular',
         'cpf',
         'idade'
     ];

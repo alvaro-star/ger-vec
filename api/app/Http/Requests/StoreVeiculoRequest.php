@@ -22,14 +22,14 @@ class StoreVeiculoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'marca' => 'required|string|max:255',
             'modelo' => 'required|string|max:255',
-            'placa' => 'required|string|unique:veiculos,placa|max:255',
-            'renavam' => 'required|string|max:255',
+            'placa' => 'required|string|unique:veiculos,placa|max:7',
+            'renavam' => 'required|string|max:11',
             'ano' => 'required|integer|min:1900|max:' . (date('Y') + 1),
-            'cor' => 'required|string|max:255',
-            'tipo_combustivel' => 'required|string|max:255',
+            'cor' => 'required|string|max:30',
+            'tipo_combustivel' => 'required|string|max:30',
             'pessoa_id' => 'required|exists:pessoas,id',
+            'marca_id' => 'required|exists:marcas,id',
         ];
     }
 }

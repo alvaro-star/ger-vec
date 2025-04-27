@@ -16,6 +16,7 @@ const routes = [
     { icon: PeapleIcon, name: 'pessoas.index', title: 'Clientes', path: '/pessoa' },
     { icon: CarIcon, name: 'veiculos.index', title: 'Veículo', path: '/veiculo' },
     { icon: RevistaIcon, name: 'revisoes.index', title: 'Revisão', path: '/revisao' },
+    { icon: RevistaIcon, name: 'marcas.index', title: 'Marcas', path: '/marca' },
 ];
 const emit = defineEmits(['toggleSidebar']);
 

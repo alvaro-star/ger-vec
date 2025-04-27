@@ -1,10 +1,10 @@
 <template>
-    <div v-show="isVisible" class="fixed inset-0  flex justify-center items-center" @click.self="closeModal">
+    <div v-show="isVisible" class="fixed inset-0 z-50  flex justify-center items-center" @click.self="closeModal">
         <div class="bg-white p-6 rounded w-full max-w-[600px] shadow-2xl border border-gray-400">
             <div class="text-xl font-semibold">Confirmar Exclusão</div>
             <div class="mt-4 text-lg text-terciary">
                 <slot>
-                    Deseja realmente excluir este refgstro? Esta ação é irreversível.
+                    Deseja realmente excluir este registro? Esta ação é irreversível.
                 </slot>
             </div>
             <div class="mt-6 flex justify-end gap-4">

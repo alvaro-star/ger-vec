@@ -8,6 +8,8 @@ use App\DTOS\PageOutput;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
+use function PHPUnit\Framework\returnSelf;
+
 class BaseModel extends Model
 {
     public function newEloquentBuilder($query)
@@ -21,5 +23,12 @@ class BaseModel extends Model
             ->limit($pageable->getLimit())
             ->get();
         return new PageOutput($pageable, $data, $nElementos);
+    }
+    public function uniqueKeyIsOcuped($field, $value): array
+    {
+        $return = static::where($field, $value)->where('id', '!=', $this->id)->exists();
+        if ($return)
+            return ['O novo valor não é único'];
+        return [];
     }
 }

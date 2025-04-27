@@ -6,38 +6,50 @@ use App\DTOS\PageInput;
 use App\Models\Veiculo;
 use App\Http\Requests\StoreVeiculoRequest;
 use App\Http\Requests\UpdateVeiculoRequest;
+use App\Models\Marca;
 use App\Models\Pessoa;
 use App\Models\Revisao;
+use App\Utils\TransformData;
 use Illuminate\Http\Request;
 
 class VeiculoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
+    protected array $sorter = ['proprietario', 'placa', 'renavam', 'ano', 'marca', 'modelo'];
+
     public function index(Request $request)
     {
         $pageable = new PageInput($request);
-        $sort = $request->query('sort') ?? ''; // Obtém o critério de ordenação
+        $queryBuilder = Veiculo::join('pessoas', 'veiculos.pessoa_id', '=', 'pessoas.id')
+            ->join('marcas', 'veiculos.marca_id', '=', 'marcas.id')
+            ->select('veiculos.*', 'pessoas.nome as proprietario', 'marcas.nome as marca');
 
-        $queryBuilder = Veiculo::join('pessoas', 'veiculos.pessoa_id', '=', 'pessoas.id');
+        if (in_array($pageable->getSort(), $this->sorter))
+            $queryBuilder->orderBy($pageable->getSort(), $pageable->getDirection());
+        else
+            $queryBuilder->orderBy('placa', 'asc');
 
-        if (!empty($sort) && $sort == 'Proprietario') {
-            $queryBuilder->orderBy('pessoas.nome', 'asc'); // Ordena por nome do proprietário
+
+        $pessoa_id = TransformData::stringInteger($request->query('pessoa_id'), 0);
+        if ($pessoa_id > 0) {
+            $queryBuilder->where('pessoas.id', $pessoa_id);
+        }
+        $marca_id = TransformData::stringInteger($request->query('marca_id'), 0);
+        if ($marca_id > 0) {
+            $queryBuilder->where('marcas.id', $marca_id);
         }
 
-        $response = $queryBuilder->getByPageable($pageable); // Aplica paginação
+        $query = strtoupper($pageable->getQuery());
+        if ($query != '') {
+            $queryBuilder->whereRaw('UPPER(placa) LIKE ?', ['%' . $query . '%'])
+                ->orWhereRaw('UPPER(pessoas.nome) LIKE ?', ['%' . $query . '%'])
+                ->orWhereRaw('UPPER(renavam) LIKE ?', ['%' . $query . '%'])
+                ->orWhereRaw('UPPER(marcas.nome) LIKE ?', ['%' . $query . '%'])
+                ->orWhereRaw('UPPER(modelo) LIKE ?', ['%' . $query . '%']);
+        }
 
-        return response()->json($response, 200);
-    }
 
-    // Exibe veículos ordenados por nome do proprietário
-    public function findAllOrderByPessoa(Request $request)
-    {
-        $pageable = new PageInput($request);
-        $response = Veiculo::join('pessoas', 'veiculos.pessoa_id', '=', 'pessoas.id')
-            ->orderBy('pessoas.nome', 'asc')
-            ->getByPageable($pageable);
+        $response = $queryBuilder->getByPageable($pageable);
 
         return response()->json($response, 200);
     }
@@ -45,31 +57,59 @@ class VeiculoController extends Controller
     // Exibe a quantidade de veículos agrupados por marca
     public function nVeiculosGroupByMarca(Request $request)
     {
-        return Veiculo::selectRaw('marca, COUNT(*) as total')
-            ->groupBy('marca')
+        $response = Veiculo::join('marcas', 'veiculos.marca_id', '=', 'marcas.id')
+            ->selectRaw('marcas.nome as marca, COUNT(*) as total')
+            ->groupBy('marcas.id')
             ->orderBy('total', 'desc')
             ->get();
+
+        return response()->json($response, 200);
     }
 
     // Exibe a quantidade de veículos agrupados por sexo do proprietário e marca
     public function nVeiculosBySexoAndMarca(Request $request)
     {
-        return Veiculo::join('pessoas', 'veiculos.pessoa_id', '=', 'pessoas.id')
-            ->selectRaw('pessoas.is_masculino, veiculos.marca, COUNT(*) as total')
-            ->groupBy('pessoas.is_masculino', 'veiculos.marca')
+        $response = Veiculo::join('pessoas', 'veiculos.pessoa_id', '=', 'pessoas.id')
+            ->join('marcas', 'veiculos.marca_id', '=', 'marcas.id')
+            ->selectRaw('pessoas.is_masculino, marcas.nome as marca, COUNT(*) as total') // Renomeia marca.nome para marca
+            ->groupBy('pessoas.is_masculino', 'marcas.nome')
             ->orderBy('pessoas.is_masculino', 'desc')
             ->orderBy('total', 'desc')
             ->get();
+
+        return response()->json($response, 200);
     }
 
     // Exibe a quantidade de revisões agrupadas por marca de veículo
     public function nRevisoesGroupByMarca(Request $request)
     {
-        return Veiculo::selectRaw('marca, SUM(n_revisoes) as total')
-            ->groupBy('marca')
+        $response =  Veiculo::join('marcas', 'veiculos.marca_id', '=', 'marcas.id')
+            ->selectRaw('marcas.nome as marca, SUM(n_revisoes) as total')
+            ->groupBy('marcas.id')
             ->orderBy('total', 'desc')
             ->get();
+
+        return response()->json($response, 200);
     }
+
+
+    public function veiculosByPessoa($id, Request $request)
+    {
+        $pageable = new PageInput($request);
+        $search = $request->query('query');
+
+        $query = Veiculo::join('marcas', 'veiculos.marca_id', '=', 'marcas.id')
+            ->where('veiculos.pessoa_id', $id)
+            ->select('veiculos.*', 'marcas.nome as marca');
+
+        if (!empty($search)) {
+            $query->where('placa', 'like', '%' . $search . '%');
+        }
+
+        $response = $query->getByPageable($pageable);
+        return response()->json($response, 200);
+    }
+
 
     /**
      * Store a newly created resource in storage.
@@ -79,9 +119,12 @@ class VeiculoController extends Controller
         $data = $request->validated();
         $veiculo = new Veiculo();
         $veiculo->fill($data);
-        $veiculo->pessoa_id = $data["pessoa_id"];
-        $veiculo->save();
 
+        $veiculo->pessoa_id = $data["pessoa_id"];
+        $veiculo->marca_id = $data["marca_id"];
+
+
+        $veiculo->save();
         $pessoa = Pessoa::find($data["pessoa_id"]);
         $pessoa->n_veiculos++;
         $pessoa->save();
@@ -95,25 +138,9 @@ class VeiculoController extends Controller
     public function show(Veiculo $veiculo)
     {
         $veiculo->pessoa = Pessoa::find($veiculo->pessoa_id);
+        $veiculo->marca = Marca::find($veiculo->marca_id);
         return response()->json($veiculo, 200);
     }
-
-    // Exibe veículos de uma pessoa específica, com possibilidade de busca por placa
-    public function veiculosByPessoa($id, Request $request)
-    {
-        $pageable = new PageInput($request);
-        $search = $request->query('query');
-
-        $query = Veiculo::where('pessoa_id', $id);
-
-        if (!empty($search)) {
-            $query->where('placa', 'like', '%' . $search . '%');
-        }
-
-        $response = $query->getByPageable($pageable);
-        return response()->json($response, 200);
-    }
-
 
 
     /**
@@ -121,14 +148,19 @@ class VeiculoController extends Controller
      */
     public function update(UpdateVeiculoRequest $request, Veiculo $veiculo)
     {
-
-        $veiculo_com_placa = Veiculo::where('placa', $request->placa)->first();
-        if ($veiculo_com_placa != null && $veiculo_com_placa->id != $veiculo->id) {
+        $errors = $veiculo->uniqueKeyIsOcuped('placa', $request->placa);
+        if (count($errors)  > 0) {
             return response()->json([
                 'message' => 'Erros no formulario',
-                'errors' => [
-                    'placa' => ['A placa já esta cadastrada']
-                ]
+                'errors' => ['placa' => $errors]
+            ], 422);
+        }
+
+        $errors = $veiculo->uniqueKeyIsOcuped('renavam', $request->placa);
+        if (count($errors)  > 0) {
+            return response()->json([
+                'message' => 'Erros no formulario',
+                'errors' => ['renavam' => $errors]
             ], 422);
         }
 

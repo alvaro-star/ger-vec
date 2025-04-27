@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('pessoas', function (Blueprint $table) {
             $table->id();
-            $table->string('nome');
-            $table->string('telefone');
-            $table->string('cpf');
+            $table->string('nome', 60);
+            $table->string('celular', 11);
+            $table->string('cpf', 11)->unique();
             $table->boolean('is_masculino');
-            $table->integer('idade');
+            $table->unsignedInteger('idade');
             $table->unsignedBigInteger('n_veiculos')->default(0);
             $table->unsignedBigInteger('n_revisoes')->default(0);
             $table->timestamps();

@@ -1,30 +1,33 @@
 <script lang="ts" setup>
 import HeaderModule from '@/components/data-table/HeaderModule.vue';
 import BackButton from '@/components/form-components/buttons/BackButton.vue';
-import ButtonCadastrar from '@/components/form-components/buttons/ButtonCadastrar.vue';
-import ButtonCancel from '@/components/form-components/buttons/ButtonCancel.vue';
+import FormTemplate from '@/components/form-components/form/FormTemplate.vue';
 import SelectInput from '@/components/form-components/SelectInput.vue';
 import TextInput from '@/components/form-components/TextInput.vue';
 import { tipo_revisao } from '@/data/options_selects';
+import { validEmptyFieldsForm } from '@/helpers/functions/validFormData';
+import patterns from '@/helpers/regexp/patterns';
 import api from '@/plugins/api';
 import { useAlertStore } from '@/stores/alertState';
 import { onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const alertStore = useAlertStore();
+
 const router = useRouter();
 const route = useRoute();
+const getIdByRoute = () => route.query.id || route.params.id;
 
 const veiculoPlaca = route.query.placa;
 
 interface RevisaoFormData {
     data: string;
-    quilometragem: number | string;
+    quilometragem: string;
     tipo: string;
     descricao: string;
     observacoes: string;
-    valor_total: number | string;
-    garantia_meses: number | string;
+    valor_total: string;
+    garantia_meses: string;
     placa: string;
 }
 
@@ -39,7 +42,7 @@ const form = reactive<RevisaoFormData>({
     placa: '',
 });
 
-const errors = reactive<Record<string, string>>({});
+const errors = ref<Record<string, string>>({});
 const loading = ref(false);
 
 function voltar() {
@@ -47,28 +50,22 @@ function voltar() {
 }
 
 function validateForm(): boolean {
-    Object.keys(errors).forEach((key) => delete errors[key]);
-
     const requiredFields = ['data', 'quilometragem', 'tipo', 'valor_total', 'garantia_meses', 'placa'];
 
-    for (const field of requiredFields) {
-        const value = (form as any)[field];
+    let formErrors: Record<string, string> = validEmptyFieldsForm(form, requiredFields);
 
-        if (value === '' || value === null || value === undefined) {
-            errors[field] = 'Campo obrigatório';
-        }
+    if (!patterns.placa.valid(form.placa))
+        formErrors.placa = 'Insira uma placa válida';
 
-        if (field === 'quilometragem' || field === 'valor_total' || field === 'garantia_meses') {
-            const numericValue = parseFloat(String(form[field]));
-            if (isNaN(numericValue) || numericValue <= 0) {
-                errors[field] = `Deve ser um valor numérico válido`;
-            } else {
-                form[field] = numericValue;
-            }
+    for (const field of ["quilometragem", 'valor_total', 'garantia_meses']) {
+        const value = (form as any)[field]
+        if (!patterns.float.valid(value)) {
+            formErrors[field] = 'Insira um valor válido';
         }
     }
 
-    return Object.keys(errors).length === 0;
+    errors.value = formErrors;
+    return Object.keys(formErrors).length === 0;
 }
 
 async function submitForm() {
@@ -76,7 +73,6 @@ async function submitForm() {
     loading.value = true;
     try {
         await api.post('/revisoes', form);
-
         alertStore.setMessage('A revisão foi cadastrada com sucesso!', null);
         window.history.go(-1);
     } catch (erro: any) {
@@ -89,17 +85,17 @@ async function submitForm() {
     }
 }
 
-function cancelarCadastro() {
+const cancelarCadastro = () => {
     router.back();
 }
+
 onMounted(() => {
-    if (veiculoPlaca)
-        form.placa = veiculoPlaca as string;
+    if (veiculoPlaca) form.placa = veiculoPlaca as string;
 })
 </script>
 
 <template>
-    <main class="h-[calc(100vh-56px)]">
+    <main class="min-h-[calc(100vh-56px)] pb-10">
         <HeaderModule class="mb-7">
             <template #title>
                 <h1 class="text-3xl font-bold">Cadastrar Revisão</h1>
@@ -108,52 +104,36 @@ onMounted(() => {
                 <BackButton label="Voltar" @click="voltar" />
             </template>
         </HeaderModule>
+        <FormTemplate class="container" :create="true" header="Dados da Revisão" @submit.prevent="submitForm"
+            :cancelar-processo="cancelarCadastro">
+            <TextInput type="placa" v-if="!veiculoPlaca" class="px-3" label="Placa" v-model="form.placa"
+                :message="errors.placa" uppercase placeholder="Digite a placa do veículo" :required="true"
+                :show-max-size="true" :max-size="7" />
 
-        <form @submit.prevent="submitForm" class="p-3 container">
-            <section class="pb-3">
-                <div class="mx-auto max-w-screen">
-                    <div class="p-5 bg-white relative border border-gray-300 sm:rounded overflow-hidden">
-                        <h2 class="text-xl font-semibold mb-4">Dados da Revisão</h2>
-                        <div class="border-b border-colorline"></div>
-                        <div class="-mx-3 mt-4 grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-3">
-                            <TextInput v-if="!veiculoPlaca" class="py-3" label="Placa"
-                                v-model="form.placa" :message="errors.placa" placeholder="Digite a placa do veículo" />
+            <TextInput class="px-3" label="Data" v-model="form.data" :message="errors.data"
+                placeholder="Digite a data da revisão" type="date" :required="true" />
 
-                            <TextInput class="py-3" label="Data" v-model="form.data"
-                                :message="errors.data" placeholder="Digite a data da revisão" type="date" />
+            <TextInput class="px-3" label="Quilometragem" prefix="Km" v-model="form.quilometragem"
+                :message="errors.quilometragem" placeholder="Digite a quilometragem" type="float" :precision="2"
+                :required="true" :max-value="999999.99" />
 
-                            <TextInput class="py-3" label="Quilometragem"
-                                v-model="form.quilometragem" :message="errors.quilometragem"
-                                placeholder="Digite a quilometragem" type="number" />
-                            <SelectInput class="py-3" label="Tipo de Revisão" v-model="form.tipo"
-                                :options="tipo_revisao" :message="errors.is_masculino"
-                                placeholder="Selecione o tipo" />
-                            <TextInput class="py-3" label="Descrição" v-model="form.descricao"
-                                :message="errors.descricao" :required="0"
-                                placeholder="Descrição detalhada da revisão" />
-                            <TextInput class="py-3" label="Garantia (meses)"
-                                v-model="form.garantia_meses" :message="errors.garantia_meses"
-                                placeholder="Digite o número de meses de garantia" type="number" />
+            <SelectInput class="px-3" label="Tipo de Revisão" v-model="form.tipo" :options="tipo_revisao"
+                :message="errors.tipo" placeholder="Selecione o tipo" :required="true" :show-max-size="true" />
 
-                            <TextInput class="py-3" label="Valor Total (R$)"
-                                v-model="form.valor_total" :message="errors.valor_total"
-                                placeholder="Digite o valor total" type="number" />
+            <TextInput class="px-3" label="Descrição" v-model="form.descricao" :message="errors.descricao"
+                :required="false" placeholder="Descrição detalhada da revisão" :show-max-size="true" :max-size="200" />
 
-                            <TextInput class="py-3" label="Observações" v-model="form.observacoes"
-                                :required="0" :message="errors.observacoes" placeholder="Observações adicionais" />
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <TextInput class="px-3" label="Garantia (meses)" v-model="form.garantia_meses"
+                :message="errors.garantia_meses" placeholder="Digite o número de meses de garantia" type="float"
+                :precision="2" :required="true" :max-value="48" />
 
-            <section>
-                <div class="mx-auto max-w-screen">
-                    <div class="flex justify-end p-5 bg-white border border-gray-300 sm:rounded gap-4">
-                        <ButtonCancel label="Cancelar" @click="cancelarCadastro" />
-                        <ButtonCadastrar type="submit" label="Confirmar Cadastro" />
-                    </div>
-                </div>
-            </section>
-        </form>
+            <TextInput class="px-3" label="Valor Total (R$)" v-model="form.valor_total" :message="errors.valor_total"
+                placeholder="Digite o valor total" type="float" prefix="R$" :precision="2" :required="true"
+                :max-value="9999999.99" :max-size="30" />
+
+            <TextInput class="px-3" label="Observações" v-model="form.observacoes" :required="false"
+                :message="errors.observacoes" placeholder="Observações adicionais" :show-max-size="true"
+                :max-size="200" />
+        </FormTemplate>
     </main>
 </template>

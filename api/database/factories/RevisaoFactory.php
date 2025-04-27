@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Veiculo;
+use App\Utils\Enums;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -26,7 +27,7 @@ class RevisaoFactory extends Factory
         return [
             'data' => $this->faker->date,
             'quilometragem' => $this->faker->numberBetween(1000, 500000),
-            'tipo' => $this->faker->randomElement(['Preventiva', 'Corretiva']),
+            'tipo' => $this->faker->randomElement(Enums::getRevisionTypes()),
             'descricao' => $this->faker->sentence,
             'observacoes' => $this->faker->paragraph,
             'valor_total' => $this->faker->randomFloat(2, 50, 1000),

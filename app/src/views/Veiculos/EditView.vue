@@ -1,30 +1,33 @@
 <script lang="ts" setup>
 import CloseModal from '@/components/CloseModal.vue';
+import HeaderModule from '@/components/data-table/HeaderModule.vue';
 import BackButton from '@/components/form-components/buttons/BackButton.vue';
-import ButtonCadastrar from '@/components/form-components/buttons/ButtonCadastrar.vue';
-import ButtonCancel from '@/components/form-components/buttons/ButtonCancel.vue';
+import FormTemplate from '@/components/form-components/form/FormTemplate.vue';
 import SelectInput from '@/components/form-components/SelectInput.vue';
 import TextInput from '@/components/form-components/TextInput.vue';
-import TrashIcon from '@/components/icons/TrashIcon.vue';
 import { cores, tipo_combustivel } from '@/data/options_selects';
+import { validEmptyFieldsForm } from '@/helpers/functions/validFormData';
+import patterns, { isInteger, validInterval } from '@/helpers/regexp/patterns';
 import api from '@/plugins/api';
 import { useAlertStore } from '@/stores/alertState';
+import type IMarca from '@/types/IMarca';
+import type IPageOutput from '@/types/IPageOutput';
 import type IVeiculo from '@/types/IVeiculo';
 import type { AxiosError } from 'axios';
 import { onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const alertStore = useAlertStore();
+
 interface FormData {
     marca: string;
     modelo: string;
     placa: string;
     renavam: string;
-    ano: number | string;
+    ano: string;
     cor: string;
     tipo_combustivel: string;
 }
-
 
 const router = useRouter();
 const route = useRoute();
@@ -41,8 +44,9 @@ const form = reactive<FormData>({
     tipo_combustivel: ''
 });
 
-const errors = reactive<Record<string, string>>({});
+const errors = ref<Record<string, string>>({});
 const loading = ref(false);
+const marcas = ref<IMarca[]>([]);
 
 const fetchVeiculo = async () => {
     try {
@@ -50,9 +54,9 @@ const fetchVeiculo = async () => {
         const response = await api.get<IVeiculo>(`/veiculos/${id}`);
         const data = response.data;
 
-        form.marca = data.marca;
+        form.marca = data.marca?.id.toString() || '';
         form.modelo = data.modelo;
-        form.ano = data.ano;
+        form.ano = data.ano.toString();
         form.cor = data.cor;
         form.placa = data.placa;
         form.renavam = data.renavam;
@@ -67,30 +71,34 @@ function voltar() {
 }
 
 function validateForm(): boolean {
-    Object.keys(errors).forEach((key) => delete errors[key]);
+    const requiredFields = ['marca', 'modelo', 'placa', 'ano', 'cor', 'renavam', 'tipo_combustivel'];
+    let formErrors: Record<string, string> = validEmptyFieldsForm(form, requiredFields);
 
-    const requiredFields = ['marca', 'modelo', 'ano', 'cor', 'tipo_combustivel', 'placa', 'renavam'];
+    if (!patterns.placa.valid(form.placa))
+        formErrors.placa = 'Insira uma placa válida';
+    if (!patterns.integer.valid(form.renavam))  
+        formErrors.renavam = 'O renavam deve conter apenas números';
+    else if (form.renavam.length != 11)
+        formErrors.renavam = 'O renavam deve conter 11 digitos';
 
-
-    for (const field of requiredFields) {
-        const value = (form as any)[field];
-        if (value === '' || value === null || value === undefined) {
-            errors[field] = 'Campo obrigatório';
-        }
-
-        if (field === 'ano') {
-            const anoValue = parseInt(String(form.ano));
-            if (isNaN(anoValue) || anoValue < 1886 || anoValue > new Date().getFullYear() + 1) {
-                errors[field] = 'Ano inválido';
-            } else {
-                form.ano = anoValue;
-            }
-        }
+    if (!patterns.integer.valid(form.ano)) {
+        formErrors.ano = 'O ano deve conter apenas números';
+    } else if (!validInterval(form.ano, 1880, 2025)) {
+        formErrors.ano = 'O ano deve ser entre 1880 e 2025';
     }
-
-    return Object.keys(errors).length === 0;
+    errors.value = formErrors;
+    return Object.keys(formErrors).length === 0;
 }
 
+const fetchMarcas = async () => {
+    try {
+        const response = await api.get<IPageOutput<IMarca>>('/marcas', { params: { page: 0, size: 100 } });
+        marcas.value = response.data.content;
+    } catch (error) {
+        alertStore.setMessage('Não foi possível carregar as marcas', 'danger');
+    }
+}
+onMounted
 async function submitForm() {
     if (!validateForm()) return;
     loading.value = true;
@@ -104,7 +112,7 @@ async function submitForm() {
         router.back();
     } catch (erro: any) {
         if (erro.status === 422 && erro.response?.data?.errors) {
-            Object.assign(errors, erro.response.data.errors);
+            Object.assign(errors.value, erro.response.data.errors);
         }
         alertStore.setMessage('Erro ao salvar alterações.', 'danger');
     } finally {
@@ -131,21 +139,22 @@ const confirmDelete = async () => {
         }
     } catch (exception: AxiosError | any) {
         if (exception.response?.status === 400 && exception.response?.data?.message) {
-            const message = exception.response?.data?.message
+            const message = exception.response?.data?.message;
             alertStore.setMessage(message, 'danger');
         } else {
             alertStore.setMessage('Não foi possível excluir o veículo.', 'danger');
         }
-    };
+    }
+};
 
-}
-
-
-onMounted(fetchVeiculo);
+onMounted(() => {
+    fetchVeiculo()
+    fetchMarcas()
+});
 </script>
 
 <template>
-    <main class="h-[calc(100vh-56px)]">
+    <main class="min-h-[calc(100vh-56px)] pb-10">
         <HeaderModule class="mb-7">
             <template #title>
                 <h1 class="text-3xl font-bold">Editar Veículo</h1>
@@ -155,69 +164,33 @@ onMounted(fetchVeiculo);
             </template>
         </HeaderModule>
 
-        <Suspense>
-            <template #default>
-                <form @submit.prevent="submitForm" class="p-3 container">
-                    <section class="pb-3">
-                        <div class="mx-auto max-w-screen">
-                            <div class="p-5 bg-white relative border border-gray-300 sm:rounded overflow-hidden">
-                                <h2 class="text-xl font-semibold mb-4">Dados do Veículo</h2>
-                                <div class="border-b border-colorline"></div>
+        <FormTemplate header="Dados do Veículo" :create="false" @submit.prevent="submitForm"
+            :cancelar-processo="cancelarEdicao" :open-delete-modal="openDeleteModal">
+            <SelectInput class="px-3" label="Marca" v-model="form.marca" :message="errors.marca" required>
+                <option v-for="marca in marcas" :value="marca.id" :key="marca.id">
+                    {{ marca.nome }}
+                </option>
+            </SelectInput>
 
-                                <div class="-mx-3 mt-4 grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-3">
-                                    <!-- Marca -->
-                                    <TextInput class="w-full md:w-1/3 px-3 py-3" label="Marca" v-model="form.marca"
-                                        :message="errors.marca" placeholder="Digite a marca" />
+            <TextInput class="px-3" label="Modelo" v-model="form.modelo" :message="errors.modelo"
+                placeholder="Digite o modelo do veículo" show-max-size :max-size="40" uppercase required />
 
-                                    <!-- Modelo -->
-                                    <TextInput class="w-full md:w-1/3 px-3 py-3" label="Modelo" v-model="form.modelo"
-                                        :message="errors.modelo" placeholder="Digite o modelo" />
+            <TextInput class="px-3" label="Placa" type="placa" v-model="form.placa" :message="errors.placa"
+                placeholder="Digite a placa" show-max-size :max-size="7" uppercase required />
 
-                                    <!-- Placa -->
-                                    <TextInput class="w-full md:w-1/3 px-3 py-3" label="Placa" v-model="form.placa"
-                                        :message="errors.placa" placeholder="Digite a placa" />
+            <TextInput class="px-3" type="integer" label="Renavam" v-model="form.renavam" :message="errors.renavam"
+                placeholder="Digite o renavam" show-max-size :max-size="11" required />
 
-                                    <!-- Renavam -->
-                                    <TextInput class="w-full md:w-1/3 px-3 py-3" label="Renavam" v-model="form.renavam"
-                                        :message="errors.renavam" placeholder="Digite o renavam" />
+            <TextInput type="integer" class="px-3" label="Ano de Fabricação" v-model="form.ano" :message="errors.ano"
+                :max-value="2025" placeholder="Digite o ano" show-max-size :max-size="4" required />
 
-                                    <!-- Ano -->
-                                    <TextInput class="w-full md:w-1/3 px-3 py-3" label="Ano" type="number"
-                                        v-model="form.ano" :message="errors.ano" placeholder="Digite o ano" />
+            <SelectInput class="px-3" label="Cor" v-model="form.cor" :options="cores" :message="errors.cor"
+                placeholder="Selecione a cor" required />
 
-                                    <!-- Cor como select -->
-                                    <SelectInput class="w-full md:w-1/3 px-3 py-3" label="Cor" v-model="form.cor"
-                                        :options="cores" :message="errors.cor" placeholder="Selecione a cor" />
-
-                                    <!-- Tipo de combustível como select -->
-                                    <SelectInput class="w-full md:w-1/3 px-3 py-3" label="Tipo de Combustível"
-                                        v-model="form.tipo_combustivel" :options="tipo_combustivel"
-                                        :message="errors.tipo_combustivel"
-                                        placeholder="Selecione o tipo de combustível" />
-
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section>
-                        <div class="flex justify-between p-5 bg-white relative border border-gray-300 sm:rounded gap-4">
-                            <button type="button" @click="openDeleteModal" class="focus:outline-none">
-                                <TrashIcon />
-                            </button>
-
-                            <div class="flex gap-4">
-                                <ButtonCancel label="Cancelar" type="button" @click="cancelarEdicao" />
-                                <ButtonCadastrar type="submit" label="Salvar Alterações" />
-                            </div>
-                        </div>
-                    </section>
-                </form>
-            </template>
-            <template #fallback>
-                <div>Carregando...</div>
-            </template>
-        </Suspense>
+            <SelectInput class="px-3" label="Tipo de Combustível" v-model="form.tipo_combustivel"
+                :options="tipo_combustivel" :message="errors.tipo_combustivel"
+                placeholder="Selecione o tipo de combustível" required />
+        </FormTemplate>
 
         <CloseModal ref="deleteModal" :confirm-delete="confirmDelete">
             Deseja realmente excluir este veículo? Esta ação é irreversível.

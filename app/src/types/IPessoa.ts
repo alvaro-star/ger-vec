@@ -1,7 +1,7 @@
 export default interface IPessoa {
     id: number;
     nome: string;
-    telefone: string;
+    celular: string;
     cpf: string;
     is_masculino: boolean;
     idade: number;

@@ -23,7 +23,7 @@ class StoreRevisaoRequest extends FormRequest
     {
         return [
             'data' => 'required|date',
-            'quilometragem' => 'required|integer|min:0',
+            'quilometragem' => 'required|numeric|min:0',
             'tipo' => 'required|string|max:50',
             'valor_total' => 'required|numeric|min:0',
             'garantia_meses' => 'required|numeric|min:0',

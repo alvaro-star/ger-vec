@@ -11,7 +11,7 @@ defineProps<{ show: boolean }>()
 
 const columns = ref<IColumn[]>([
     { label: 'Marca', field: 'marca' },
-    { label: 'N Revisoes', field: 'total' }
+    { label: 'N Revisões', field: 'total' }
 ])
 
 
@@ -44,16 +44,18 @@ onMounted(() => {
                 <section class="px-3">
                     <div class="mx-auto max-w-screen">
                         <div class="bg-white relative border border-gray-300 sm:rounded overflow-hidden">
-                            <TableActions placeholder="" :show-search="false" title="Quantidade de Revisoes por Marca"
-                                :show-filters="false" />
+                            <TableActions placeholder="" :show-search="false" title="Quantidade de Revisões por Marca"
+                                :show-filters="false">
+                            </TableActions>
                             <div class="overflow-x-auto">
-                                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                <table class="w-full text-sm text-left text-gray-500 ">
                                     <Header :columns="columns" :showActions="false" />
                                     <tbody>
                                         <Row v-for="(row, index) in rows" :key="index" :columns="columns" :row="row" />
                                     </tbody>
                                 </table>
                             </div>
+                            
                         </div>
                     </div>
                 </section>

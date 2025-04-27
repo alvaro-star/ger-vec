@@ -18,10 +18,10 @@ class PessoaFactory extends Factory
     {
         return [
             'nome' => $this->faker->name,
-            'telefone' => $this->faker->phoneNumber,
+            'celular' => $this->faker->numerify('###########'),
             'cpf' => $this->faker->unique()->numerify('###########'),
             'is_masculino' => $this->faker->boolean,
-            'idade' => $this->faker->numberBetween(18, 65)
+            'idade' => $this->faker->numberBetween(18, 70)
         ];
     }
 }

@@ -4,9 +4,11 @@ import SectionComponent from '@/components/SectionComponent.vue';
 import type IStatisticPessoa from '@/types/IStatisticPessoa';
 import HorizontalBar from '@/plugins/chartjs/HorizontalBar.vue';
 import CampoShow from '@/components/form-components/CampoShow.vue';
+import SpinerAnimation from '@/components/animation/SpinerAnimation.vue';
 
 const props = defineProps<{
     sexo: string[]
+    loading: boolean;
     statistics: Record<string, IStatisticPessoa>;
 }>();
 
@@ -38,8 +40,12 @@ const temEstatisticas = computed(() => {
 
 <template>
     <SectionComponent titulo="Dados Estatisticos" v-if="temEstatisticas" class="container">
-        <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 px-4 py-10">
+        <div v-if="loading" class="flex justify-center items-center h-60">
+            <SpinerAnimation />
+        </div>
+        <div v-else class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 px-4 py-10">
             <div>
+                <p class="text-center w-full text-lg font-semibold mt-2">Qtd de Individuos no Sistema</p>
                 <HorizontalBar :labels="['Masculino', 'Feminino']"
                     :values="[statistics['M'].n_elementos, statistics['F'].n_elementos]" />
                 <p class="text-center w-full text-xs font-semibold mt-2">Quantidade de Individuos ({{
@@ -47,6 +53,7 @@ const temEstatisticas = computed(() => {
             </div>
             <div class="w-full flex justify-center">
                 <div class="space-y-2 max-w-[500px] w-full">
+                    <h3 class="w-full text-center font-semibold text-lg">Média, minimo e maximo</h3>
                     <div class="flex justify-center items-center space-x-4">
                         <label class="mr-4">
                             <input type="radio" value="idade" v-model="campoSelecionado" />
@@ -65,20 +72,23 @@ const temEstatisticas = computed(() => {
                         <div v-if="campoSelecionado === 'idade'" class="-space-y-7">
                             <CampoShow titulo="Geral" class="flex flex-row justify-between">
                                 <p class="font-normal">
-                                    {{ statistics['Ambos'].media_idades }} (min: {{ statistics['Ambos'].min_idade }},
+                                    Média: {{ statistics['Ambos'].media_idades }} (min: {{ statistics['Ambos'].min_idade
+                                    }},
                                     max:
                                     {{ statistics['Ambos'].max_idade }}) anos
                                 </p>
                             </CampoShow>
                             <CampoShow titulo="Homens" class="flex flex-row justify-between">
                                 <p class="font-normal">
-                                    {{ statistics['M'].media_idades }} (min: {{ statistics['M'].min_idade }}, max: {{
+                                    Média: {{ statistics['M'].media_idades }} (min: {{ statistics['M'].min_idade }},
+                                    max: {{
                                         statistics['M'].max_idade }}) anos
                                 </p>
                             </CampoShow>
                             <CampoShow titulo="Mulheres" class="flex flex-row justify-between">
                                 <p class="font-normal">
-                                    {{ statistics['F'].media_idades }} (min: {{ statistics['F'].min_idade }}, max: {{
+                                    Média: {{ statistics['F'].media_idades }} (min: {{ statistics['F'].min_idade }},
+                                    max: {{
                                         statistics['F'].max_idade }}) anos
                                 </p>
                             </CampoShow>
@@ -87,21 +97,24 @@ const temEstatisticas = computed(() => {
                         <div v-if="campoSelecionado === 'n_veiculos'" class="-space-y-7">
                             <CampoShow titulo="Geral" class="flex flex-row justify-between">
                                 <p class="font-normal">
-                                    {{ statistics['Ambos'].media_veiculos }} (min: {{ statistics['Ambos'].min_veiculos
+                                    Média: {{ statistics['Ambos'].media_veiculos }} (min: {{
+                                        statistics['Ambos'].min_veiculos
                                     }},
                                     max: {{ statistics['Ambos'].max_veiculos }}) veículos
                                 </p>
                             </CampoShow>
                             <CampoShow titulo="Homens" class="flex flex-row justify-between">
                                 <p class="font-normal">
-                                    {{ statistics['M'].media_veiculos }} (min: {{ statistics['M'].min_veiculos }}, max:
+                                    Média{{ statistics['M'].media_veiculos }} (min: {{ statistics['M'].min_veiculos }},
+                                    max:
                                     {{
                                         statistics['M'].max_veiculos }}) veículos
                                 </p>
                             </CampoShow>
                             <CampoShow titulo="Mulheres" class="flex flex-row justify-between">
                                 <p class="font-normal">
-                                    {{ statistics['F'].media_veiculos }} (min: {{ statistics['F'].min_veiculos }}, max:
+                                    Média {{ statistics['F'].media_veiculos }} (min: {{ statistics['F'].min_veiculos }},
+                                    max:
                                     {{
                                         statistics['F'].max_veiculos }}) veículos
                                 </p>
@@ -111,21 +124,24 @@ const temEstatisticas = computed(() => {
                         <div v-if="campoSelecionado === 'n_revisoes'" class="-space-y-7">
                             <CampoShow titulo="Geral" class="flex flex-row justify-between">
                                 <p class="font-normal">
-                                    {{ statistics['Ambos'].media_revisoes }} (min: {{ statistics['Ambos'].min_revisoes
+                                    Média {{ statistics['Ambos'].media_revisoes }} (min: {{
+                                        statistics['Ambos'].min_revisoes
                                     }},
                                     max: {{ statistics['Ambos'].max_revisoes }}) revisões
                                 </p>
                             </CampoShow>
                             <CampoShow titulo="Homens" class="flex flex-row justify-between">
                                 <p class="font-normal">
-                                    {{ statistics['M'].media_revisoes }} (min: {{ statistics['M'].min_revisoes }}, max:
+                                    Média {{ statistics['M'].media_revisoes }} (min: {{ statistics['M'].min_revisoes }},
+                                    max:
                                     {{
                                         statistics['M'].max_revisoes }}) revisões
                                 </p>
                             </CampoShow>
                             <CampoShow titulo="Mulheres" class="flex flex-row justify-between">
                                 <p class="font-normal">
-                                    {{ statistics['F'].media_revisoes }} (min: {{ statistics['F'].min_revisoes }}, max:
+                                    Média {{ statistics['F'].media_revisoes }} (min: {{ statistics['F'].min_revisoes }},
+                                    max:
                                     {{
                                         statistics['F'].max_revisoes }}) revisões
                                 </p>

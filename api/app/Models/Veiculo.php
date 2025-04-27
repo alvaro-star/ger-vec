@@ -8,6 +8,7 @@ class Veiculo extends BaseModel
 {
     /** @use HasFactory<\Database\Factories\VehiculoFactory> */
     use HasFactory;
+
     protected $fillable = [
         'marca',
         'modelo',

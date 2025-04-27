@@ -1,11 +1,10 @@
 <script lang="ts" setup>
 import CloseModal from '@/components/CloseModal.vue';
+import HeaderModule from '@/components/data-table/HeaderModule.vue';
 import BackButton from '@/components/form-components/buttons/BackButton.vue';
-import ButtonCadastrar from '@/components/form-components/buttons/ButtonCadastrar.vue';
-import ButtonCancel from '@/components/form-components/buttons/ButtonCancel.vue';
+import FormTemplate from '@/components/form-components/form/FormTemplate.vue';
 import SelectInput from '@/components/form-components/SelectInput.vue';
 import TextInput from '@/components/form-components/TextInput.vue';
-import TrashIcon from '@/components/icons/TrashIcon.vue';
 import { tipo_revisao } from '@/data/options_selects';
 import api from '@/plugins/api';
 import { useAlertStore } from '@/stores/alertState';
@@ -108,56 +107,44 @@ onMounted(fetchRevisao);
 </script>
 
 <template>
-    <main class="h-[calc(100vh-56px)]">
-        <HeaderModule class="mb-7">
-            <template #title>
-                <h1 class="text-3xl font-bold">Editar Revisão</h1>
-            </template>
-            <template #actions>
-                <BackButton label="Voltar" @click="cancelarEdicao" />
-            </template>
-        </HeaderModule>
+    <HeaderModule class="mb-7">
+        <template #title>
+            <h1 class="text-3xl font-bold">Editar Revisão</h1>
+        </template>
+        <template #actions>
+            <BackButton label="Voltar" @click="cancelarEdicao" />
+        </template>
+    </HeaderModule>
+    <main class="min-h-[calc(100vh-56px)] pb-10">
 
-        <form @submit.prevent="submitForm" class="p-3 container">
-            <section class="pb-3">
-                <div class="p-5 bg-white border border-gray-300 sm:rounded">
-                    <h2 class="text-xl font-semibold mb-4">Dados da Revisão</h2>
-                    <div class="-mx-3 mt-4 grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-3">
-                        <TextInput class="w-full md:w-1/3 px-3 py-3" label="Data" v-model="form.data"
-                            :message="errors.data" placeholder="AAAA-MM-DD" type="date" />
+        <FormTemplate class="container" :create="false" header="Dados da Revisão" @submit.prevent="submitForm"
+            :cancelar-processo="cancelarEdicao" :open-delete-modal="openDeleteModal">
+            <TextInput class="px-3" label="Data" v-model="form.data" :message="errors.data"
+                placeholder="Digite a data da revisão" type="date" :required="true" />
 
-                        <TextInput class="w-full md:w-1/3 px-3 py-3" label="Quilometragem" v-model="form.quilometragem"
-                            :message="errors.quilometragem" placeholder="Digite a quilometragem" type="number" />
+            <TextInput class="px-3" label="Quilometragem" prefix="Km" v-model="form.quilometragem"
+                :message="errors.quilometragem" placeholder="Digite a quilometragem" type="float" :precision="2"
+                :required="true" :max-value="999999.99" />
 
-                        <SelectInput class="w-full md:w-1/3 px-3 py-3" label="Tipo" v-model="form.tipo"
-                            :options="tipo_revisao" :message="errors.tipo" placeholder="Selecione o tipo" />
+            <SelectInput class="px-3" label="Tipo de Revisão" v-model="form.tipo" :options="tipo_revisao"
+                :message="errors.is_masculino" placeholder="Selecione o tipo" :required="true" :show-max-size="true" />
 
-                        <TextInput class="w-full md:w-1/3 px-3 py-3" label="Garantia (meses)"
-                            v-model="form.garantia_meses" :message="errors.garantia_meses"
-                            placeholder="Meses de garantia" type="number" />
+            <TextInput class="px-3" label="Descrição" v-model="form.descricao" :message="errors.descricao"
+                :required="false" placeholder="Descrição detalhada da revisão" :show-max-size="true" :max-size="200" />
 
-                        <TextInput class="w-full md:w-1/3 px-3 py-3" label="Valor Total" v-model="form.valor_total"
-                            :message="errors.valor_total" placeholder="Digite o valor total" type="number" />
+            <TextInput class="px-3" label="Garantia (meses)" v-model="form.garantia_meses"
+                :message="errors.garantia_meses" placeholder="Digite o número de meses de garantia" type="float"
+                :precision="2" :required="true" :max-value="48" />
 
-                        <TextInput class="w-full md:w-1/3 px-3 py-3" label="Descrição" v-model="form.descricao"
-                            :message="errors.descricao" placeholder="Informe a descrição da revisão" />
+            <TextInput class="px-3" label="Valor Total (R$)" v-model="form.valor_total" :message="errors.valor_total"
+                placeholder="Digite o valor total" type="float" prefix="R$" :precision="2" :required="true"
+                :max-value="9999999.99" :max-size="30" />
 
-                        <TextInput class="w-full md:w-1/3 px-3 py-3" label="Observações" v-model="form.observacoes"
-                            :message="errors.observacoes" placeholder="Observações adicionais" />
-                    </div>
-                </div>
-            </section>
+            <TextInput class="px-3" label="Observações" v-model="form.observacoes" :required="false"
+                :message="errors.observacoes" placeholder="Observações adicionais" :show-max-size="true"
+                :max-size="200" />
 
-            <section class="flex justify-between p-5 bg-white border border-gray-300 sm:rounded gap-4">
-                <button type="button" @click="openDeleteModal" class="focus:outline-none">
-                    <TrashIcon />
-                </button>
-                <div class="flex gap-4">
-                    <ButtonCancel label="Cancelar" type="button" @click="cancelarEdicao" />
-                    <ButtonCadastrar type="submit" label="Salvar Alterações" />
-                </div>
-            </section>
-        </form>
+        </FormTemplate>
 
         <CloseModal ref="deleteModal" :confirm-delete="confirmDelete">
             Deseja realmente excluir esta revisão? Esta ação é irreversível.

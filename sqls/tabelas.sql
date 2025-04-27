@@ -269,7 +269,7 @@ ALTER SEQUENCE alvaro_vargas_alvarez.personal_access_tokens_id_seq OWNED BY alva
 CREATE TABLE alvaro_vargas_alvarez.pessoas (
     id bigint NOT NULL,
     nome character varying(255) NOT NULL,
-    telefone character varying(255) NOT NULL,
+    celular character varying(255) NOT NULL,
     cpf character varying(255) NOT NULL,
     is_masculino boolean NOT NULL,
     idade integer NOT NULL,
