@@ -148,21 +148,26 @@ class VeiculoController extends Controller
      */
     public function update(UpdateVeiculoRequest $request, Veiculo $veiculo)
     {
-        $errors = $veiculo->uniqueKeyIsOcuped('placa', $request->placa);
-        if (count($errors)  > 0) {
+        $errorsPlaca = $veiculo->uniqueKeyIsOcuped('placa', $request->placa);
+        $errorsRenavam = $veiculo->uniqueKeyIsOcuped('renavam', $request->renavam);
+        $errors = [];
+
+        if (count($errorsPlaca)  > 0) {
+            $errors['placa'] = $errorsPlaca;
+        }
+
+        if (count($errorsRenavam)  > 0) {
+            $errors['renavam'] = $errorsRenavam;
             return response()->json([
                 'message' => 'Erros no formulario',
-                'errors' => ['placa' => $errors]
+                'errors' => ['renavam' => $errorsRenavam]
             ], 422);
         }
 
-        $errors = $veiculo->uniqueKeyIsOcuped('renavam', $request->renavam);
-        if (count($errors)  > 0) {
-            return response()->json([
-                'message' => 'Erros no formulario',
-                'errors' => ['renavam' => $errors]
-            ], 422);
-        }
+        if (count($errors) > 0) return response()->json([
+            'message' => 'Erros no formulario',
+            'errors' => $errors
+        ], 422);
 
         $veiculo->fill($request->validated());
         $veiculo->save();
