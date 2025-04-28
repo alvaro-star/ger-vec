@@ -6,6 +6,7 @@ use App\DTOS\PageInput;
 use App\Models\Pessoa;
 use App\Http\Requests\StorePessoaRequest;
 use App\Http\Requests\UpdatePessoaRequest;
+use App\Models\CacheRevisao;
 use App\Models\Revisao;
 use App\Models\Veiculo;
 use App\Utils\TransformData;
@@ -30,23 +31,25 @@ class PessoaController extends Controller
         $sexo = $request->query('sexo') ?? '';
         if (!in_array($sexo, ['M', 'F'])) $sexo = '';
 
-
         $queryBuilder =  Pessoa::query();
 
-        if ($sexo !== '')
+        if ($sexo != '')
             $queryBuilder->where('is_masculino', $sexo === 'M');
 
         $query_numbers = TransformData::extractNumbers($query);
-        if ($query !== '')
-            $queryBuilder->whereRaw('UPPER(nome) LIKE ?', ['%' . strtoupper($query) . '%'])
-                ->orWhereRaw('cpf LIKE ?', ['%' . $query_numbers . '%'])
-                ->orWhereRaw('celular LIKE ?', ['%' . $query_numbers . '%']);;
+        if ($query != '') {
+            $queryBuilder->whereRaw('UPPER(nome) LIKE ?', ['%' . strtoupper($query) . '%']);
+            if ($query_numbers != '')
+                $queryBuilder->orWhereRaw('cpf LIKE ?', ['%' . $query_numbers . '%'])
+                    ->orWhereRaw('celular LIKE ?', ['%' . $query_numbers . '%']);;
+        }
 
 
         if (!in_array($pageable->getSort(), $this->sorter)) {
             $pageable->setSort('nome');
             $pageable->setDirection('asc');
         }
+
         $queryBuilder->orderBy($pageable->getSort(), $pageable->getDirection());
 
         $response = $queryBuilder->getByPageable($pageable);
@@ -166,10 +169,15 @@ class PessoaController extends Controller
     public function store(StorePessoaRequest $request)
     {
         $pessoa = new Pessoa;
+
         $pessoa->fill($request->validated());
         $pessoa->is_masculino = $request->sexo === 'M';
         $pessoa->save();
 
+        $cache_revisao = new CacheRevisao();
+        $cache_revisao->pessoa_id = $pessoa->id;
+
+        $cache_revisao->save();
         return response()->json($pessoa, 201);
     }
 

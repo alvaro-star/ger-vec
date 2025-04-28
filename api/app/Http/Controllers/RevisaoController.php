@@ -94,72 +94,39 @@ class RevisaoController extends Controller
         $pageable = new PageInput($request);
         $query = $pageable->getQuery();
 
-        $queryBuilder = Pessoa::query();
+        $queryBuilder = Pessoa::query()
+            ->leftJoin('cache_revisaos', 'pessoas.id', '=', 'cache_revisaos.pessoa_id') // Ajuste conforme necessário para o campo de chave
+            ->select('pessoas.*', 'cache_revisaos.last_revisao', 'cache_revisaos.avg_revisoes as media'); // Seleciona todas as colunas de pessoas e as duas colunas de cache_revisaos
+
+
+
+        //$queryBuilder = Pessoa::query();
 
         if (!in_array($pageable->getSort(), ['nome', 'cpf', 'n_revisoes'])) {
             $pageable->setSort('n_revisoes');
             $pageable->setDirection('desc');
         }
+
         $queryBuilder->orderBy($pageable->getSort(), $pageable->getDirection());
 
 
+
         $query_numbers = TransformData::extractNumbers($query);
-        if ($query !== '')
-            $queryBuilder->whereRaw('UPPER(nome) LIKE ?', ['%' . strtoupper($query) . '%'])
-                ->orWhereRaw('cpf LIKE ?', ['%' . $query_numbers . '%']);
-        $response =  $queryBuilder->getByPageable($pageable);
-
-
-        // Com base nos resultados previos realiza uma busca da ultima revisao feita feita e da media das revisoes
-        // Isto obriga ao banco de dados a realizar os calculos necessarios para apenas estas 10 pessoas
-        $pessoaIds = $response->content->pluck('id')->toArray();
-
-        $placeholders = implode(',', array_fill(0, count($pessoaIds), '?'));
-
-        $query = "SELECT
-            pessoa_id,
-            MAX(data) AS last_revisao,
-            AVG(diferenca_segundos) AS media_diferenca
-        FROM (
-            SELECT
-                pessoa_id,
-                data,
-                EXTRACT(EPOCH FROM (data::timestamp - LAG(data::timestamp) OVER (PARTITION BY pessoa_id ORDER BY data))) AS diferenca_segundos
-            FROM alvaro_vargas_alvarez.revisoes
-            WHERE pessoa_id IN ($placeholders)
-        ) AS sub
-        GROUP BY pessoa_id;";
-
-        $result = DB::select($query, $pessoaIds);
-
-
-        //Com base nos resultados, a seguir se agrupam estes dados da segunda consulta como atributos
-        // de cada objeto da primeira lista
-        $mapIdData = [];
-        foreach ($result as $item) {
-            $key = $this->generateHashKey($item->pessoa_id);
-            $mapIdData[$key] = ['media' => $item->media_diferenca, 'last_revisao' => $item->last_revisao];
+        if ($query !== '') {
+            $queryBuilder->whereRaw('UPPER(nome) LIKE ?', ['%' . strtoupper($query) . '%']);
+            if ($query_numbers != '')
+                $queryBuilder->orWhereRaw('cpf LIKE ?', ['%' . $query_numbers . '%']);
         }
 
-        foreach ($response->content as $item) {
-            $key = $this->generateHashKey($item->id);
+        $response =  $queryBuilder->getByPageable($pageable);
 
-            if (isset($mapIdData[$key])) {
-                $mediaSegundos = $mapIdData[$key]['media'] ?? null;
-                $item->avg_tempo_revisoes = $mediaSegundos !== null ? round($mediaSegundos / 86400, 2) : 0;
-                $item->last_revisao = $mapIdData[$key]['last_revisao'] ?? '';
-            } else {
-                $item->avg_tempo_revisoes = 0;
-                $item->last_revisao = '';
-            }
+        foreach ($response->content as $item) {
+            $mediaSegundos = $item->media ?? null;
+            $item->avg_tempo_revisoes = $mediaSegundos !== null ? round($mediaSegundos / 86400, 2) : 0;
+            $item->last_revisao = $item->last_revisao ?? '';
         }
 
         return response()->json($response, 200);
-    }
-
-    private function generateHashKey($int): string
-    {
-        return 'KEY' . strval($int);
     }
 
     /**

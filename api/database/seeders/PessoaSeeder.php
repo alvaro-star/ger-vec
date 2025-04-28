@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\CacheRevisao;
 use App\Models\Pessoa;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -13,6 +14,11 @@ class PessoaSeeder extends Seeder
      */
     public function run(): void
     {
-        Pessoa::factory(100)->create();
+        $pessoas = Pessoa::factory(100)->create();
+        foreach ($pessoas as $pessoa) {
+            $cache = new CacheRevisao();
+            $cache->pessoa_id = $pessoa->id;
+            $cache->save();
+        }
     }
 }
