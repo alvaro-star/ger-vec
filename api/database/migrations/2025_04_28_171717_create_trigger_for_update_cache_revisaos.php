@@ -1,9 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -16,13 +14,11 @@ return new class extends Migration
                 IF NEW.data IS DISTINCT FROM OLD.data OR TG_OP = \'INSERT\' THEN
                     PERFORM 1 FROM cache_revisaos WHERE pessoa_id = NEW.pessoa_id;
 
-                    -- Se o registro não existir, criar um novo registro na tabela cache_revisaos
                     IF NOT FOUND THEN
                         INSERT INTO cache_revisaos (pessoa_id, avg_revisoes, last_revisao)
                         VALUES (NEW.pessoa_id, CAST(0 AS numeric(20, 2)), NEW.data); -- Casteando o valor 0 para o tipo numeric
                     END IF;
 
-                    -- Atualizar os dados em cache_revisaos com base na pessoa_id
                     UPDATE cache_revisaos
                     SET last_revisao = (
                         SELECT MAX(data)
@@ -43,7 +39,6 @@ return new class extends Migration
             $$ LANGUAGE plpgsql;
         ');
 
-        // Criar o trigger que será chamado após a inserção ou atualização na tabela revisoes
         DB::unprepared('
             CREATE TRIGGER update_cache_revisaos_after_update
             AFTER INSERT OR UPDATE OF data ON revisoes
