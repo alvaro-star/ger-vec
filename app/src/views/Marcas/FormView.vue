@@ -57,7 +57,7 @@ function validateForm(): boolean {
         formErrors['ano_fundacao'] = 'O ano deve estar no intervalo de 1880 a 2025'
 
     if (!/^[\p{Lu}\s]+$/u.test(form.nome))
-        form.nome = "Digite letras validas"
+        formErrors.nome = "Digite letras validas"
     errors.value = formErrors
     return Object.keys(formErrors).length === 0
 }

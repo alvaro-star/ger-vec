@@ -52,6 +52,17 @@ class PageInput
         return $this->direction;
     }
 
+    public function setSort(string $sort): void
+    {
+        $this->sort = $sort;
+    }
+
+    public function setDirection(string $direction): void
+    {
+        $this->direction = $direction;
+    }
+
+
     public function getFilter(): string
     {
         return $this->filter;

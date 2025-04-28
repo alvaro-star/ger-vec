@@ -20,24 +20,23 @@ class VeiculoController extends Controller
     public function index(Request $request)
     {
         $pageable = new PageInput($request);
+
         $queryBuilder = Veiculo::join('pessoas', 'veiculos.pessoa_id', '=', 'pessoas.id')
             ->join('marcas', 'veiculos.marca_id', '=', 'marcas.id')
             ->select('veiculos.*', 'pessoas.nome as proprietario', 'marcas.nome as marca');
 
-        if (in_array($pageable->getSort(), $this->sorter))
-            $queryBuilder->orderBy($pageable->getSort(), $pageable->getDirection());
-        else
-            $queryBuilder->orderBy('placa', 'asc');
+        if (!in_array($pageable->getSort(), $this->sorter)) {
+            $pageable->setSort('placa');
+            $pageable->setDirection('asc');
+        }
 
+        $queryBuilder->orderBy($pageable->getSort(), $pageable->getDirection());
 
         $pessoa_id = TransformData::stringInteger($request->query('pessoa_id'), 0);
-        if ($pessoa_id > 0) {
-            $queryBuilder->where('pessoas.id', $pessoa_id);
-        }
+        if ($pessoa_id > 0) $queryBuilder->where('pessoas.id', $pessoa_id);
+
         $marca_id = TransformData::stringInteger($request->query('marca_id'), 0);
-        if ($marca_id > 0) {
-            $queryBuilder->where('marcas.id', $marca_id);
-        }
+        if ($marca_id > 0) $queryBuilder->where('marcas.id', $marca_id);
 
         $query = strtoupper($pageable->getQuery());
         if ($query != '') {
@@ -50,12 +49,11 @@ class VeiculoController extends Controller
 
 
         $response = $queryBuilder->getByPageable($pageable);
-
         return response()->json($response, 200);
     }
 
     // Exibe a quantidade de veículos agrupados por marca
-    public function nVeiculosGroupByMarca(Request $request)
+    public function nVeiculosGroupByMarca()
     {
         $response = Veiculo::join('marcas', 'veiculos.marca_id', '=', 'marcas.id')
             ->selectRaw('marcas.nome as marca, COUNT(*) as total')
@@ -67,7 +65,7 @@ class VeiculoController extends Controller
     }
 
     // Exibe a quantidade de veículos agrupados por sexo do proprietário e marca
-    public function nVeiculosBySexoAndMarca(Request $request)
+    public function nVeiculosBySexoAndMarca()
     {
         $response = Veiculo::join('pessoas', 'veiculos.pessoa_id', '=', 'pessoas.id')
             ->join('marcas', 'veiculos.marca_id', '=', 'marcas.id')
@@ -81,7 +79,7 @@ class VeiculoController extends Controller
     }
 
     // Exibe a quantidade de revisões agrupadas por marca de veículo
-    public function nRevisoesGroupByMarca(Request $request)
+    public function nRevisoesGroupByMarca()
     {
         $response =  Veiculo::join('marcas', 'veiculos.marca_id', '=', 'marcas.id')
             ->selectRaw('marcas.nome as marca, SUM(n_revisoes) as total')
@@ -89,24 +87,6 @@ class VeiculoController extends Controller
             ->orderBy('total', 'desc')
             ->get();
 
-        return response()->json($response, 200);
-    }
-
-
-    public function veiculosByPessoa($id, Request $request)
-    {
-        $pageable = new PageInput($request);
-        $search = $request->query('query');
-
-        $query = Veiculo::join('marcas', 'veiculos.marca_id', '=', 'marcas.id')
-            ->where('veiculos.pessoa_id', $id)
-            ->select('veiculos.*', 'marcas.nome as marca');
-
-        if (!empty($search)) {
-            $query->where('placa', 'like', '%' . $search . '%');
-        }
-
-        $response = $query->getByPageable($pageable);
         return response()->json($response, 200);
     }
 
@@ -137,8 +117,8 @@ class VeiculoController extends Controller
      */
     public function show(Veiculo $veiculo)
     {
-        $veiculo->pessoa = Pessoa::find($veiculo->pessoa_id);
-        $veiculo->marca = Marca::find($veiculo->marca_id);
+        $veiculo['pessoa'] = Pessoa::find($veiculo->pessoa_id);
+        $veiculo['marca'] = Marca::find($veiculo->marca_id);
         return response()->json($veiculo, 200);
     }
 
@@ -152,22 +132,17 @@ class VeiculoController extends Controller
         $errorsRenavam = $veiculo->uniqueKeyIsOcuped('renavam', $request->renavam);
         $errors = [];
 
-        if (count($errorsPlaca)  > 0) {
+        if (count($errorsPlaca)  > 0)
             $errors['placa'] = $errorsPlaca;
-        }
 
-        if (count($errorsRenavam)  > 0) {
+        if (count($errorsRenavam)  > 0)
             $errors['renavam'] = $errorsRenavam;
+
+        if (count($errors) > 0)
             return response()->json([
                 'message' => 'Erros no formulario',
-                'errors' => ['renavam' => $errorsRenavam]
+                'errors' => $errors
             ], 422);
-        }
-
-        if (count($errors) > 0) return response()->json([
-            'message' => 'Erros no formulario',
-            'errors' => $errors
-        ], 422);
 
         $veiculo->fill($request->validated());
         $veiculo->save();
@@ -179,15 +154,16 @@ class VeiculoController extends Controller
      */
     public function destroy(Veiculo $veiculo)
     {
-        $revisoes = Revisao::where('veiculo_id', $veiculo->id)->limit(1)->get();
+        $revisao = Revisao::where('veiculo_id', $veiculo->id)->first();
 
-        if ($revisoes->isNotEmpty()) {
+        if ($revisao) {
             return response()->json([
                 'message' => 'Não é possível excluir este veículo. Existem revisões associadas a ele.'
             ], 400);
         }
 
         $pessoa_id = $veiculo->pessoa_id;
+
         $veiculo->delete();
 
         Pessoa::find($pessoa_id)?->decrement('n_veiculos');

@@ -20,22 +20,25 @@ class RevisaoController extends Controller
      */
     public function index(Request $request)
     {
-
         $pageable = new PageInput($request);
+
         $data_start = $request->query('data_start');
         $data_start = TransformData::stringToDateTime($data_start);
         $data_end = $request->query('data_end');
         $data_end = TransformData::stringToDateTime($data_end);
 
+
         $queryBuilder = Revisao::query();
-        if (in_array($pageable->getSort(), $this->sorter))
-            $queryBuilder->orderBy($pageable->getSort(), $pageable->getDirection());
-        else
-            $queryBuilder->orderBy('data', 'desc');
-        $queryBuilder
-            ->join('veiculos', 'veiculos.id', '=', 'revisoes.veiculo_id')
-            ->addSelect('revisoes.*')
-            ->addSelect('veiculos.placa as veiculo');
+
+        if (!in_array($pageable->getSort(), $this->sorter)) {
+            $pageable->setSort('data');
+            $pageable->setDirection('desc');
+        }
+
+        $queryBuilder->orderBy($pageable->getSort(), $pageable->getDirection());
+
+        $queryBuilder->join('veiculos', 'veiculos.id', '=', 'revisoes.veiculo_id')
+            ->select('revisoes.*', 'veiculos.placa as veiculo');
 
         $pessoa_id = $request->query('pessoa_id') ?? '';
         $pessoa_id = TransformData::stringInteger($pessoa_id, 0);
@@ -49,11 +52,11 @@ class RevisaoController extends Controller
 
 
         if ($data_start !== null && $data_end !== null) {
-            $queryBuilder = $queryBuilder->whereBetween('data', [$data_start, $data_end]);
+            $queryBuilder->whereBetween('data', [$data_start, $data_end]);
         } else if ($data_start !== null) {
-            $queryBuilder = $queryBuilder->where('data', '>=', $data_start);
+            $queryBuilder->where('data', '>=', $data_start);
         } else if ($data_end !== null) {
-            $queryBuilder = $queryBuilder->where('data', '<=', $data_end);
+            $queryBuilder->where('data', '<=', $data_end);
         }
 
         $response = $queryBuilder->getByPageable($pageable);
@@ -87,23 +90,28 @@ class RevisaoController extends Controller
 
     public function countRevisoesByPessoa(Request $request)
     {
-
+        // Realiza uma busca basica com base nos filtros das pessoas
         $pageable = new PageInput($request);
         $query = $pageable->getQuery();
 
         $queryBuilder = Pessoa::query();
-        if (in_array($pageable->getSort(), ['nome', 'cpf', 'n_revisoes']))
-            $queryBuilder->orderBy($pageable->getSort(), $pageable->getDirection());
-        else
-            $queryBuilder->orderBy('n_revisoes', 'desc');
+
+        if (!in_array($pageable->getSort(), ['nome', 'cpf', 'n_revisoes'])) {
+            $pageable->setSort('n_revisoes');
+            $pageable->setDirection('desc');
+        }
+        $queryBuilder->orderBy($pageable->getSort(), $pageable->getDirection());
 
 
         $query_numbers = TransformData::extractNumbers($query);
         if ($query !== '')
-            $queryBuilder->whereRaw('LOWER(nome) LIKE ?', ['%' . strtolower($query) . '%'])
+            $queryBuilder->whereRaw('UPPER(nome) LIKE ?', ['%' . strtoupper($query) . '%'])
                 ->orWhereRaw('cpf LIKE ?', ['%' . $query_numbers . '%']);
-
         $response =  $queryBuilder->getByPageable($pageable);
+
+
+        // Com base nos resultados previos realiza uma busca da ultima revisao feita feita e da media das revisoes
+        // Isto obriga ao banco de dados a realizar os calculos necessarios para apenas estas 10 pessoas
         $pessoaIds = $response->content->pluck('id')->toArray();
 
         $placeholders = implode(',', array_fill(0, count($pessoaIds), '?'));
@@ -125,7 +133,8 @@ class RevisaoController extends Controller
         $result = DB::select($query, $pessoaIds);
 
 
-        //Merging result
+        //Com base nos resultados, a seguir se agrupam estes dados da segunda consulta como atributos
+        // de cada objeto da primeira lista
         $mapIdData = [];
         foreach ($result as $item) {
             $key = $this->generateHashKey($item->pessoa_id);
@@ -158,16 +167,8 @@ class RevisaoController extends Controller
      */
     public function show(Revisao $reviso)
     {
-        $reviso->veiculo = Veiculo::find($reviso->veiculo_id);
+        $reviso['veiculo'] = Veiculo::find($reviso->veiculo_id);
         return response()->json($reviso, 200);
-    }
-
-    public function revisoesByVeiculo($id, Request $request)
-    {
-        $pageable = new PageInput($request);
-        $query = Revisao::where('veiculo_id', $id)->orderBy('data', 'desc');
-        $response = $query->getByPageable($pageable);
-        return response()->json($response, 200);
     }
 
     /**
@@ -175,7 +176,8 @@ class RevisaoController extends Controller
      */
     public function update(UpdateRevisaoRequest $request, Revisao $reviso)
     {
-        $reviso->fill($request->validated());
+        $data = $request->validated();
+        $reviso->fill($data);
         $reviso->save();
         return response()->json($reviso, 200);
     }

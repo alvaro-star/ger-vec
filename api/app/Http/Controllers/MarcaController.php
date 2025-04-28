@@ -19,17 +19,18 @@ class MarcaController extends Controller
     {
         $pageable = new PageInput($request);
         $query = $pageable->getQuery();
+        $queryBuilder = Marca::query();
 
-        $queryBuilder = null;
-
-        if (in_array($pageable->getSort(), $this->sorter)) {
-            $queryBuilder = Marca::orderBy($pageable->getSort(), $pageable->getDirection());
-        } else {
-            $queryBuilder = Marca::orderBy('nome', 'asc');
+        if (!in_array($pageable->getSort(), $this->sorter)) {
+            $pageable->setSort('nome');
+            $pageable->setDirection('asc');
         }
 
+        $queryBuilder->orderBy($pageable->getSort(), $pageable->getDirection());
+
         if ($query !== '') {
-            $queryBuilder->whereRaw('UPPER(nome) LIKE ?', ['%' . strtoupper($query) . '%'])
+            $queryBuilder
+                ->whereRaw('UPPER(nome) LIKE ?', ['%' . strtoupper($query) . '%'])
                 ->orWhereRaw('UPPER(pais) LIKE ?', ['%' . strtoupper($query) . '%']);
         }
 
@@ -54,7 +55,6 @@ class MarcaController extends Controller
      */
     public function show(Marca $marca)
     {
-
         return response()->json($marca, 200);
     }
 
@@ -63,22 +63,19 @@ class MarcaController extends Controller
      */
     public function update(UpdateMarcaRequest $request, Marca $marca)
     {
-        $marca->fill($request->validated());
+        $data = $request->validated();
+        $marca->fill($data);
 
+        $errors = $marca->uniqueKeyIsOcuped('nome', $marca->nome);
 
-        $result = $marca->uniqueKeyIsOcuped('nome', $marca->nome);
-
-        if (count($result) > 0) {
+        if (count($errors) > 0) {
             return response()->json([
                 'message' => 'Houve erros no formulario',
-                'errors' => [
-                    'nome' => $result
-                ]
+                'errors' => ['nome' => $errors]
             ], 422);
         }
 
         $marca->save();
-
         return response()->json($marca, 200);
     }
 
@@ -87,9 +84,9 @@ class MarcaController extends Controller
      */
     public function destroy(Marca $marca)
     {
-        $veiculos = Veiculo::where('marca_id', $marca->id)->count();
+        $veiculos = Veiculo::where('marca_id', $marca->id)->first();
 
-        if ($veiculos > 0) {
+        if ($veiculos) {
             return response()->json([
                 'message' => 'Não é possível excluir esta marca. Existem veículos associados a ela.'
             ], 400);

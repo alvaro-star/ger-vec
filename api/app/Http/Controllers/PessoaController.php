@@ -27,26 +27,27 @@ class PessoaController extends Controller
         $pageable = new PageInput($request);
         $query = $pageable->getQuery();
 
-
         $sexo = $request->query('sexo') ?? '';
-        if (!in_array($sexo, ['M', 'F']))
-            $sexo = '';
-
-        $queryBuilder =  null;
-        if (in_array($pageable->getSort(), $this->sorter))
-            $queryBuilder = Pessoa::orderBy($pageable->getSort(), $pageable->getDirection());
-        else
-            $queryBuilder = Pessoa::orderBy('nome', 'asc');
+        if (!in_array($sexo, ['M', 'F'])) $sexo = '';
 
 
-        $query_numbers = TransformData::extractNumbers($query);
-        if ($query !== '')
-            $queryBuilder->whereRaw('LOWER(nome) LIKE ?', ['%' . strtolower($query) . '%'])
-                ->orWhereRaw('cpf LIKE ?', ['%' . $query_numbers . '%'])
-                ->orWhereRaw('celular LIKE ?', ['%' . $query_numbers . '%']);;
+        $queryBuilder =  Pessoa::query();
 
         if ($sexo !== '')
             $queryBuilder->where('is_masculino', $sexo === 'M');
+
+        $query_numbers = TransformData::extractNumbers($query);
+        if ($query !== '')
+            $queryBuilder->whereRaw('UPPER(nome) LIKE ?', ['%' . strtoupper($query) . '%'])
+                ->orWhereRaw('cpf LIKE ?', ['%' . $query_numbers . '%'])
+                ->orWhereRaw('celular LIKE ?', ['%' . $query_numbers . '%']);;
+
+
+        if (!in_array($pageable->getSort(), $this->sorter)) {
+            $pageable->setSort('nome');
+            $pageable->setDirection('asc');
+        }
+        $queryBuilder->orderBy($pageable->getSort(), $pageable->getDirection());
 
         $response = $queryBuilder->getByPageable($pageable);
         return response()->json($response, 200);
@@ -186,6 +187,7 @@ class PessoaController extends Controller
     public function update(UpdatePessoaRequest $request, Pessoa $pessoa)
     {
         $pessoa->fill($request->validated());
+
         $pessoa_with_cpf = Pessoa::where('cpf', $request->cpf)->first();
         if ($pessoa_with_cpf != null && $pessoa_with_cpf->id != $pessoa->id) {
             return response()->json([
@@ -205,10 +207,10 @@ class PessoaController extends Controller
      */
     public function destroy(Pessoa $pessoa)
     {
-        $veiculos = Veiculo::where('pessoa_id', $pessoa->id)->limit(1)->get();
-        $revisoes = Revisao::where('pessoa_id', $pessoa->id)->limit(1)->get();
+        $veiculo = Veiculo::where('pessoa_id', $pessoa->id)->first();
+        $revisao = Revisao::where('pessoa_id', $pessoa->id)->first();
 
-        if ($veiculos->isNotEmpty() || $revisoes->isNotEmpty()) {
+        if ($veiculo || $revisao) {
             return response()->json([
                 'message' => 'Não é possível excluir. Existem veículos ou revisões associadas a esta pessoa.'
             ], 400);

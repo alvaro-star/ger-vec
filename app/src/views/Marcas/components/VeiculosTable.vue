@@ -7,7 +7,6 @@ import Table from '@/components/data-table/Table.vue'
 import type IColumn from '@/types/IColumn'
 import type IPageOutput from '@/types/IPageOutput'
 import type IVeiculo from '@/types/IVeiculo'
-import PrimaryButton from '@/components/form-components/buttons/PrimaryButton.vue'
 
 const props = defineProps<{
     id: string[] | string
@@ -102,10 +101,5 @@ onMounted(() => {
                 <div>Loading...</div>
             </template>
         </Suspense>
-        <div class="flex justify-center py-7">
-            <RouterLink :to="{ name: 'veiculos.create' }">
-                <PrimaryButton label="Cadastrar Veículo" />
-            </RouterLink>
-        </div>
     </main>
 </template>
