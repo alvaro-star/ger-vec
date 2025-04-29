@@ -5,6 +5,8 @@ import type IStatisticPessoa from '@/types/IStatisticPessoa';
 import HorizontalBar from '@/plugins/chartjs/HorizontalBar.vue';
 import CampoShow from '@/components/form-components/CampoShow.vue';
 import SpinerAnimation from '@/components/animation/SpinerAnimation.vue';
+import { color } from 'chart.js/helpers';
+import { Colors } from 'chart.js';
 
 const props = defineProps<{
     sexo: string[]
@@ -46,7 +48,7 @@ const temEstatisticas = computed(() => {
         <div v-else class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 px-4 py-10">
             <div>
                 <p class="text-center w-full text-lg font-semibold mt-2">Qtd de Individuos no Sistema</p>
-                <HorizontalBar :labels="['Masculino', 'Feminino']"
+                <HorizontalBar :labels="['Masculino', 'Feminino']" :colors="['#36A2EB', '#FF6386']"
                     :values="[statistics['M'].n_elementos, statistics['F'].n_elementos]" />
                 <p class="text-center w-full text-xs font-semibold mt-2">Quantidade de Individuos ({{
                     statistics['Ambos'].n_elementos }})</p>
