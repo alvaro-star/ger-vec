@@ -116,6 +116,10 @@ class Enums
             'TOYOTA',
             'RENAULT',
             'NISSAN',
+            'NISSAN1',
+            'NISSAN2',
+            'NISSAN4',
+            'NISSAN7',
             'BMW',
             'MERCEDES-BENZ',
             'AUDI',
@@ -126,6 +130,8 @@ class Enums
             'CHRYSLER',
             'CITROËN',
             'MITSUBISHI',
+            'KIA1',
+            'KIA2',
             'MAZDA',
             'LAND ROVER'
         ];

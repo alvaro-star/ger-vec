@@ -25,6 +25,10 @@ Route::apiResource('veiculos', VeiculoController::class);
 Route::apiResource('revisoes', RevisaoController::class);
 Route::apiResource('marcas', MarcaController::class);
 
+Route::get('/marcas/statistics/group_pais', [MarcaController::class, 'groupByPais']);
+Route::get('/marcas/statistics/n_veiculos', [VeiculoController::class, 'nVeiculosGroupByMarca']);
+Route::get('/marcas/statistics/n_revisoes', [VeiculoController::class, 'nRevisoesGroupByMarca']);
+
 Route::get('/test-redis', function () {
     $redis = Redis::connection();
     $redis->set('foo', 'bar');

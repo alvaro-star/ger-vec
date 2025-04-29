@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { defineEmits, defineProps } from 'vue';
 import type IColumn from '@/types/IColumn';
+import OrderIcon from '@/views/Layout/components/icons/OrderIcon.vue';
 
 defineProps<{
   columns: IColumn[],
@@ -23,7 +24,14 @@ function handleClick(column: IColumn) {
     <tr>
       <th v-for="(column, index) in columns" :key="index" scope="col" class="px-4 py-4"
         :class="{ 'hover:bg-gray-100 cursor-pointer': column.sorteable }" @click="handleClick(column)">
-        {{ column.label }}
+        <span class="flex justify-between">
+          <span>
+            {{ column.label }}
+          </span>
+          <span>
+            <OrderIcon v-if="column.sorteable" class=""/>
+          </span>
+        </span>
       </th>
       <th v-if="showActions" scope="col" class="px-4 py-3">
         <span class="sr-only">Actions</span>

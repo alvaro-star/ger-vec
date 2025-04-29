@@ -2,13 +2,15 @@
 import PrimaryButton from '@/components/form-components/buttons/PrimaryButton.vue'
 import api from '@/plugins/api'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-
 import HeaderModule from '@/components/data-table/HeaderModule.vue'
 import Table from '@/components/data-table/Table.vue'
 import type IColumn from '@/types/IColumn'
 import type { IFilters } from '@/types/IFilter'
 import type IPageOutput from '@/types/IPageOutput'
 import type IMarca from '@/types/IMarca'
+import SectionComponent from '@/components/SectionComponent.vue'
+import Pie from '@/plugins/chartjs/Pie.vue'
+import StatisticsMarcaComponente from './components/StatisticsMarcaComponente.vue'
 
 const query = ref<string>('')
 const currentPage = ref<number>(1)
@@ -106,13 +108,18 @@ onMounted(() => {
     </HeaderModule>
 
     <main class="min-h-[calc(100vh-56px)] pb-10">
+        <SectionComponent titulo="Dados Estatisticos" class="mb-10 container">
+            <StatisticsMarcaComponente />
+        </SectionComponent>
         <Suspense>
             <template #default>
-                <Table :show-filters="0" :loading="loadingTable" class="container" :columns="columns" :rows="paginatedRecords"
-                    :currentPage="currentPage" :filters="filters" :totalRecords="totalRecords" :pageSize="pageSize"
-                    :pageSizeOptions="[5, 10, 15, 20, 25]" v-model:sort="sort" v-model:asc="asc" @search="handleSearch"
-                    @page-changed="updatePage" @page-size-changed="updatePageSize" @update-sort="updateSort"
-                    title="Lista de Marcas" placeholder="Pesquise pelo nome ou país da marca" />
+                <Table :show-filters="0" :loading="loadingTable" class="container" :columns="columns"
+                    show-order-info
+                    :rows="paginatedRecords" :currentPage="currentPage" :filters="filters" :totalRecords="totalRecords"
+                    :pageSize="pageSize" :pageSizeOptions="[5, 10, 15, 20, 25]" v-model:sort="sort" v-model:asc="asc"
+                    @search="handleSearch" @page-changed="updatePage" @page-size-changed="updatePageSize"
+                    @update-sort="updateSort" title="Lista de Marcas"
+                    placeholder="Pesquise pelo nome ou país da marca" />
             </template>
 
             <template #fallback>

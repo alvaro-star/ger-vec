@@ -6,6 +6,8 @@ import defaultColors from './defaultColors';
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 
 const props = defineProps<{
+  title?: string
+  subtitle?: string
   labels: string[]
   values: number[]
   colors?: string[]
@@ -55,7 +57,13 @@ ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels)
 </script>
 
 <template>
-  <div class="chart-container">
-    <Pie :data="data" :options="chartOptions" />
+  <div class="flex items-center flex-col">
+    <header v-if="title" class="text-xl mb-5 font-semibold">{{ title }}</header>
+    <div class="chart-container">
+      <Pie :data="data" :options="chartOptions" />
+    </div>
+    <footer v-if="subtitle" class="font-semibold text-sm">
+      {{ subtitle }}
+    </footer>
   </div>
 </template>

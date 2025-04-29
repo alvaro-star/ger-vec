@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:latest
+    container_name: redis-container
+    ports:
+      - "6379:6379"
+    # Não especificamos mais a rede personalizada, será usado o padrão 'bridge'
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres-container
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: senha123
+      POSTGRES_DB: api
+    ports:
+      - "5433:5432"
+    # Também sem a rede personalizada, usará 'bridge' por padrão
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+# A rede 'bridge' padrão não precisa ser explicitamente definida, é implícita
+
+volumes:
+  postgres-data:
+    driver: local

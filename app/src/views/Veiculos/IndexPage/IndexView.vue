@@ -7,6 +7,7 @@ import Pie from '@/plugins/chartjs/Pie.vue'
 import { ref } from 'vue'
 import MarcasTable from './tables/MarcasTable.vue'
 import VeiculosTable from './tables/VeiculosTable.vue'
+import selectTop5 from '@/helpers/functions/selectTop5'
 
 const marcasGeral = ref<any[]>([])
 const marcasGroupFeminino = ref<any[]>([])
@@ -26,22 +27,16 @@ function calcularTotal(lista: any[]): number {
     return lista.reduce((soma, item) => soma + item.total, 0)
 }
 
-function escolherTop5(items: any[]) {
-    if (items.length <= 5) return items
-    const principais = items.slice(0, 5)
-    const outros = items.slice(5)
-    const totalOutros = outros.reduce((soma, item) => soma + item.total, 0)
-    return [...principais, { marca: 'Outros', total: totalOutros }]
-}
+
 
 const updateData = (marcasGeralData: any[], groupMasculinos: any[], groupFemininos: any[]) => {
-    marcasGeral.value = escolherTop5(marcasGeralData)
+    marcasGeral.value = selectTop5(marcasGeralData, 'marca', 'total')
     totaisPorGrupo.value.Geral = calcularTotal(marcasGeralData)
     totaisPorGrupo.value.Feminino = calcularTotal(groupFemininos)
     totaisPorGrupo.value.Masculino = calcularTotal(groupMasculinos)
 
-    marcasGroupFeminino.value = escolherTop5(groupFemininos)
-    marcasGroupMasculino.value = escolherTop5(groupMasculinos)
+    marcasGroupFeminino.value = selectTop5(groupFemininos, 'marca', 'total')
+    marcasGroupMasculino.value = selectTop5(groupMasculinos, 'marca', 'total')
 }
 
 </script>
@@ -53,7 +48,6 @@ const updateData = (marcasGeralData: any[], groupMasculinos: any[], groupFeminin
         </template>
     </HeaderModule>
     <main class="min-min-h-[calc(100vh)] pb-10">
-
         <SectionComponent titulo="Dados Estatistícos" class="container">
             <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 px-4 py-5">
                 <div class="flex flex-col items-center justify-center">

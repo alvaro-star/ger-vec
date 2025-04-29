@@ -12,10 +12,22 @@ use function PHPUnit\Framework\returnSelf;
 
 class BaseModel extends Model
 {
+    private static string $controller;
+    private static string $method;
+    private static string $query;
+    private static string $where;
+    private static string $watchers;
+
     public function newEloquentBuilder($query)
     {
         return new CustomBuilder($query);
     }
+
+    public static function setBaseKey($controller, $method) {
+        static::$controller = $controller;
+        static::$method = $method;
+    }
+    
     public static function findAllByPageable(PageInput $pageable): PageOutput
     {
         $nElementos  = static::count();

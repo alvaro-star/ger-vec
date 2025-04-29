@@ -38,6 +38,16 @@ class MarcaController extends Controller
         return response()->json($response, 200);
     }
 
+    public function groupByPais(){
+        
+        $queryBuilder =  Marca::query();    
+        $response = $queryBuilder->selectRaw("pais, COUNT(*) as total")
+            ->groupBy('pais')
+            ->orderBy('total', 'desc')
+            ->get();
+        return response()->json($response, 200);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -53,6 +63,7 @@ class MarcaController extends Controller
     /**
      * Display the specified resource.
      */
+
     public function show(Marca $marca)
     {
         return response()->json($marca, 200);
