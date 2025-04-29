@@ -43,12 +43,12 @@ onMounted(() => {
 
 <template>
     <div class="w-full">
-        <div class="flex">
-            <div class="w-1/2 p-8 flex items-center justify-center">
+        <div class="flex flex-col md:flex-row">
+            <div class="w-full md:w-1/2 p-8 flex items-center justify-center">
                 <Pie title="Qnt de Marcas por país" class="w-80" :labels="paises.map(e => e.pais)"
                     :values="paises.map(e => e.total)" />
             </div>
-            <Swiper class="w-1/2" :loop="true" pagination :modules="[Navigation, Pagination]">
+            <Swiper class="w-full md:w-1/2" :loop="true" pagination :modules="[Navigation, Pagination]">
                 <SwiperSlide>
                     <div class="p-8 flex items-center justify-center">
                         <Pie title="Qnt de Veículos por Marca" class="w-80" :labels="nVeiculos.map(e => e.marca)"
