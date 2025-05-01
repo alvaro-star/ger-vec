@@ -37,7 +37,7 @@ class RevisaoController extends Controller
 
         $queryBuilder->orderBy($pageable->getSort(), $pageable->getDirection());
 
-        $queryBuilder->join('veiculos', 'veiculos.id', '=', 'revisoes.veiculo_id')
+        $queryBuilder->leftJoin('veiculos', 'veiculos.id', '=', 'revisoes.veiculo_id')
             ->select('revisoes.*', 'veiculos.placa as veiculo');
 
         $pessoa_id = $request->query('pessoa_id') ?? '';

@@ -1,81 +1,76 @@
 -- Função: index(Request $request)
--- Busca veículos, com join na tabela de pessoas, e possível ordenação por nome do proprietário
--- O método getByPageable aplica paginação via LIMIT e OFFSET
-SELECT veiculos.*
+-- Descrição: Lista veículos com filtros de placa, renavam, modelo, marca e proprietário, incluindo paginação
+SELECT veiculos.*, pessoas.nome AS proprietario, marcas.nome AS marca
 FROM alvaro_vargas_alvarez.veiculos
 JOIN alvaro_vargas_alvarez.pessoas ON veiculos.pessoa_id = pessoas.id
-ORDER BY pessoas.nome ASC -- (se sort == 'Proprietario')
-LIMIT {pageSize} OFFSET {offset};
+LEFT JOIN alvaro_vargas_alvarez.marcas ON veiculos.marca_id = marcas.id
+WHERE (:pessoa_id IS NULL OR pessoas.id = :pessoa_id)
+  AND (:marca_id IS NULL OR marcas.id = :marca_id)
+  AND (:query IS NULL OR UPPER(placa) LIKE :query || '%')
+  AND (:query IS NULL OR UPPER(pessoas.nome) LIKE :query || '%')
+  AND (:query IS NULL OR UPPER(renavam) LIKE :query || '%')
+  AND (:query IS NULL OR UPPER(marcas.nome) LIKE :query || '%')
+  AND (:query IS NULL OR UPPER(modelo) LIKE :query || '%')
+ORDER BY :sort :direction
+LIMIT :limit OFFSET :offset;
 
--- Função: findAllOrderByPessoa(Request $request)
--- Lista veículos ordenados pelo nome do proprietário com paginação
-SELECT veiculos.*
+-- Função: nVeiculosGroupByMarca()
+-- Descrição: Exibe a quantidade de veículos agrupados por marca
+SELECT marcas.nome AS marca, COUNT(*) AS total
 FROM alvaro_vargas_alvarez.veiculos
-JOIN alvaro_vargas_alvarez.pessoas ON veiculos.pessoa_id = pessoas.id
-ORDER BY pessoas.nome ASC
-LIMIT {pageSize} OFFSET {offset};
-
--- Função: nVeiculosGroupByMarca(Request $request)
--- Agrupa e conta veículos por marca
-SELECT marca, COUNT(*) AS total
-FROM alvaro_vargas_alvarez.veiculos
-GROUP BY marca
+JOIN alvaro_vargas_alvarez.marcas ON veiculos.marca_id = marcas.id
+GROUP BY marcas.id
 ORDER BY total DESC;
 
--- Função: nVeiculosBySexoAndMarca(Request $request)
--- Agrupa veículos por sexo do proprietário e marca
-SELECT pessoas.is_masculino, veiculos.marca, COUNT(*) AS total
+-- Função: nVeiculosBySexoAndMarca()
+-- Descrição: Exibe a quantidade de veículos agrupados por sexo do proprietário e marca
+SELECT pessoas.is_masculino, marcas.nome AS marca, COUNT(*) AS total
 FROM alvaro_vargas_alvarez.veiculos
 JOIN alvaro_vargas_alvarez.pessoas ON veiculos.pessoa_id = pessoas.id
-GROUP BY pessoas.is_masculino, veiculos.marca
+LEFT JOIN alvaro_vargas_alvarez.marcas ON veiculos.marca_id = marcas.id
+GROUP BY pessoas.is_masculino, marcas.nome
 ORDER BY pessoas.is_masculino DESC, total DESC;
 
--- Função: nRevisoesGroupByMarca(Request $request)
--- Soma as revisões por marca de veículo
-SELECT marca, SUM(n_revisoes) AS total
+-- Função: nRevisoesGroupByMarca()
+-- Descrição: Exibe a quantidade de revisões agrupadas por marca de veículo
+SELECT marcas.nome AS marca, SUM(n_revisoes) AS total
 FROM alvaro_vargas_alvarez.veiculos
-GROUP BY marca
+JOIN alvaro_vargas_alvarez.marcas ON veiculos.marca_id = marcas.id
+GROUP BY marcas.id
 ORDER BY total DESC;
 
 -- Função: store(StoreVeiculoRequest $request)
--- Insere novo veículo e incrementa contador de veículos na pessoa
-INSERT INTO alvaro_vargas_alvarez.veiculos (col1, col2, ..., pessoa_id) VALUES (..., {pessoa_id});
-
-SELECT * FROM alvaro_vargas_alvarez.pessoas WHERE id = {pessoa_id};
-
-UPDATE alvaro_vargas_alvarez.pessoas
-SET n_veiculos = n_veiculos + 1
-WHERE id = {pessoa_id};
+-- Descrição: Cadastra um novo veículo
+INSERT INTO alvaro_vargas_alvarez.veiculos (placa, renavam, modelo, pessoa_id, marca_id)
+VALUES (:placa, :renavam, :modelo, :pessoa_id, :marca_id);
 
 -- Função: show(Veiculo $veiculo)
--- Retorna veículo com dados da pessoa
-SELECT * FROM alvaro_vargas_alvarez.veiculos WHERE id = {veiculo_id};
-SELECT * FROM alvaro_vargas_alvarez.pessoas WHERE id = {pessoa_id};
-
--- Função: veiculosByPessoa($id, Request $request)
--- Lista veículos de uma pessoa com busca por placa e paginação
-SELECT *
+-- Descrição: Retorna os dados de um veículo específico
+SELECT veiculos.*, pessoas.nome AS proprietario, marcas.nome AS marca
 FROM alvaro_vargas_alvarez.veiculos
-WHERE pessoa_id = {id}
-  AND placa ILIKE '%{query}%' -- caso exista busca
-LIMIT {pageSize} OFFSET {offset};
+JOIN alvaro_vargas_alvarez.pessoas ON veiculos.pessoa_id = pessoas.id
+LEFT JOIN alvaro_vargas_alvarez.marcas ON veiculos.marca_id = marcas.id
+WHERE veiculos.id = :id;
 
 -- Função: update(UpdateVeiculoRequest $request, Veiculo $veiculo)
--- Atualiza o veículo se não houver outro com a mesma placa
-SELECT * FROM alvaro_vargas_alvarez.veiculos WHERE placa = '{placa}' LIMIT 1;
-
+-- Descrição: Atualiza os dados de um veículo
 UPDATE alvaro_vargas_alvarez.veiculos
-SET col1 = val1, col2 = val2, ...
-WHERE id = {veiculo_id};
+SET placa = :placa, renavam = :renavam, modelo = :modelo, pessoa_id = :pessoa_id, marca_id = :marca_id
+WHERE id = :id;
 
 -- Função: destroy(Veiculo $veiculo)
--- Deleta veículo se não tiver revisões associadas
-SELECT * FROM alvaro_vargas_alvarez.revisoes
-WHERE veiculo_id = {veiculo_id}
+-- Descrição: Remove um veículo, desde que não existam revisões associadas
+-- Primeiro verifica se existem revisões associadas
+SELECT 1
+FROM alvaro_vargas_alvarez.revisoes
+WHERE veiculo_id = :veiculo_id
 LIMIT 1;
 
-DELETE FROM alvaro_vargas_alvarez.veiculos WHERE id = {veiculo_id};
+-- Se não existirem revisões, realiza a exclusão
+DELETE FROM alvaro_vargas_alvarez.veiculos
+WHERE id = :veiculo_id;
 
+-- Atualiza a quantidade de veículos do proprietário após a exclusão
 UPDATE alvaro_vargas_alvarez.pessoas
 SET n_veiculos = n_veiculos - 1
-WHERE id = {pessoa_id};
+WHERE id = :pessoa_id;

@@ -1,77 +1,60 @@
--- Função: index
--- Variações dependendo da presença de filtros (pessoa_id, veiculo_id, data_start, data_end)
-SELECT * FROM alvaro_vargas_alvarez.revisoes
--- Filtros aplicáveis condicionalmente:
--- WHERE pessoa_id = ?
--- AND veiculo_id = ?
--- AND data BETWEEN ? AND ?
--- AND data >= ?
--- AND data <= ?
-ORDER BY data DESC
-LIMIT ? OFFSET ?;
+-- Função: index(Request $request)
+-- Descrição: Exibe as revisões com filtros de pessoa, veículo e intervalo de datas
+SELECT revisoes.*, veiculos.placa AS veiculo
+FROM alvaro_vargas_alvarez.revisoes
+LEFT JOIN alvaro_vargas_alvarez.veiculos ON veiculos.id = revisoes.veiculo_id
+WHERE (:pessoa_id IS NULL OR revisoes.pessoa_id = :pessoa_id)
+  AND (:veiculo_id IS NULL OR revisoes.veiculo_id = :veiculo_id)
+  AND (:data_start IS NULL OR revisoes.data >= :data_start)
+  AND (:data_end IS NULL OR revisoes.data <= :data_end)
+ORDER BY :sort :direction
+LIMIT :limit OFFSET :offset;
 
--- Função: store
-SELECT * FROM alvaro_vargas_alvarez.veiculos
-WHERE placa = ?
-LIMIT 1;
+-- Função: store(StoreRevisaoRequest $request)
+-- Descrição: Cadastra uma nova revisão para o veículo
+INSERT INTO alvaro_vargas_alvarez.revisoes (data, quilometragem, valor_total, veiculo_id, pessoa_id)
+VALUES (:data, :quilometragem, :valor_total, :veiculo_id, :pessoa_id);
 
-UPDATE alvaro_vargas_alvarez.veiculos
-SET n_revisoes = n_revisoes + 1
-WHERE id = ?;
+-- Função: countRevisoesByPessoa(Request $request)
+-- Descrição: Contabiliza as revisões de uma pessoa, retornando dados de cache de revisões
+SELECT pessoas.*, cache_revisaos.last_revisao, cache_revisaos.avg_revisoes AS media
+FROM alvaro_vargas_alvarez.pessoas
+LEFT JOIN alvaro_vargas_alvarez.cache_revisaos ON pessoas.id = cache_revisaos.pessoa_id
+WHERE (:query IS NULL OR UPPER(pessoas.nome) LIKE :query || '%')
+  AND (:query_numbers IS NULL OR pessoas.cpf LIKE :query_numbers || '%')
+ORDER BY :sort :direction
+LIMIT :limit OFFSET :offset;
 
-UPDATE alvaro_vargas_alvarez.pessoas
-SET n_revisoes = n_revisoes + 1
-WHERE id = ?;
+-- Função: show(Revisao $reviso)
+-- Descrição: Exibe os dados de uma revisão específica
+SELECT revisoes.*, veiculos.placa AS veiculo
+FROM alvaro_vargas_alvarez.revisoes
+LEFT JOIN alvaro_vargas_alvarez.veiculos ON veiculos.id = revisoes.veiculo_id
+WHERE revisoes.id = :id;
 
-INSERT INTO alvaro_vargas_alvarez.revisoes (...campos...)
-VALUES (...valores...);
-
--- Função: countRevisoesByPessoa
--- Busca por nome (opcional):
-SELECT * FROM alvaro_vargas_alvarez.pessoas
-WHERE nome LIKE ?
-ORDER BY n_revisoes DESC
-LIMIT ? OFFSET ?;
-
--- Consulta agregada por pessoa_id, considerando as diferenças entre datas de revisões
-SELECT
-    pessoa_id,
-    MAX(data) AS last_revisao,
-    AVG(diferenca_segundos) AS media_diferenca
-FROM (
-    SELECT
-        pessoa_id,
-        data,
-        EXTRACT(EPOCH FROM (data::timestamp - LAG(data::timestamp) OVER (PARTITION BY pessoa_id ORDER BY data))) AS diferenca_segundos
-    FROM alvaro_vargas_alvarez.revisoes
-    WHERE pessoa_id IN (?, ?, ...)
-) AS sub
-GROUP BY pessoa_id;
-
--- Função: show
-SELECT * FROM alvaro_vargas_alvarez.veiculos
-WHERE id = ?
-LIMIT 1;
-
--- Função: revisoesByVeiculo
-SELECT * FROM alvaro_vargas_alvarez.revisoes
-WHERE veiculo_id = ?
-ORDER BY data DESC
-LIMIT ? OFFSET ?;
-
--- Função: update
+-- Função: update(UpdateRevisaoRequest $request, Revisao $reviso)
+-- Descrição: Atualiza uma revisão existente
 UPDATE alvaro_vargas_alvarez.revisoes
-SET campo1 = ?, campo2 = ?, ...
-WHERE id = ?;
+SET data = :data, quilometragem = :quilometragem, valor_total = :valor_total, veiculo_id = :veiculo_id, pessoa_id = :pessoa_id
+WHERE id = :id;
 
--- Função: destroy
+-- Função: destroy(Revisao $reviso)
+-- Descrição: Remove uma revisão e decrementa as contagens de revisões nos veículos e nas pessoas
+SELECT 1
+FROM alvaro_vargas_alvarez.revisoes
+WHERE id = :id
+LIMIT 1;
+
+-- Decrementa as revisões no veículo
 UPDATE alvaro_vargas_alvarez.veiculos
 SET n_revisoes = n_revisoes - 1
-WHERE id = ?;
+WHERE id = :veiculo_id;
 
+-- Decrementa as revisões na pessoa
 UPDATE alvaro_vargas_alvarez.pessoas
 SET n_revisoes = n_revisoes - 1
-WHERE id = ?;
+WHERE id = :pessoa_id;
 
+-- Remove a revisão
 DELETE FROM alvaro_vargas_alvarez.revisoes
-WHERE id = ?;
+WHERE id = :id;

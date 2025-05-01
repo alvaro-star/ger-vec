@@ -22,7 +22,7 @@ class VeiculoController extends Controller
         $pageable = new PageInput($request);
 
         $queryBuilder = Veiculo::join('pessoas', 'veiculos.pessoa_id', '=', 'pessoas.id')
-            ->join('marcas', 'veiculos.marca_id', '=', 'marcas.id')
+            ->leftJoin('marcas', 'veiculos.marca_id', '=', 'marcas.id')
             ->select('veiculos.*', 'pessoas.nome as proprietario', 'marcas.nome as marca');
 
         if (!in_array($pageable->getSort(), $this->sorter)) {
@@ -68,7 +68,7 @@ class VeiculoController extends Controller
     public function nVeiculosBySexoAndMarca()
     {
         $response = Veiculo::join('pessoas', 'veiculos.pessoa_id', '=', 'pessoas.id')
-            ->join('marcas', 'veiculos.marca_id', '=', 'marcas.id')
+            ->leftJoin('marcas', 'veiculos.marca_id', '=', 'marcas.id')
             ->selectRaw('pessoas.is_masculino, marcas.nome as marca, COUNT(*) as total') // Renomeia marca.nome para marca
             ->groupBy('pessoas.is_masculino', 'marcas.nome')
             ->orderBy('pessoas.is_masculino', 'desc')
