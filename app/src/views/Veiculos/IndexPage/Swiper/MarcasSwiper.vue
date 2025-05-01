@@ -10,7 +10,7 @@ const topMarcas = ref<MarcaData[]>([])
 
 const fetchMarcasData = async () => {
     try {
-        const { data } = await api.get('/veiculos/statistics/marcas/n_veiculos')
+        const { data } = await api.get('/marcas/statistics/n_veiculos')
         const totalGeral = data.reduce((acc: number, item: any) => acc + item.total, 0)
 
         const formatted = data.map((item: any) => {

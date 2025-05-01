@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('celular', 11);
             $table->string('cpf', 11)->unique();
             $table->boolean('is_masculino');
-            $table->unsignedInteger('idade');
+            $table->date('nascimento');
             $table->unsignedBigInteger('n_veiculos')->default(0);
             $table->unsignedBigInteger('n_revisoes')->default(0);
             $table->timestamps();

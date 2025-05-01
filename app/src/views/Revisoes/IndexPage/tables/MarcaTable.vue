@@ -22,7 +22,7 @@ const rows = ref<any[]>([])
 const emit = defineEmits(['update-data'])
 const fetchData = async () => {
     try {
-        const response = await api.get('/veiculos/statistics/marcas/revisoes')
+        const response = await api.get('/marcas/statistics/n_revisoes')
         rows.value = response.data
         emit('update-data', response.data)
     } catch (error) {

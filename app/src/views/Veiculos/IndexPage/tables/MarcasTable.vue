@@ -23,16 +23,6 @@ const groupBySexo = ref(false)
 
 const emit = defineEmits(['update-data'])
 
-const fetchDataGroupBySexo = async () => {
-    try {
-        const response = await api.get('/veiculos/statistics/marcas/n_veiculos')
-        geral.value = response.data
-        emit('update-data', response.data)
-    } catch (error) {
-        geral.value = []
-        console.error('Erro ao buscar estatísticas de veículos por marca:', error)
-    }
-}
 
 
 const fetchData = async () => {
@@ -40,7 +30,7 @@ const fetchData = async () => {
         const response = await api.get('/veiculos/statistics/sexo-marca/n_veiculos')
         const data = response.data
 
-        const responseGeral = await api.get('/veiculos/statistics/marcas/n_veiculos')
+        const responseGeral = await api.get('/marcas/statistics/n_veiculos')
         geral.value = responseGeral.data
 
         masculinos.value = data
@@ -60,7 +50,6 @@ const fetchData = async () => {
 }
 
 onMounted(() => {
-    fetchDataGroupBySexo()
     fetchData()
 })
 </script>

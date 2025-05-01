@@ -22,7 +22,7 @@ class PessoaFactory extends Factory
             'celular' => $this->faker->numerify('###########'),
             'cpf' => $this->faker->unique()->numerify('###########'),
             'is_masculino' => $this->faker->boolean,
-            'idade' => $this->faker->numberBetween(18, 70)
+            'nascimento' => fake()->dateTimeBetween('-80 years', '-18 years')->format('Y-m-d'),
         ];
     }
 }

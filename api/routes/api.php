@@ -17,9 +17,8 @@ Route::get('/pessoas/statistics/sexo/n_veiculos', [PessoaController::class, 'cou
 Route::get('/pessoas/statistics/revisoes/quantidade-media-tempo', [RevisaoController::class, 'countRevisoesByPessoa']);
 Route::apiResource('pessoas', PessoaController::class);
 
-Route::get('/veiculos/statistics/marcas/n_veiculos', [VeiculoController::class, 'nVeiculosGroupByMarca']);
+
 Route::get('/veiculos/statistics/sexo-marca/n_veiculos', [VeiculoController::class, 'nVeiculosBySexoAndMarca']);
-Route::get('/veiculos/statistics/marcas/revisoes', [VeiculoController::class, 'nRevisoesGroupByMarca']);
 Route::apiResource('veiculos', VeiculoController::class);
 
 Route::apiResource('revisoes', RevisaoController::class);

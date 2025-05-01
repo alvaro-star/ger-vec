@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DTOS\PageInput;
+use App\DTOS\PageOutput;
 use App\Models\Pessoa;
 use App\Http\Requests\StorePessoaRequest;
 use App\Http\Requests\UpdatePessoaRequest;
@@ -10,6 +11,7 @@ use App\Models\CacheRevisao;
 use App\Models\Revisao;
 use App\Models\Veiculo;
 use App\Utils\TransformData;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -22,6 +24,19 @@ class PessoaController extends Controller
     /**
      * Lista os registros de pessoas com suporte a paginação, filtro por nome e sexo.
      */
+    public function calculateIdadeColection(PageOutput $page)
+    {
+        foreach ($page->content as $item)
+            $item->idade =  $this->calculateIdade($item->nascimento);
+    }
+
+    public function calculateIdade(string $nascimento)
+    {
+        $data_nascimento = TransformData::stringToDateTime($nascimento);
+        $data_atual = new DateTime();
+        $idade = $data_atual->diff($data_nascimento)->y;
+        return $idade;
+    }
     public function index(Request $request)
     {
 
@@ -48,11 +63,16 @@ class PessoaController extends Controller
         if (!in_array($pageable->getSort(), $this->sorter)) {
             $pageable->setSort('nome');
             $pageable->setDirection('asc');
+        } else if ($pageable->getSort() == 'idade') {
+            $pageable->setSort('nascimento');
+            $pageable->setDirection($pageable->getDirection() == 'asc' ? 'desc' : 'asc');
         }
+
 
         $queryBuilder->orderBy($pageable->getSort(), $pageable->getDirection());
 
         $response = $queryBuilder->getByPageable($pageable);
+        $this->calculateIdadeColection($response);
         return response()->json($response, 200);
     }
 
@@ -61,7 +81,7 @@ class PessoaController extends Controller
      */
     public function statistics()
     {
-        $result = Pessoa::selectRaw('
+        $result = Pessoa::selectRaw("
             is_masculino,
             SUM(n_veiculos) as n_veiculos,
             MIN(n_veiculos) as min_veiculos,
@@ -72,10 +92,10 @@ class PessoaController extends Controller
             MAX(n_revisoes) as max_revisoes,
 
             COUNT(*) as n_elementos,
-            SUM(idade) as soma_idades,
-            MIN(idade) as min_idade,
-            MAX(idade) as max_idade
-        ')
+            SUM(DATE_PART('year', AGE(NOW(), nascimento))) as soma_idades,
+            MIN(DATE_PART('year', AGE(NOW(), nascimento))) as min_idade,
+            MAX(DATE_PART('year', AGE(NOW(), nascimento))) as max_idade
+        ")
             ->groupBy('is_masculino')
             ->get();
 
@@ -163,6 +183,7 @@ class PessoaController extends Controller
         return response()->json($response, 200);
     }
 
+
     /**
      * Cadastra uma nova pessoa no banco de dados.
      */
@@ -172,6 +193,13 @@ class PessoaController extends Controller
 
         $pessoa->fill($request->validated());
         $pessoa->is_masculino = $request->sexo === 'M';
+        $idade =  $this->calculateIdade($pessoa->nascimento);
+        if ($idade < 18) {
+            return response()->json([
+                'message' => 'Erro no formulario',
+                'errors' => ['nascimento' => ['Deve ser maior de idade']]
+            ], 422);
+        }
         $pessoa->save();
 
         $cache_revisao = new CacheRevisao();
@@ -186,6 +214,7 @@ class PessoaController extends Controller
      */
     public function show(Pessoa $pessoa)
     {
+        $pessoa['idade'] = $this->calculateIdade($pessoa->nascimento);
         return response()->json($pessoa, 200);
     }
 
@@ -201,6 +230,14 @@ class PessoaController extends Controller
             return response()->json([
                 'message' => 'Erros no formulario',
                 'errors' => ['cpf' => ['O cpf já está cadastrado']]
+            ], 422);
+        }
+
+        $idade =  $this->calculateIdade($pessoa->nascimento);
+        if ($idade < 18) {
+            return response()->json([
+                'message' => 'Erro no formulario',
+                'errors' => ['nascimento' => ['Deve ser maior de idade']]
             ], 422);
         }
 

@@ -5,6 +5,7 @@ export default interface IPessoa {
     cpf: string;
     is_masculino: boolean;
     idade: number;
+    nascimento: number;
     created_at: string;
     updated_at: string;
 }

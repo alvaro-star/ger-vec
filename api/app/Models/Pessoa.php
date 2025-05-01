@@ -12,6 +12,6 @@ class Pessoa extends BaseModel
         'nome',
         'celular',
         'cpf',
-        'idade'
+        'nascimento'
     ];
 }

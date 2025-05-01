@@ -5,18 +5,17 @@ import BackButton from '@/components/form-components/buttons/BackButton.vue';
 import FormTemplate from '@/components/form-components/form/FormTemplate.vue';
 import SelectInput from '@/components/form-components/SelectInput.vue';
 import TextInput from '@/components/form-components/TextInput.vue';
+import { formatarCelular, formatarCPF } from '@/helpers/formatters';
 import extractNumbers from '@/helpers/functions/extractNumbers';
 import { validEmptyFieldsForm } from '@/helpers/functions/validFormData';
 import patterns from '@/helpers/regexp/patterns';
+import { calculateIdade, isDate } from '@/helpers/validatorsFunctions';
 import api from '@/plugins/api';
 import { useAlertStore } from '@/stores/alertState';
 import type IPessoa from '@/types/IPessoa';
 import { onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import type IFormData from './types/IFormData';
-import { formatarCelular, formatarCPF } from '@/helpers/formatters';
-import { isInteger, validInterval } from '@/helpers/validatorsFunctions';
-import NumberInput from '@/components/form-components/NumberInput.vue';
 
 const alertStore = useAlertStore()
 const router = useRouter();
@@ -29,7 +28,7 @@ const form = reactive<IFormData>({
     celular: '',
     cpf: '',
     sexo: '',
-    idade: ''
+    nascimento: ''
 });
 
 const errors = ref<Record<string, string>>({});
@@ -44,7 +43,7 @@ const fetchPessoa = async () => {
         form.celular = formatarCelular(response.data.celular);
         form.cpf = formatarCPF(response.data.cpf);
         form.sexo = response.data.is_masculino ? 'Masculino' : 'Feminino';
-        form.idade = response.data.idade.toString();
+        form.nascimento = response.data.nascimento.toString();
     } catch (error) {
         console.error((error as Error).message);
     }
@@ -55,17 +54,25 @@ function voltar() {
 }
 
 function validateForm(): boolean {
-    const requiredFields = ['nome', 'celular', 'cpf', 'sexo', 'idade'];
+    const requiredFields = ['nome', 'celular', 'cpf', 'sexo', 'nascimento'];
     let formErrors: Record<string, string> = validEmptyFieldsForm(form, requiredFields);
 
-    for (const field of requiredFields) {
-        if (field === 'idade') {
-            if (!isInteger(form.idade))
-                formErrors[field] = 'Deve ser um número inteiro';
-            if (isInteger(form.idade) && !validInterval(form.idade, 18, 100))
-                formErrors[field] = 'Deve ter no mínimo 18 anos';
-        }
+
+    if (!isDate(form.nascimento))
+        formErrors['nascimento'] = 'Insira uma data válido';
+    else {
+        const idade = calculateIdade(form.nascimento)
+        console.log("A idade do garoto", idade);
+
+        if (idade < 18)
+            formErrors['nascimento'] = 'Deve ter no mínimo 18 anos';
+        if (idade > 100)
+            formErrors['nascimento'] = 'Deve ter no maximo 100 anos';
     }
+
+
+
+
     if (!patterns.cpf.valid(form.cpf))
         formErrors.cpf = 'Insira um CPF válido';
     if (!patterns.phone.valid(form.celular))
@@ -188,8 +195,9 @@ onMounted(() => {
                     <SelectInput class="w-full px-3" label="Sexo" v-model="form.sexo"
                         :options="['Masculino', 'Feminino']" :message="errors.sexo" placeholder="Selecione o sexo" />
 
-                    <NumberInput required class="w-full px-3" label="Idade" v-model="form.idade" :message="errors.idade"
-                        not_format placeholder="Digite a idade" type="integer" :max-value="100" />
+                    <TextInput required class="w-full px-3" label="Data Nascimento" v-model="form.nascimento"
+                        :message="errors.nascimento" not_format placeholder="Digite o seu ano de nascimento"
+                        type="date" />
                 </FormTemplate>
             </template>
             <template #fallback>

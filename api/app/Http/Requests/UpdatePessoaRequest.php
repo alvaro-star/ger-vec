@@ -26,7 +26,7 @@ class UpdatePessoaRequest extends FormRequest
             'celular' => 'required|string|regex:/^\d{11}$/',
             'cpf' => 'required|string|regex:/^\d{11}$/',
             'sexo' => 'required|string|in:F,M',
-            'idade' => 'required|integer|between:18,100',
+            'nascimento' => 'required|date',
         ];
     }
 
@@ -50,8 +50,7 @@ class UpdatePessoaRequest extends FormRequest
             'sexo.in' => 'O Sexo deve ser M (Masculino) ou F (Feminino).',
 
             'idade.required' => 'O campo Idade é obrigatório.',
-            'idade.integer' => 'O campo Idade deve ser um número inteiro.',
-            'idade.between' => 'A Idade deve estar entre 18 e 100 anos.',
+            'idade.date' => 'A data de nascimento dece ser uma data.',
         ];
     }
 }
