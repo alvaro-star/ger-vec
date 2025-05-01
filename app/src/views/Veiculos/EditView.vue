@@ -3,17 +3,20 @@ import CloseModal from '@/components/CloseModal.vue';
 import HeaderModule from '@/components/data-table/HeaderModule.vue';
 import BackButton from '@/components/form-components/buttons/BackButton.vue';
 import FormTemplate from '@/components/form-components/form/FormTemplate.vue';
+import NumberInput from '@/components/form-components/NumberInput.vue';
 import SelectInput from '@/components/form-components/SelectInput.vue';
 import TextInput from '@/components/form-components/TextInput.vue';
 import { cores, tipo_combustivel } from '@/data/options_selects';
 import { validEmptyFieldsForm } from '@/helpers/functions/validFormData';
-import patterns, { isInteger, validInterval } from '@/helpers/regexp/patterns';
+import patterns from '@/helpers/regexp/patterns';
+import { isInteger, validInterval } from '@/helpers/validatorsFunctions';
 import api from '@/plugins/api';
 import { useAlertStore } from '@/stores/alertState';
 import type IMarca from '@/types/IMarca';
 import type IPageOutput from '@/types/IPageOutput';
 import type IVeiculo from '@/types/IVeiculo';
 import type { AxiosError } from 'axios';
+import { isNumber } from 'chart.js/helpers';
 import { onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -76,12 +79,12 @@ function validateForm(): boolean {
 
     if (!patterns.placa.valid(form.placa))
         formErrors.placa = 'Insira uma placa válida';
-    if (!patterns.integer.valid(form.renavam))
+    if (!isInteger(form.renavam))
         formErrors.renavam = 'O renavam deve conter apenas números';
     else if (form.renavam.length != 11)
         formErrors.renavam = 'O renavam deve conter 11 digitos';
 
-    if (!patterns.integer.valid(form.ano)) {
+    if (!isInteger(form.ano)) {
         formErrors.ano = 'O ano deve conter apenas números';
     } else if (!validInterval(form.ano, 1880, 2025)) {
         formErrors.ano = 'O ano deve ser entre 1880 e 2025';
@@ -178,11 +181,11 @@ onMounted(() => {
             <TextInput class="px-3" label="Placa" type="placa" v-model="form.placa" :message="errors.placa"
                 placeholder="Digite a placa" show-max-size :max-size="7" uppercase required />
 
-            <TextInput class="px-3" type="integer" label="Renavam" v-model="form.renavam" :message="errors.renavam"
+            <NumberInput class="px-3" type="integer" label="Renavam" v-model="form.renavam" :message="errors.renavam"
                 placeholder="Digite o renavam" show-max-size :max-size="11" required />
 
-            <TextInput type="integer" class="px-3" label="Ano de Fabricação" v-model="form.ano" :message="errors.ano"
-                :max-value="2025" placeholder="Digite o ano" show-max-size :max-size="4" required />
+            <NumberInput type="integer" class="px-3" label="Ano de Fabricação" v-model="form.ano" :message="errors.ano"
+                :max-value="2025" not_format placeholder="Digite o ano" show-max-size :max-size="4" required />
 
             <SelectInput class="px-3" label="Cor" v-model="form.cor" :options="cores" :message="errors.cor"
                 placeholder="Selecione a cor" required />

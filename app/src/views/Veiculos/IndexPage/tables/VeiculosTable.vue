@@ -20,7 +20,7 @@ const sort = ref<string>('proprietario')
 const asc = ref<boolean>(true)
 
 const columns = ref<IColumn[]>([
-    { label: 'Proprietario', field: 'proprietario', sorteable: true },
+    { label: 'proprietário', field: 'proprietario', sorteable: true },
     { label: 'Placa', field: 'placa', sorteable: true },
     { label: 'Marca', field: 'marca', sorteable: true },
     { label: 'Modelo', field: 'modelo', sorteable: true },

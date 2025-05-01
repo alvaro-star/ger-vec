@@ -1,5 +1,5 @@
-const extractNumbers = (texto: string) => {
-    return texto.replace(/\D/g, '');
+const extractNumbers = (str: string) => {
+    if (str) return str.replace(/\D/g, '')
+    return ''
 }
-
 export default extractNumbers;

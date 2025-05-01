@@ -5,11 +5,11 @@ import HeaderModule from '@/components/data-table/HeaderModule.vue'
 import BackButton from '@/components/form-components/buttons/BackButton.vue'
 import ButtonEdit from '@/components/form-components/buttons/ButtonEdit.vue'
 import CampoShow from '@/components/form-components/CampoShow.vue'
-import formatarData from '@/helpers/formatarData'
 import api from '@/plugins/api'
 import type IMarca from '@/types/IMarca'
 import ShowTemplate from '@/components/form-components/ShowTemplate.vue'
 import VeiculosTable from './components/VeiculosTable.vue'
+import { formatarLocalDateTime } from '@/helpers/formatters'
 
 const route = useRoute()
 const router = useRouter()
@@ -54,16 +54,17 @@ onMounted(fetchMarca)
         <Suspense>
             <template #default>
                 <div v-if="marca" class="container">
-                    <ShowTemplate  title="Dados da Marca">
+                    <ShowTemplate title="Dados da Marca">
                         <CampoShow class="" titulo="Nome" :valor="marca.nome" />
                         <CampoShow class="" titulo="Ano de Fundação" :valor="marca.ano_fundacao" />
                         <CampoShow class="" titulo="País de Origem" :valor="marca.pais" />
                         <template #dates>
-                            <CampoShow class="" titulo="Criado em" :valor="formatarData(marca.created_at)" />
-                            <CampoShow class="" titulo="Atualizado em" :valor="formatarData(marca.updated_at)" />
+                            <CampoShow class="" titulo="Criado em" :valor="formatarLocalDateTime(marca.created_at)" />
+                            <CampoShow class="" titulo="Atualizado em"
+                                :valor="formatarLocalDateTime(marca.updated_at)" />
                         </template>
                     </ShowTemplate>
-                    <VeiculosTable :id="id"  title="Veículos da Marca"/>
+                    <VeiculosTable :id="id" title="Veículos da Marca" />
                 </div>
             </template>
             <template #fallback>

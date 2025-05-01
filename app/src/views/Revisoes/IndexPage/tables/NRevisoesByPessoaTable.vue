@@ -2,11 +2,10 @@
 import api from '@/plugins/api'
 import { computed, onMounted, ref, watch } from 'vue'
 import Table from '@/components/data-table/Table.vue'
-import formatarData, { formatarClassicData } from '@/helpers/formatarData'
 import type IColumn from '@/types/IColumn'
 import type IPageOutput from '@/types/IPageOutput'
 import type IPessoa from '@/types/IPessoa'
-import { formatarCPF } from '@/helpers/regexp/patterns'
+import { formatarCPF, formatarLocalDate, formatarLocalDateTime } from '@/helpers/formatters'
 
 defineProps<{
     show: boolean
@@ -38,7 +37,7 @@ const calcuateNextRevisao = (last_revisao: string, avg_tempo_revisoes: number): 
     const data = new Date(last_revisao)
     data.setDate(data.getDate() + dias)
 
-    return formatarData(data.toISOString())
+    return formatarLocalDateTime(data.toISOString())
 }
 
 const rows = ref<any[]>([])
@@ -62,7 +61,7 @@ const fetchData = async () => {
             ...item,
             sexo: item.is_masculino ? 'Masculino' : 'Feminino',
             cpf: formatarCPF(item.cpf),
-            last_revisao: item.last_revisao ? formatarClassicData(item.last_revisao) : 'Sem revisão',
+            last_revisao: item.last_revisao ? formatarLocalDate(item.last_revisao) : 'Sem revisão',
             next_revisao: calcuateNextRevisao(item.last_revisao, item.avg_tempo_revisoes),
             routeName: 'pessoas.show'
         }))

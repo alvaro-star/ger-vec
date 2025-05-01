@@ -4,12 +4,10 @@ import Header from '@/components/data-table/Header.vue'
 import SearchIcon from '@/components/data-table/icons/SearchIcon.vue'
 import Pagination from '@/components/data-table/Pagination.vue'
 import Row from '@/components/data-table/Row.vue'
-import Table from '@/components/data-table/Table.vue'
 import TableActions from '@/components/data-table/TableActions.vue'
 import PrimaryButton from '@/components/form-components/buttons/PrimaryButton.vue'
 import TextInput from '@/components/form-components/TextInput.vue'
-import { formatarClassicData } from '@/helpers/formatarData'
-import { formatarFistLetter } from '@/helpers/regexp/patterns'
+import { formatarFistLetter, formatarLocalDate } from '@/helpers/formatters'
 import api from '@/plugins/api'
 import type IColumn from '@/types/IColumn'
 import type IPageOutput from '@/types/IPageOutput'
@@ -80,7 +78,7 @@ const fetchData = async () => {
 
         rows.value = data.content.map((item: IRevisao) => ({
             ...item,
-            data: formatarClassicData(item.data),
+            data: formatarLocalDate(item.data),
             quilometragem: `${item.quilometragem} km`,
             valor_total: `R$ ${item.valor_total}`,
             garantia_meses: `${item.garantia_meses} meses`,

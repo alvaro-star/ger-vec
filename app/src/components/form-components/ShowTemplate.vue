@@ -10,7 +10,7 @@ defineProps<{
             <div class="p-5 bg-white relative border border-gray-300 sm:rounded overflow-hidden">
                 <h2 class="text-xl font-semibold mb-4">{{ title }}</h2>
                 <div class="border-b border-colorline"></div>
-                <div class=" mt-4 grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div class=" mt-4 grid sm:grid-cols-2 md:grid-cols-3 gap-3">
                     <slot></slot>
                 </div>
                 <div class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-3">

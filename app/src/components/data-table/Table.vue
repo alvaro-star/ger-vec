@@ -8,7 +8,7 @@ import Row from './Row.vue';
 import TabelaAcoes from './TableActions.vue';
 import type { IFilters, ISort } from "@/types/IFilter";
 import SpinerAnimation from "../animation/SpinerAnimation.vue";
-import { formatarFistLetter } from "@/helpers/regexp/patterns";
+import { formatarFistLetter } from "@/helpers/formatters";
 
 // Aqui usando withDefaults para organizar tudo
 const props = withDefaults(defineProps<{

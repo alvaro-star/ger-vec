@@ -12,7 +12,9 @@ import { validEmptyFieldsForm } from '@/helpers/functions/validFormData'
 import SelectInput from '@/components/form-components/SelectInput.vue'
 import { countries } from '@/data/options_selects'
 import TextInput from '@/components/form-components/TextInput.vue'
-import patterns, { validInterval } from '@/helpers/regexp/patterns'
+import patterns from '@/helpers/regexp/patterns'
+import { isInteger, validInterval } from '@/helpers/validatorsFunctions'
+import NumberInput from '@/components/form-components/NumberInput.vue'
 
 const alertStore = useAlertStore()
 const router = useRouter()
@@ -51,7 +53,7 @@ function validateForm(): boolean {
     const formErrors: Record<string, string> = validEmptyFieldsForm(form, requiredFields)
 
 
-    if (!patterns.integer.valid(form.ano_fundacao))
+    if (!isInteger(form.ano_fundacao))
         formErrors['ano_fundacao'] = 'Ano de fundação deve ser um número'
     else if (!validInterval(form.ano_fundacao, 1880, 2025))
         formErrors['ano_fundacao'] = 'O ano deve estar no intervalo de 1880 a 2025'
@@ -161,7 +163,7 @@ onMounted(() => {
                     <TextInput class="px-3" label="Nome da Marca" v-model="form.nome" :message="errors.nome" uppercase
                         placeholder="Digite o nome da marca" :required="true" :show-max-size="true" :max-size="20" />
 
-                    <TextInput class="px-3" label="Ano de Fundação" v-model="form.ano_fundacao"
+                    <NumberInput class="px-3" label="Ano de Fundação" v-model="form.ano_fundacao" not_format
                         :message="errors.ano_fundacao" placeholder="Digite o ano de fundação (ex: 1990)" type="integer"
                         :required="true" :max-value="2025" />
 

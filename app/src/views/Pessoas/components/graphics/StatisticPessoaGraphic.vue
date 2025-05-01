@@ -47,10 +47,10 @@ const temEstatisticas = computed(() => {
         </div>
         <div v-else class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 px-4 py-10">
             <div>
-                <p class="text-center w-full text-lg font-semibold mt-2">Qtd de Individuos no Sistema</p>
+                <p class="text-center w-full text-lg font-semibold mt-2">Qtd de Proprietários no Sistema</p>
                 <HorizontalBar :labels="['Masculino', 'Feminino']" :colors="['#36A2EB', '#FF6386']"
                     :values="[statistics['M'].n_elementos, statistics['F'].n_elementos]" />
-                <p class="text-center w-full text-xs font-semibold mt-2">Quantidade de Individuos ({{
+                <p class="text-center w-full text-xs font-semibold mt-2">Quantidade de Proprietários ({{
                     statistics['Ambos'].n_elementos }})</p>
             </div>
             <div class="w-full flex justify-center">
@@ -107,7 +107,7 @@ const temEstatisticas = computed(() => {
                             </CampoShow>
                             <CampoShow titulo="Homens" class="flex flex-row justify-between">
                                 <p class="font-normal">
-                                    Média{{ statistics['M'].media_veiculos }} (min: {{ statistics['M'].min_veiculos }},
+                                    Média: {{ statistics['M'].media_veiculos }} (min: {{ statistics['M'].min_veiculos }},
                                     max:
                                     {{
                                         statistics['M'].max_veiculos }}) veículos
@@ -115,7 +115,7 @@ const temEstatisticas = computed(() => {
                             </CampoShow>
                             <CampoShow titulo="Mulheres" class="flex flex-row justify-between">
                                 <p class="font-normal">
-                                    Média {{ statistics['F'].media_veiculos }} (min: {{ statistics['F'].min_veiculos }},
+                                    Média: {{ statistics['F'].media_veiculos }} (min: {{ statistics['F'].min_veiculos }},
                                     max:
                                     {{
                                         statistics['F'].max_veiculos }}) veículos
@@ -126,7 +126,7 @@ const temEstatisticas = computed(() => {
                         <div v-if="campoSelecionado === 'n_revisoes'" class="-space-y-7">
                             <CampoShow titulo="Geral" class="flex flex-row justify-between">
                                 <p class="font-normal">
-                                    Média {{ statistics['Ambos'].media_revisoes }} (min: {{
+                                    Média: {{ statistics['Ambos'].media_revisoes }} (min: {{
                                         statistics['Ambos'].min_revisoes
                                     }},
                                     max: {{ statistics['Ambos'].max_revisoes }}) revisões
@@ -134,7 +134,7 @@ const temEstatisticas = computed(() => {
                             </CampoShow>
                             <CampoShow titulo="Homens" class="flex flex-row justify-between">
                                 <p class="font-normal">
-                                    Média {{ statistics['M'].media_revisoes }} (min: {{ statistics['M'].min_revisoes }},
+                                    Média: {{ statistics['M'].media_revisoes }} (min: {{ statistics['M'].min_revisoes }},
                                     max:
                                     {{
                                         statistics['M'].max_revisoes }}) revisões
@@ -142,7 +142,7 @@ const temEstatisticas = computed(() => {
                             </CampoShow>
                             <CampoShow titulo="Mulheres" class="flex flex-row justify-between">
                                 <p class="font-normal">
-                                    Média {{ statistics['F'].media_revisoes }} (min: {{ statistics['F'].min_revisoes }},
+                                    Média: {{ statistics['F'].media_revisoes }} (min: {{ statistics['F'].min_revisoes }},
                                     max:
                                     {{
                                         statistics['F'].max_revisoes }}) revisões

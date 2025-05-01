@@ -10,7 +10,7 @@ import type IPageOutput from '@/types/IPageOutput'
 import type IPessoa from '@/types/IPessoa'
 import type IStatisticPessoa from '@/types/IStatisticPessoa'
 import StatisticPessoaGraphic from './components/graphics/StatisticPessoaGraphic.vue'
-import { formatarCelular, formatarCPF } from '@/helpers/regexp/patterns'
+import { formatarCelular, formatarCPF } from '@/helpers/formatters'
 
 const query = ref<string>('')
 const currentPage = ref<number>(1)

@@ -5,12 +5,11 @@ import HeaderModule from '@/components/data-table/HeaderModule.vue';
 import BackButton from '@/components/form-components/buttons/BackButton.vue';
 import ButtonEdit from '@/components/form-components/buttons/ButtonEdit.vue';
 import CampoShow from '@/components/form-components/CampoShow.vue';
-import formatarData from '@/helpers/formatarData';
 import api from '@/plugins/api';
 import type IPessoa from '@/types/IPessoa';
 import TableVeiculos from './components/TableVeiculos.vue';
-import { formatarCelular, formatarCPF } from '@/helpers/regexp/patterns';
 import ShowTemplate from '@/components/form-components/ShowTemplate.vue';
+import { formatarCelular, formatarCPF, formatarLocalDateTime } from '@/helpers/formatters';
 
 
 const route = useRoute();
@@ -64,8 +63,9 @@ onMounted(fetchPessoa);
                         <CampoShow class="" titulo="Sexo" :valor="pessoa.is_masculino ? 'Masculino' : 'Feminino'" />
                         <CampoShow class="" titulo="Idade" :valor="pessoa.idade + ' anos'" />
                         <template #dates>
-                            <CampoShow class="" titulo="Criado em" :valor="formatarData(pessoa.created_at)" />
-                            <CampoShow class="" titulo="Atualizado em" :valor="formatarData(pessoa.updated_at)" />
+                            <CampoShow class="" titulo="Criado em" :valor="formatarLocalDateTime(pessoa.created_at)" />
+                            <CampoShow class="" titulo="Atualizado em"
+                                :valor="formatarLocalDateTime(pessoa.updated_at)" />
                         </template>
                     </ShowTemplate>
                     <TableVeiculos title="Veículos da pessoa" :id="route.params.id" />

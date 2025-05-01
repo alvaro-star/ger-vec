@@ -3,13 +3,13 @@ import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import HeaderModule from '@/components/data-table/HeaderModule.vue';
 import CampoShow from '@/components/form-components/CampoShow.vue';
-import formatarData from '@/helpers/formatarData';
 import api from '@/plugins/api';
 import type IVeiculo from '@/types/IVeiculo';
 import TableRevisoes from './components/TableRevisoes.vue';
 import ButtonEdit from '@/components/form-components/buttons/ButtonEdit.vue';
 import BackButton from '@/components/form-components/buttons/BackButton.vue';
 import ShowTemplate from '@/components/form-components/ShowTemplate.vue';
+import { formatarLocalDateTime } from '@/helpers/formatters';
 
 const route = useRoute();
 const router = useRouter();
@@ -57,7 +57,7 @@ onMounted(() => {
                 <CampoShow class="" titulo="Marca" :valor="veiculo.marca?.nome" />
                 <CampoShow class="" titulo="Modelo" :valor="veiculo.modelo" />
                 <CampoShow class="" titulo="Placa" :valor="veiculo.placa" />
-                <CampoShow class="" titulo="Proprietario">
+                <CampoShow class="" titulo="Proprietário">
                     <router-link :to="{ name: 'pessoas.show', params: { id: veiculo.pessoa?.id } }"
                         class="text-blue-500 hover:underline">
                         {{ veiculo.pessoa?.nome }}
@@ -69,11 +69,11 @@ onMounted(() => {
                 <CampoShow class="" titulo="Tipo de Combustível" :valor="veiculo.tipo_combustivel" />
                 <CampoShow class="" titulo="N Revisões" :valor="veiculo.n_revisoes" />
                 <template #dates>
-                    <CampoShow titulo="Criado em" :valor="formatarData(veiculo.created_at)" />
-                    <CampoShow titulo="Atualizado em" :valor="formatarData(veiculo.updated_at)" />
+                    <CampoShow titulo="Criado em" :valor="formatarLocalDateTime(veiculo.created_at)" />
+                    <CampoShow titulo="Atualizado em" :valor="formatarLocalDateTime(veiculo.updated_at)" />
                 </template>
             </ShowTemplate>
-            
+
             <TableRevisoes title="Revisões do veículo" :id="route.params.id" :placa="veiculo?.placa" />
         </div>
 

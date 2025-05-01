@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-
 import HeaderModule from '@/components/data-table/HeaderModule.vue';
-
+import BackButton from '@/components/form-components/buttons/BackButton.vue';
+import ButtonEdit from '@/components/form-components/buttons/ButtonEdit.vue';
 import CampoShow from '@/components/form-components/CampoShow.vue';
-import formatarData, { formatarClassicData } from '@/helpers/formatarData';
+import ShowTemplate from '@/components/form-components/ShowTemplate.vue';
 import api from '@/plugins/api';
 import type IRevisao from '@/types/IRevisao';
-import ButtonEdit from '@/components/form-components/buttons/ButtonEdit.vue';
-import BackButton from '@/components/form-components/buttons/BackButton.vue';
-import ShowTemplate from '@/components/form-components/ShowTemplate.vue';
+import { formatarFloat, formatarLocalDate, formatarLocalDateTime } from '@/helpers/formatters';
 
 const route = useRoute();
 const router = useRouter();
@@ -21,6 +19,8 @@ const { id } = route.params;
 const fetchRevisao = async () => {
     try {
         const response = await api.get(`/revisoes/${id}`);
+        response.data.quilometragem = formatarFloat(response.data.quilometragem.replace(".", ","), 2)
+        response.data.valor_total = formatarFloat(response.data.valor_total.replace(".", ","), 2)
         revisao.value = response.data;
     } catch (error) {
         console.error((error as Error).message);
@@ -65,11 +65,11 @@ onMounted(fetchRevisao);
             <CampoShow titulo="Valor">
                 R$ {{ revisao.valor_total }}
             </CampoShow>
-            <CampoShow titulo="Data" :valor="formatarClassicData(revisao.data)" />
+            <CampoShow titulo="Data" :valor="formatarLocalDate(revisao.data)" />
             <CampoShow titulo="Observacoes" :valor="revisao.observacoes" />
             <template #dates>
-                <CampoShow titulo="Criado em" :valor="formatarData(revisao.created_at)" />
-                <CampoShow titulo="Atualizado em" :valor="formatarData(revisao.updated_at)" />
+                <CampoShow titulo="Criado em" :valor="formatarLocalDateTime(revisao.created_at)" />
+                <CampoShow titulo="Atualizado em" :valor="formatarLocalDateTime(revisao.updated_at)" />
             </template>
         </ShowTemplate>
     </main>

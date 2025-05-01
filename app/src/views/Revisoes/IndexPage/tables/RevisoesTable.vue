@@ -6,8 +6,7 @@ import Pagination from '@/components/data-table/Pagination.vue'
 import Row from '@/components/data-table/Row.vue'
 import TableActions from '@/components/data-table/TableActions.vue'
 import TextInput from '@/components/form-components/TextInput.vue'
-import { formatarClassicData } from '@/helpers/formatarData'
-import { formatarFistLetter } from '@/helpers/regexp/patterns'
+import { formatarFistLetter, formatarFloat, formatarInteger, formatarLocalDate } from '@/helpers/formatters'
 import api from '@/plugins/api'
 import type IColumn from '@/types/IColumn'
 import type IPageOutput from '@/types/IPageOutput'
@@ -16,7 +15,7 @@ import { onMounted, ref, watch } from 'vue'
 
 defineProps<{
     show: boolean
-    
+
 }>()
 const dataInicio = ref<string>('')
 const dataFim = ref<string>('')
@@ -77,9 +76,9 @@ const fetchData = async () => {
 
         rows.value = data.content.map((item: any) => ({
             ...item,
-            quilometragem: item.quilometragem + ' km',
-            data: formatarClassicData(item.data),
-            valor_total: "R$ " + item.valor_total,
+            quilometragem: formatarFloat(item.quilometragem.replace(".", ","), 2) + ' km',
+            data: formatarLocalDate(item.data),
+            valor_total: "R$ " + formatarFloat(item.valor_total.replace(".", ","), 2),
             routeName: 'revisoes.show',
         }))
         totalRecords.value = data.nElementos
@@ -159,7 +158,8 @@ onMounted(() => {
                                 </tbody>
                             </table>
 
-                            <div v-if="!rows.length" class="min-w-[800px] w-full text-base text-center py-4 text-gray-500 border-y">
+                            <div v-if="!rows.length"
+                                class="min-w-[800px] w-full text-base text-center py-4 text-gray-500 border-y">
                                 Não encontramos nenhum registro.
                             </div>
                         </div>

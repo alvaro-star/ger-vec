@@ -1,156 +1,80 @@
 <script setup lang="ts">
-import type { InputType } from '@/helpers/regexp/patterns';
-import patterns, { formatarFistLetter } from '@/helpers/regexp/patterns';
-import { computed, defineEmits, defineProps, ref, watch } from 'vue';
-import InputError from './InputError.vue';
+import patterns from '@/helpers/regexp/patterns';
+import { computed, defineEmits, defineProps } from 'vue';
+import InputComponent from './InputComponent.vue';
+import { formatarFloat, formatarInteger } from '@/helpers/formatters';
+import extractNumbers from '@/helpers/functions/extractNumbers';
 
-const props = withDefaults(defineProps < {
-  label?: string;
-  message?: string;
-  placeholder?: string;
-  required?: boolean;
-  type?: InputType;
-  modelValue: string;
-  maxValue?: number;
-  firstUppercase?: boolean;
-  uppercase?: boolean;
-  precicion?: number;
-  minValue?: number;
-  maxSize?: number;
-  showMaxSize?: boolean;
-} > (), {
-  label: '',
-  message: '',
-  placeholder: '',
-  required: false,
-  type: 'text',
-  maxSize: 10,
-  firstUppercase: false,
-  precicion: undefined,
-  maxValue: undefined,
-  minValue: undefined,
-  uppercase: false,
-  showMaxSize: false,
+const props = withDefaults(defineProps<{
+    label?: string;
+    message?: string;
+    placeholder?: string;
+    required?: boolean;
+    type?: 'integer' | 'float';
+    modelValue: string;
+    precision?: number
+    not_format?: boolean
+    maxSize?: number
+    prefix?: string;
+    maxValue?: number;
+}>(), {
+    label: '',
+    message: '',
+    placeholder: '',
+    prefix: undefined,
+    required: false,
+    precision: 2,
+    maxSize: undefined,
+    type: 'integer',
+    maxValue: undefined,
 });
 
+const model = defineModel<string>({ required: true, default: '' })
 
-const emit = defineEmits < {
-  (e: 'update:modelValue', value: string): void
-}> ()
+const validator = computed(() => patterns[props.type])
 
-watch(() => props.modelValue, (newValue) => {
-  value.value = newValue
-})
+const formatter = (value: string) => {
+    if (props.not_format) return extractNumbers(value)
 
-const typeLocal = computed(() => {
-  switch (props.type) {
-    case 'date': return 'date'
-    default: return 'text'
-  }
-})
-
-const value = ref(props.modelValue)
-const messageLocal = ref('')
-
-const messageDefault = computed(() => {
-  return messageLocal.value == '' ? props.message : messageLocal.value;
-});
-
-const validator = computed(() => {
-  if (!props.type) return patterns.text
-  if (props.type === 'date') return undefined
-  return patterns[props.type]
-})
-
-watch(messageLocal, (newMessage) => {
-  if (newMessage !== '') {
-    setTimeout(() => {
-      messageLocal.value = '';
-    }, 2000);
-  }
-});
-
-const updateValue = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  let valueTarget = target.value;
-
-
-  if (props.firstUppercase) {
-    const textFirstUppercase = formatarFistLetter(valueTarget)
-    if (valueTarget !== textFirstUppercase) {
-      value.value = textFirstUppercase
-      valueTarget = textFirstUppercase
+    if (value == '0,0' || value == '') return ''
+    let newFormat = value
+    if (validator.value.format) {
+        if (props.type == 'float') newFormat = validator.value.format(value, props.precision)
+        else newFormat = validator.value.format(value)
     }
-  }
-  if (props.uppercase) {
-    const textUppercase = valueTarget.toUpperCase()
-    if (valueTarget !== textUppercase) {
-      value.value = textUppercase
-      valueTarget = textUppercase
+    return newFormat
+}
+
+const validTarget = (value: string) => {
+    if (value == '') return ''
+
+    if (!(validator.value?.format) && !validator.value.semiValid(value))
+        return validator.value.message
+    const numberFormated = value.replace(/\./g, "").replace(",", ".")
+    const numericValue = Number(numberFormated);
+
+    if (props.maxSize) {
+        if (value.length > props.maxSize)
+            return props.not_format ? "No maximo podem haver 11 digitos" : "No maximo podem haver 11 caracteres"
     }
-  }
-
-
-  if (validator.value && !validator.value.semiValid(valueTarget)) {
-    value.value = props.modelValue;
-    messageLocal.value = validator.value.message;
-    return;
-  }
-
-  if (props.maxSize && valueTarget.length > props.maxSize) {
-    value.value = props.modelValue;
-    messageLocal.value = `No máximo são ${props.maxSize} caracteres.`;
-    return;
-  }
-
-
-  if (props.type === 'integer' || props.type === 'float') {
-    const numericValue = Number(valueTarget);
-
-    if (!isNaN(numericValue)) {
-      if (props.minValue !== undefined && numericValue < props.minValue) {
-        value.value = props.modelValue;
-        messageLocal.value = `O valor mínimo permitido é ${props.minValue}.`;
-        return;
-      }
-      if (props.maxValue !== undefined && numericValue > props.maxValue) {
-        value.value = props.modelValue;
-        messageLocal.value = `O valor máximo permitido é ${props.maxValue}.`;
-        return;
-      }
+    if (!isNaN(numericValue) && props.maxValue && numericValue > props.maxValue) {
+        let maxValueFormatted = ''
+        if (props.type == 'float')
+            maxValueFormatted = formatarFloat(props.maxValue.toString().replace(".", ","), props.precision)
+        else maxValueFormatted = formatarInteger(props.maxValue.toString())
+        if (props.not_format) {
+            maxValueFormatted = props.maxValue.toString()
+        }
+        return `O valor máximo permitido é ${props.prefix} ${maxValueFormatted}.`;
     }
-  }
-  if (props.type === 'float' && props.precicion !== undefined) {
-    const subPartes = valueTarget.split(".")
-    if (subPartes.length > 1) {
-      const decimalPart = subPartes[1];
-      if (decimalPart.length > props.precicion) {
-        value.value = props.modelValue;
-        messageLocal.value = `São permitidas apenas ${props.precicion} casas decimais.`;
-        return;
-      }
-    }
-  }
 
-  emit('update:modelValue', valueTarget);
+    return ''
 }
 
 </script>
 
 <template>
-  <div class="">
-    <label v-if="label" :class="[messageDefault !== '' && 'text-red-500']"
-      class="block tracking-wide text-gray-700 text-x font-semibold mb-2">
-      {{ label }} <span v-if="required" class="text-red-500">*</span>
-    </label>
-    <div :class="['relative flex items-center transition duration-300 text-gray-700']">
-      <input v-model="value" @input="updateValue" :type="typeLocal" :placeholder="placeholder" :class="[
-        'appearance-none block w-full bg-inputBg  focus:shadow-none focus:ring-1 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white transition duration-300',
-        messageDefault !== '' && 'border-red-600 focus:border-red-700 focus:ring-red-500  transition duration-300'
-      ]" />
-      <p v-if="showMaxSize" :class="['absolute right-0 mr-3', messageDefault != '' && 'text-red-700']">{{ maxSize -
-        props.modelValue.length }}</p>
-    </div>
-    <InputError :message="messageDefault" />
-  </div>
+    <InputComponent v-model="model" :type="type" :label="label" :message="message" :placeholder="placeholder"
+        :required="required" :show-max-size="maxSize != undefined" :valid-target="validTarget" :format-target="formatter"
+        :prefix="prefix" restart-select-edit :max-size="maxSize" />
 </template>

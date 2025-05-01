@@ -7,13 +7,16 @@ import SelectInput from '@/components/form-components/SelectInput.vue';
 import TextInput from '@/components/form-components/TextInput.vue';
 import extractNumbers from '@/helpers/functions/extractNumbers';
 import { validEmptyFieldsForm } from '@/helpers/functions/validFormData';
-import patterns, { formatarCelular, formatarCPF, isInteger, validInterval } from '@/helpers/regexp/patterns';
+import patterns from '@/helpers/regexp/patterns';
 import api from '@/plugins/api';
 import { useAlertStore } from '@/stores/alertState';
 import type IPessoa from '@/types/IPessoa';
 import { onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import type IFormData from './types/IFormData';
+import { formatarCelular, formatarCPF } from '@/helpers/formatters';
+import { isInteger, validInterval } from '@/helpers/validatorsFunctions';
+import NumberInput from '@/components/form-components/NumberInput.vue';
 
 const alertStore = useAlertStore()
 const router = useRouter();
@@ -185,8 +188,8 @@ onMounted(() => {
                     <SelectInput class="w-full px-3" label="Sexo" v-model="form.sexo"
                         :options="['Masculino', 'Feminino']" :message="errors.sexo" placeholder="Selecione o sexo" />
 
-                    <TextInput required class="w-full px-3" label="Idade" v-model="form.idade" :message="errors.idade"
-                        placeholder="Digite a idade" type="integer" :max-value="100" />
+                    <NumberInput required class="w-full px-3" label="Idade" v-model="form.idade" :message="errors.idade"
+                        not_format placeholder="Digite a idade" type="integer" :max-value="100" />
                 </FormTemplate>
             </template>
             <template #fallback>

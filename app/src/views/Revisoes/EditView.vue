@@ -3,11 +3,14 @@ import CloseModal from '@/components/CloseModal.vue';
 import HeaderModule from '@/components/data-table/HeaderModule.vue';
 import BackButton from '@/components/form-components/buttons/BackButton.vue';
 import FormTemplate from '@/components/form-components/form/FormTemplate.vue';
+import NumberInput from '@/components/form-components/NumberInput.vue';
 import SelectInput from '@/components/form-components/SelectInput.vue';
 import TextInput from '@/components/form-components/TextInput.vue';
 import { tipo_revisao } from '@/data/options_selects';
+import { formatarFloat, formatarInteger } from '@/helpers/formatters';
 import { validEmptyFieldsForm } from '@/helpers/functions/validFormData';
-import patterns, { isDateInFuture } from '@/helpers/regexp/patterns';
+import patterns from '@/helpers/regexp/patterns';
+import { isDateInFuture } from '@/helpers/validatorsFunctions';
 import api from '@/plugins/api';
 import { useAlertStore } from '@/stores/alertState';
 import type IRevisao from '@/types/IRevisao';
@@ -51,9 +54,11 @@ const fetchRevisao = async () => {
         const id = getIdByRoute();
         const { data } = await api.get<IRevisao>(`/revisoes/${id}`);
         Object.assign(form, data);
+        form.garantia_meses = formatarInteger(form.garantia_meses.replace(".", ","))
+        form.quilometragem = formatarFloat(form.quilometragem.replace(".", ","), 2)
+        form.valor_total = formatarFloat(form.valor_total.replace(".", ","), 2)
         form.observacoes = data.observacoes || '';
         form.descricao = data.descricao || '';
-
     } catch (error) {
         console.error((error as Error).message);
     }
@@ -65,10 +70,10 @@ function validateForm(): boolean {
     const formErrors: Record<string, string> = validEmptyFieldsForm(form, requiredFields);
 
     for (const field of ["quilometragem", 'valor_total', 'garantia_meses']) {
-        const value = (form as any)[field];
-        if (!patterns.float.valid(value)) {
+        const value = (form as any)[field]
+        if (!patterns.float.valid(value))
             formErrors[field] = 'Insira um valor válido';
-        }
+
     }
 
     if (isDateInFuture(form.data))
@@ -85,6 +90,14 @@ async function submitForm() {
 
     try {
         const id = getIdByRoute();
+
+        if (form.valor_total == '') form.valor_total = '0'
+        if (form.quilometragem == '') form.quilometragem = '0'
+        if (form.garantia_meses == '') form.garantia_meses = '0'
+        for (const field of ["quilometragem", 'valor_total', 'garantia_meses']) {
+            let numericValue = (form as any)[field].replace(/\./g, "").replace(",", ".");
+            (form as any)[field] = numericValue.toString();
+        }
         if (!id) return;
         await api.put(`/revisoes/${id}`, form);
         alertStore.setMessage('Revisão editada com sucesso', null);
@@ -112,8 +125,12 @@ const confirmDelete = async () => {
             alertStore.setMessage('Revisão deletada com sucesso', null);
             window.history.go(-2);
         }
-    } catch (exception) {
-        alertStore.setMessage('Não foi possível excluir a revisão.', 'danger');
+    } catch (erro: any) {
+        if (erro.status === 422 && erro.response?.data?.errors) {
+            Object.assign(errors.value, erro.response.data.errors);
+        } else {
+            alertStore.setMessage('Não foi possível cadastrar a revisão', 'danger');
+        }
     }
 };
 
@@ -136,7 +153,7 @@ onMounted(fetchRevisao);
             <TextInput class="px-3" label="Data" v-model="form.data" :message="errors.data"
                 placeholder="Digite a data da revisão" type="date" :required="true" />
 
-            <TextInput class="px-3" label="Quilometragem" prefix="Km" v-model="form.quilometragem"
+            <NumberInput class="px-3" label="Quilometragem" prefix="Km" v-model="form.quilometragem"
                 :message="errors.quilometragem" placeholder="Digite a quilometragem" type="float" :precision="2"
                 :required="true" :max-value="999999.99" />
 
@@ -146,11 +163,11 @@ onMounted(fetchRevisao);
             <TextInput class="px-3" label="Descrição" v-model="form.descricao" :message="errors.descricao"
                 :required="false" placeholder="Descrição detalhada da revisão" :show-max-size="true" :max-size="200" />
 
-            <TextInput class="px-3" label="Garantia (meses)" v-model="form.garantia_meses"
-                :message="errors.garantia_meses" placeholder="Digite o número de meses de garantia" type="float"
+            <NumberInput class="px-3" label="Garantia (meses)" v-model="form.garantia_meses"
+                :message="errors.garantia_meses" placeholder="Digite o número de meses de garantia" type="integer"
                 :precision="2" :required="true" :max-value="48" />
 
-            <TextInput class="px-3" label="Valor Total (R$)" v-model="form.valor_total" :message="errors.valor_total"
+            <NumberInput class="px-3" label="Valor Total (R$)" v-model="form.valor_total" :message="errors.valor_total"
                 placeholder="Digite o valor total" type="float" prefix="R$" :precision="2" :required="true"
                 :max-value="9999999.99" :max-size="30" />
 

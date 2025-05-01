@@ -53,9 +53,9 @@ const updateData = (marcasGeralData: any[], groupMasculinos: any[], groupFeminin
                 <div class="flex flex-col items-center justify-center">
                     <div class="text-xl text-center font-semibold pt-2  max-w-96">
                         <p v-if="selecionado === 'todos'">Qtd de Veículos agrupado por marca</p>
-                        <p v-if="selecionado === 'feminino'">Qtd de Veículos por marca das Proprietaritarias Femininas
+                        <p v-if="selecionado === 'feminino'">Qtd de Veículos por marca das Proprietáritarias Femininas
                         </p>
-                        <p v-if="selecionado === 'masculino'">Qtd de Veículos por marca dos Proprietaritarios Masculinos
+                        <p v-if="selecionado === 'masculino'">Qtd de Veículos por marca dos Proprietáritarios Masculinos
                         </p>
                     </div>
                     <div class="flex space-x-5 mb-6 w-full justify-center">
