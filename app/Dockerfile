@@ -1,28 +1,19 @@
-# Usa a imagem oficial do PHP 8.3 com FPM
-FROM php:8.3-fpm
+FROM node:22.15.0 as build-stage
+WORKDIR /var/www/html
+COPY package*.json ./
+RUN npm install
 
-# Instala extensões necessárias para Laravel com PostgreSQL
-RUN apt-get update && apt-get install -y \
-    libpng-dev libjpeg-dev libfreetype6-dev \
-    zip unzip git curl \
-    libpq-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_pgsql
+ARG API_URL
 
-# Instala o Composer (pego da imagem oficial mais atual)
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN if [ -n "$API_URL" ]; then echo "VITE_API_URL=${API_URL}" > .env.docker; fi
 
-# Define o diretório de trabalho
-WORKDIR /var/www
 
-# Copia os arquivos do projeto
 COPY . .
+RUN npm run build
 
-# Instala as dependências do Laravel
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
-
-# Expõe a porta do PHP-FPM
-EXPOSE 9000
-
-# Comando padrão para iniciar o FPM
-CMD ["php-fpm"]
+# estágio de produção
+FROM nginx:1.24.0 as production-stage
+COPY --from=build-stage /var/www/html/dist /usr/share/nginx/html
+COPY --from=build-stage /var/www/html/nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 5173
+CMD ["nginx", "-g", "daemon off;"]

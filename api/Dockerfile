@@ -3,15 +3,15 @@ FROM php:8.3-fpm
 
 # Instala extensões necessárias para Laravel com PostgreSQL
 RUN apt-get update && apt-get install -y \
-    libpng-dev libjpeg-dev libfreetype6-dev zip unzip git curl \
+    libpq-dev libpng-dev libjpeg-dev libfreetype6-dev zip unzip git curl \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_pgsql
+    && docker-php-ext-install pgsql pdo_pgsql pdo
 
 # Instala o Composer (pego da imagem oficial mais atual)
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.7.1 /usr/bin/composer /usr/bin/composer
 
 # Define o diretório de trabalho
-WORKDIR /var/www
+WORKDIR /var/www/html
 
 # Copia os arquivos do projeto
 COPY . .
@@ -23,4 +23,6 @@ RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 EXPOSE 9000
 
 # Comando padrão para iniciar o FPM
+RUN chown -R www-data:www-data \
+    /var/www
 CMD ["php-fpm"]

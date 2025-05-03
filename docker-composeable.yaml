@@ -1,12 +1,38 @@
 version: '3.8'
 
 services:
+  api:
+    build:
+      context: ./api
+    expose:
+      - "9000"
+    ports:
+      - "9080:9000"
+    volumes:
+      - ./api/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - ger-vec
+    depends_on:
+      - redis
+      - postgres
+
+  app:
+    build:
+      context: ./app
+      args:
+        - API_URL=${API_URL}
+    expose:
+      - "5173"
+    networks:
+      - ger-vec
+
   redis:
     image: redis:latest
     container_name: redis-container
-    ports:
-      - "6379:6379"
-    # Não especificamos mais a rede personalizada, será usado o padrão 'bridge'
+    expose:
+      - "6379"
+    networks:
+      - ger-vec
 
   postgres:
     image: postgres:latest
@@ -15,14 +41,29 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: senha123
       POSTGRES_DB: api
-    ports:
-      - "5433:5432"
-    # Também sem a rede personalizada, usará 'bridge' por padrão
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    networks:
+      - ger-vec
 
-# A rede 'bridge' padrão não precisa ser explicitamente definida, é implícita
+  nginx:
+    image: nginx:1.24.0
+    container_name: nginx-container
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "7100:80"
+    command: [ "sh", "-c", "nginx -g 'daemon off;' && nginx -s reload" ]
+    depends_on:
+      - api
+      - app
+    networks:
+      - ger-vec
 
 volumes:
   postgres-data:
     driver: local
+
+networks:
+  ger-vec:
+    driver: bridge
