@@ -19,8 +19,13 @@ COPY . .
 # Instala as dependências do Laravel
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
+
+RUN mv .env.docker .env
+RUN php artisan key:generate
 RUN php artisan route:cache
 RUN php artisan config:cache
+
+
 # Expõe a porta do PHP-FPM
 EXPOSE 9000
 
