@@ -5,8 +5,10 @@ FROM php:8.3-fpm
 RUN apt-get update && apt-get install -y \
     libpq-dev libpng-dev libjpeg-dev libfreetype6-dev zip unzip git curl \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pgsql pdo_pgsql pdo
-
+    && docker-php-ext-install pgsql pdo_pgsql pdo \
+    && apt-get install -y libssl-dev libzip-dev \
+    && pecl install redis \
+    && docker-php-ext-enable redis
 # Instala o Composer (pego da imagem oficial mais atual)
 COPY --from=composer:2.7.1 /usr/bin/composer /usr/bin/composer
 
