@@ -8,7 +8,7 @@ import CampoShow from '@/components/form-components/CampoShow.vue';
 import ShowTemplate from '@/components/form-components/ShowTemplate.vue';
 import api from '@/plugins/api';
 import type IRevisao from '@/types/IRevisao';
-import { formatarFloat, formatarLocalDate, formatarLocalDateTime } from '@/helpers/formatters';
+import { formatarFloat, formatarInteger, formatarLocalDate, formatarLocalDateTime } from '@/helpers/formatters';
 
 const route = useRoute();
 const router = useRouter();
@@ -19,6 +19,7 @@ const { id } = route.params;
 const fetchRevisao = async () => {
     try {
         const response = await api.get(`/revisoes/${id}`);
+        response.data.quilometragem = formatarInteger(response.data.quilometragem.replace(".", ","))
         response.data.quilometragem = formatarFloat(response.data.quilometragem.replace(".", ","), 2)
         response.data.valor_total = formatarFloat(response.data.valor_total.replace(".", ","), 2)
         revisao.value = response.data;
