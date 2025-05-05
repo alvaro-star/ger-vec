@@ -28,7 +28,8 @@ export const validCustomFormat = (format: string, input: string) => {
 
 
 export const formatarInteger = (number: string) => {
-    number = Number(extractNumbers(number)).toString()
+    const [integer, decimal] = number.split(",")
+    number = Number(extractNumbers(integer)).toString()
     if (number.length == 0) return ''
 
     let nExcecos = number.length % 3;
@@ -48,7 +49,6 @@ export const formatarFloat = (number: string, precicion: number) => {
     precicion = precicion || 2
 
     let [integer, decimal] = number.split(',')
-    console.log();
 
     if (!decimal && (!integer || integer == '')) return ''
     integer = formatarInteger(integer)

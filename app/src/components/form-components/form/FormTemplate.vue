@@ -31,7 +31,7 @@ defineProps<{
         <section>
             <div v-if="create" class="mx-auto max-w-screen">
                 <div class="flex justify-end p-5 bg-white border border-gray-300 sm:rounded gap-4">
-                    <ButtonCancel label="Cancelar" @click="cancelarProcesso" />
+                    <ButtonCancel type="button" label="Cancelar" @click="cancelarProcesso" />
                     <ButtonCadastrar type="submit" label="Confirmar Cadastro" />
             </div>
             </div>
