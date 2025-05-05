@@ -19,7 +19,7 @@ const { id } = route.params;
 const fetchRevisao = async () => {
     try {
         const response = await api.get(`/revisoes/${id}`);
-        response.data.quilometragem = formatarInteger(response.data.quilometragem.replace(".", ","))
+        response.data.garantia_meses = formatarInteger(response.data.garantia_meses.replace(".", ","))
         response.data.quilometragem = formatarFloat(response.data.quilometragem.replace(".", ","), 2)
         response.data.valor_total = formatarFloat(response.data.valor_total.replace(".", ","), 2)
         revisao.value = response.data;
