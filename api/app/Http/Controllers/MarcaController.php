@@ -7,6 +7,7 @@ use App\Models\Marca;
 use App\Http\Requests\StoreMarcaRequest;
 use App\Http\Requests\UpdateMarcaRequest;
 use App\Models\Veiculo;
+use App\Utils\Redis\Entity\CacheEntityRequest;
 use Illuminate\Http\Request;
 
 class MarcaController extends Controller
@@ -17,7 +18,9 @@ class MarcaController extends Controller
      */
     public function index(Request $request)
     {
+        Marca::loadCacheInfo($request, ['query'], ['marcas']);
         $pageable = new PageInput($request);
+
         $query = $pageable->getQuery();
         $queryBuilder = Marca::query();
 
@@ -38,9 +41,10 @@ class MarcaController extends Controller
         return response()->json($response, 200);
     }
 
-    public function groupByPais(){
-        
-        $queryBuilder =  Marca::query();    
+    public function groupByPais()
+    {
+
+        $queryBuilder =  Marca::query();
         $response = $queryBuilder->selectRaw("pais, COUNT(*) as total")
             ->groupBy('pais')
             ->orderBy('total', 'desc')
@@ -53,10 +57,15 @@ class MarcaController extends Controller
      */
     public function store(StoreMarcaRequest $request)
     {
+
         $data = $request->validated();
         $marca = new Marca();
         $marca->fill($data);
         $marca->save();
+
+        $watcher = new CacheEntityRequest('marcas');
+        $watcher->alterNElements();
+
         return response()->json($marca, 201);
     }
 
@@ -87,6 +96,9 @@ class MarcaController extends Controller
         }
 
         $marca->save();
+
+        $watcher = new CacheEntityRequest('marcas');
+        $watcher->updateElement();
         return response()->json($marca, 200);
     }
 
@@ -104,6 +116,9 @@ class MarcaController extends Controller
         }
 
         $marca->delete();
+
+        $watcher = new CacheEntityRequest('marcas');
+        $watcher->alterNElements();
         return response()->json([], 204);
     }
 }

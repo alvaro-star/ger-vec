@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateVeiculoRequest;
 use App\Models\Marca;
 use App\Models\Pessoa;
 use App\Models\Revisao;
+use App\Utils\Redis\Entity\CacheEntityRequest;
 use App\Utils\TransformData;
 use Illuminate\Http\Request;
 
@@ -19,6 +20,7 @@ class VeiculoController extends Controller
 
     public function index(Request $request)
     {
+        Veiculo::loadCacheInfo($request, ['query', 'pessoa_id', 'marca_id'], ['veiculos', 'pessoas']);
         $pageable = new PageInput($request);
 
         $queryBuilder = Veiculo::join('pessoas', 'veiculos.pessoa_id', '=', 'pessoas.id')
@@ -69,7 +71,7 @@ class VeiculoController extends Controller
     {
         $response = Veiculo::join('pessoas', 'veiculos.pessoa_id', '=', 'pessoas.id')
             ->leftJoin('marcas', 'veiculos.marca_id', '=', 'marcas.id')
-            ->selectRaw('pessoas.is_masculino, marcas.nome as marca, COUNT(*) as total') // Renomeia marca.nome para marca
+            ->selectRaw('pessoas.is_masculino, marcas.nome as marca, COUNT(*) as total')
             ->groupBy('pessoas.is_masculino', 'marcas.nome')
             ->orderBy('pessoas.is_masculino', 'desc')
             ->orderBy('total', 'desc')
@@ -103,12 +105,13 @@ class VeiculoController extends Controller
         $veiculo->pessoa_id = $data["pessoa_id"];
         $veiculo->marca_id = $data["marca_id"];
 
-
         $veiculo->save();
         $pessoa = Pessoa::find($data["pessoa_id"]);
         $pessoa->n_veiculos++;
         $pessoa->save();
 
+        $watcher = new CacheEntityRequest('veiculos');
+        $watcher->alterNElements();
         return response()->json($veiculo, 201);
     }
 
@@ -146,6 +149,10 @@ class VeiculoController extends Controller
 
         $veiculo->fill($request->validated());
         $veiculo->save();
+
+        $watcher = new CacheEntityRequest('veiculos');
+        $watcher->updateElement();
+
         return response()->json($veiculo, 200);
     }
 
@@ -168,6 +175,8 @@ class VeiculoController extends Controller
 
         Pessoa::find($pessoa_id)?->decrement('n_veiculos');
 
+        $watcher = new CacheEntityRequest('veiculos');
+        $watcher->alterNElements();
         return response()->json([], 204);
     }
 }

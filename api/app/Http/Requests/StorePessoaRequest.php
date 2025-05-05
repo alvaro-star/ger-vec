@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\AgeOlder;
+use App\Rules\CPF;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StorePessoaRequest extends FormRequest
@@ -22,11 +24,11 @@ class StorePessoaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nome' => 'required|string|max:60',
-            'celular' => 'required|string|regex:/^\d{11}$/',
-            'cpf' => 'required|string|regex:/^\d{11}$/|unique:pessoas,cpf',
-            'sexo' => 'required|string|in:F,M',
-            'nascimento' => 'required|date',
+            'nome' => ['required', 'string', 'max:60'],
+            'celular' => ['required', 'string', 'regex:/^\d{11}$/'],
+            'cpf' => ['required', 'string', 'regex:/^\d{11}$/', 'unique:pessoas,cpf', new CPF],
+            'sexo' =>  ['required', 'string', 'in:F,M'],
+            'nascimento' => ['required', 'date', new AgeOlder],
         ];
     }
 

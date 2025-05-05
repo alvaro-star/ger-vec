@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\Renavam;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateVeiculoRequest extends FormRequest
@@ -19,17 +20,19 @@ class UpdateVeiculoRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
+
     public function rules(): array
     {
         return [
             'modelo' => 'required|string|max:50',
             'placa' => 'required|string|max:7',
-            'renavam' => 'required|string|regex:/^\d{11}$/',
+            'renavam' => ['required', 'string', 'regex:/^\d{11}$/', new Renavam],
             'ano' => 'required|integer|min:1800|max:' . (date('Y') + 1),
             'cor' => 'required|string|max:50',
             'tipo_combustivel' => 'required|string|max:50',
         ];
     }
+
 
     public function messages(): array
     {

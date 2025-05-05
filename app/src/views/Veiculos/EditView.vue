@@ -83,6 +83,8 @@ function validateForm(): boolean {
         formErrors.renavam = 'O renavam deve conter apenas números';
     else if (form.renavam.length != 11)
         formErrors.renavam = 'O renavam deve conter 11 digitos';
+    else if (!patterns.renavam.valid(form.renavam))
+        formErrors.renavam = 'O renavam não é válido.';
 
     if (!isInteger(form.ano)) {
         formErrors.ano = 'O ano deve conter apenas números';
@@ -182,7 +184,7 @@ onMounted(() => {
                 placeholder="Digite a placa" show-max-size :max-size="7" uppercase required />
 
             <NumberInput class="px-3" type="integer" label="Renavam" v-model="form.renavam" :message="errors.renavam"
-                placeholder="Digite o renavam" show-max-size :max-size="11" required />
+                placeholder="Digite o renavam" show-max-size :max-size="11" required not_format />
 
             <NumberInput type="integer" class="px-3" label="Ano de Fabricação" v-model="form.ano" :message="errors.ano"
                 :max-value="2025" not_format placeholder="Digite o ano" show-max-size :max-size="4" required />

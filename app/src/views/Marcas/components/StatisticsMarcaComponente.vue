@@ -4,13 +4,11 @@ import api from '@/plugins/api';
 import Pie from '@/plugins/chartjs/Pie.vue';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 
-// Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/scrollbar';
 import 'swiper/css/pagination';
 import { Navigation, Pagination, Scrollbar, A11y } from 'swiper/modules';
 
-// Vue setup
 import { onMounted, ref } from 'vue';
 
 const paises = ref<any[]>([]);

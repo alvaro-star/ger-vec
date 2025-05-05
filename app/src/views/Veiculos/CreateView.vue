@@ -59,7 +59,8 @@ function validateForm(): boolean {
         formErrors.renavam = 'O renavam deve conter apenas números';
     else if (form.renavam.length != 11)
         formErrors.renavam = 'O renavam deve conter 11 digitos';
-
+    else if (!patterns.renavam.valid(form.renavam))
+        formErrors.renavam = 'O renavam não é válido.';
 
     if (!isInteger(form.ano)) {
         formErrors.ano = 'O ano deve conter apenas números';

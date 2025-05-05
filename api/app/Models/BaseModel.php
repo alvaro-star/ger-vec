@@ -5,37 +5,30 @@ namespace App\Models;
 use App\Config\CustomBuilder;
 use App\DTOS\PageInput;
 use App\DTOS\PageOutput;
+use App\Utils\Redis\Pageable\CachePageableRequest;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 
 use function PHPUnit\Framework\returnSelf;
 
 class BaseModel extends Model
 {
-    private static string $controller;
-    private static string $method;
-    private static string $query;
-    private static string $where;
-    private static string $watchers;
+
+    public static CachePageableRequest|null $pageableCache = null;
+    public static function loadCacheInfo(Request $request, array $filters, array $watchers)
+    {
+        static::$pageableCache = new CachePageableRequest($request, $filters, $watchers);
+    }
 
     public function newEloquentBuilder($query)
     {
-        return new CustomBuilder($query);
+
+        $builder = new CustomBuilder($query);
+        $builder->pageableCache = static::$pageableCache;
+        return $builder;
     }
 
-    public static function setBaseKey($controller, $method) {
-        static::$controller = $controller;
-        static::$method = $method;
-    }
-    
-    public static function findAllByPageable(PageInput $pageable): PageOutput
-    {
-        $nElementos  = static::count();
-        $data = static::offset($pageable->getOffset())
-            ->limit($pageable->getLimit())
-            ->get();
-        return new PageOutput($pageable, $data, $nElementos);
-    }
     public function uniqueKeyIsOcuped($field, $value): array
     {
         $return = static::where($field, $value)->where('id', '!=', $this->id)->exists();

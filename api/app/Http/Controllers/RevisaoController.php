@@ -8,9 +8,9 @@ use App\Http\Requests\StoreRevisaoRequest;
 use App\Http\Requests\UpdateRevisaoRequest;
 use App\Models\Pessoa;
 use App\Models\Veiculo;
+use App\Utils\Redis\Entity\CacheEntityRequest;
 use App\Utils\TransformData;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class RevisaoController extends Controller
 {
@@ -20,6 +20,8 @@ class RevisaoController extends Controller
      */
     public function index(Request $request)
     {
+        Revisao::loadCacheInfo($request, ['data_start', 'data_end', 'pessoa_id', 'veiculo_id'], ['revisoes']);
+
         $pageable = new PageInput($request);
 
         $data_start = $request->query('data_start');
@@ -85,22 +87,22 @@ class RevisaoController extends Controller
         $veiculo->pessoa->save();
         $veiculo->save();
 
+        $watcher = new CacheEntityRequest('revisoes');
+        $watcher->alterNElements();
+
         return response()->json($revisao, 201);
     }
 
     public function countRevisoesByPessoa(Request $request)
     {
-        // Realiza uma busca basica com base nos filtros das pessoas
+        Revisao::loadCacheInfo($request, ['query'], ['revisoes', 'pessoas']);
+
         $pageable = new PageInput($request);
         $query = $pageable->getQuery();
 
         $queryBuilder = Pessoa::query()
-            ->leftJoin('cache_revisaos', 'pessoas.id', '=', 'cache_revisaos.pessoa_id') // Ajuste conforme necessário para o campo de chave
-            ->select('pessoas.*', 'cache_revisaos.last_revisao', 'cache_revisaos.avg_revisoes as media'); // Seleciona todas as colunas de pessoas e as duas colunas de cache_revisaos
-
-
-
-        //$queryBuilder = Pessoa::query();
+            ->leftJoin('cache_revisaos', 'pessoas.id', '=', 'cache_revisaos.pessoa_id')
+            ->select('pessoas.*', 'cache_revisaos.last_revisao', 'cache_revisaos.avg_revisoes as media');
 
         if (!in_array($pageable->getSort(), ['nome', 'cpf', 'n_revisoes'])) {
             $pageable->setSort('n_revisoes');
@@ -108,8 +110,6 @@ class RevisaoController extends Controller
         }
 
         $queryBuilder->orderBy($pageable->getSort(), $pageable->getDirection());
-
-
 
         $query_numbers = TransformData::extractNumbers($query);
         if ($query !== '') {
@@ -146,6 +146,9 @@ class RevisaoController extends Controller
         $data = $request->validated();
         $reviso->fill($data);
         $reviso->save();
+
+        $watcher = new CacheEntityRequest('revisoes');
+        $watcher->updateElement();
         return response()->json($reviso, 200);
     }
 
@@ -157,6 +160,9 @@ class RevisaoController extends Controller
         Veiculo::find($reviso->veiculo_id)->decrement('n_revisoes');
         Pessoa::find($reviso->pessoa_id)->decrement('n_revisoes');
         $reviso->delete();
+
+        $watcher = new CacheEntityRequest('revisoes');
+        $watcher->alterNElements();
         return response()->json([], 204);
     }
 }

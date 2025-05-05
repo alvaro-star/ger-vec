@@ -62,16 +62,11 @@ function validateForm(): boolean {
         formErrors['nascimento'] = 'Insira uma data válido';
     else {
         const idade = calculateIdade(form.nascimento)
-        console.log("A idade do garoto", idade);
-
         if (idade < 18)
             formErrors['nascimento'] = 'Deve ter no mínimo 18 anos';
         if (idade > 100)
             formErrors['nascimento'] = 'Deve ter no maximo 100 anos';
     }
-
-
-
 
     if (!patterns.cpf.valid(form.cpf))
         formErrors.cpf = 'Insira um CPF válido';

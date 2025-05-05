@@ -3,9 +3,7 @@
 namespace App\Utils;
 
 use DateTime;
-use Exception;
 
-use function PHPUnit\Framework\returnSelf;
 
 class TransformData
 {
@@ -36,7 +34,6 @@ class TransformData
     {
         if ($string === null) return null;
 
-        // Verifica se a string está no formato yyyy-mm-dd
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $string)) {
             return null;
         }
@@ -51,5 +48,14 @@ class TransformData
         }
 
         return $date;
+    }
+
+    public static function nascimentoStringToIdade(string $nascimento)
+    {
+        $data_nascimento = TransformData::stringToDateTime($nascimento);
+        if ($data_nascimento === null) return 0;
+        $data_atual = new DateTime();
+        $idade = $data_atual->diff($data_nascimento)->y;
+        return $idade;
     }
 }

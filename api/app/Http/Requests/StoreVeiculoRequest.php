@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\Renavam;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreVeiculoRequest extends FormRequest
@@ -22,16 +23,17 @@ class StoreVeiculoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'modelo' => 'required|string|max:50',
-            'placa' => 'required|string|unique:veiculos,placa|max:7',
-            'renavam' => 'required|string|unique:veiculos,renavam|regex:/^\d{11}$/',
-            'ano' => 'required|integer|min:1800|max:' . (date('Y') + 1),
-            'cor' => 'required|string|max:50',
-            'tipo_combustivel' => 'required|string|max:50',
-            'pessoa_id' => 'required|exists:pessoas,id',
-            'marca_id' => 'required|exists:marcas,id',
+            'modelo' => ['required', 'string', 'max:50'],
+            'placa' => ['required', 'string', 'unique:veiculos,placa', 'max:7'],
+            'renavam' => ['required', 'string', 'unique:veiculos,renavam', 'regex:/^\d{11}$/', new Renavam],
+            'ano' => ['required', 'integer', 'min:1800', 'max:' . (date('Y') + 1)],
+            'cor' => ['required', 'string', 'max:50'],
+            'tipo_combustivel' => ['required', 'string', 'max:50'],
+            'pessoa_id' => ['required', 'exists:pessoas,id'],
+            'marca_id' => ['required', 'exists:marcas,id'],
         ];
     }
+
     public function messages()
     {
         return [

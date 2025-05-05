@@ -10,7 +10,9 @@ use App\Http\Requests\UpdatePessoaRequest;
 use App\Models\CacheRevisao;
 use App\Models\Revisao;
 use App\Models\Veiculo;
+use App\Utils\Redis\Entity\CacheEntityRequest;
 use App\Utils\TransformData;
+use App\Utils\Validators;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,23 +24,11 @@ class PessoaController extends Controller
 {
     protected array $sorter = ['nome', 'celular', 'cpf', 'idade'];
     /**
-     * Lista os registros de pessoas com suporte a paginação, filtro por nome e sexo.
+     * Lista os registros de pessoas
      */
-    public function calculateIdadeColection(PageOutput $page)
-    {
-        foreach ($page->content as $item)
-            $item->idade =  $this->calculateIdade($item->nascimento);
-    }
-
-    public function calculateIdade(string $nascimento)
-    {
-        $data_nascimento = TransformData::stringToDateTime($nascimento);
-        $data_atual = new DateTime();
-        $idade = $data_atual->diff($data_nascimento)->y;
-        return $idade;
-    }
     public function index(Request $request)
     {
+        Pessoa::loadCacheInfo($request, ['query', 'sexo'], ['pessoas']);
 
         $pageable = new PageInput($request);
         $query = $pageable->getQuery();
@@ -75,6 +65,14 @@ class PessoaController extends Controller
         $this->calculateIdadeColection($response);
         return response()->json($response, 200);
     }
+
+    public function calculateIdadeColection(PageOutput $page)
+    {
+        foreach ($page->content as $item)
+            $item->idade =  TransformData::nascimentoStringToIdade($item->nascimento);
+    }
+
+
 
     /**
      * Retorna estatísticas agregadas das pessoas por sexo e no total.
@@ -193,19 +191,15 @@ class PessoaController extends Controller
 
         $pessoa->fill($request->validated());
         $pessoa->is_masculino = $request->sexo === 'M';
-        $idade =  $this->calculateIdade($pessoa->nascimento);
-        if ($idade < 18) {
-            return response()->json([
-                'message' => 'Erro no formulario',
-                'errors' => ['nascimento' => ['Deve ser maior de idade']]
-            ], 422);
-        }
         $pessoa->save();
 
         $cache_revisao = new CacheRevisao();
         $cache_revisao->pessoa_id = $pessoa->id;
 
         $cache_revisao->save();
+
+        $watcher = new CacheEntityRequest('pessoas');
+        $watcher->alterNElements();
         return response()->json($pessoa, 201);
     }
 
@@ -214,7 +208,7 @@ class PessoaController extends Controller
      */
     public function show(Pessoa $pessoa)
     {
-        $pessoa['idade'] = $this->calculateIdade($pessoa->nascimento);
+        $pessoa['idade'] = TransformData::nascimentoStringToIdade($pessoa->nascimento);
         return response()->json($pessoa, 200);
     }
 
@@ -225,25 +219,23 @@ class PessoaController extends Controller
     {
         $pessoa->fill($request->validated());
 
-        $pessoa_with_cpf = Pessoa::where('cpf', $request->cpf)->first();
-        if ($pessoa_with_cpf != null && $pessoa_with_cpf->id != $pessoa->id) {
-            return response()->json([
-                'message' => 'Erros no formulario',
-                'errors' => ['cpf' => ['O cpf já está cadastrado']]
-            ], 422);
-        }
+        $errors = [];
 
-        $idade =  $this->calculateIdade($pessoa->nascimento);
-        if ($idade < 18) {
+        $pessoa_with_cpf = Pessoa::where('cpf', $request->cpf)->first();
+        if ($pessoa_with_cpf != null && $pessoa_with_cpf->id != $pessoa->id)
+            $errors['cpf'] = ['O cpf já está cadastrado'];
+
+        if (count($errors) > 0)
             return response()->json([
                 'message' => 'Erro no formulario',
-                'errors' => ['nascimento' => ['Deve ser maior de idade']]
+                'errors' => $errors
             ], 422);
-        }
 
         $pessoa->is_masculino = $request->sexo === 'M';
         $pessoa->save();
 
+        $watcher = new CacheEntityRequest('pessoas');
+        $watcher->updateElement();
         return response()->json($pessoa, 200);
     }
 
@@ -262,6 +254,9 @@ class PessoaController extends Controller
         }
 
         $pessoa->delete();
+
+        $watcher = new CacheEntityRequest('pessoas');
+        $watcher->alterNElements();
         return response()->json([], 204);
     }
 }

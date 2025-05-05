@@ -1,10 +1,12 @@
 import { formatarCelular, formatarCPF, formatarFloat, formatarInteger, validCustomFormat } from "../formatters"
+import extractNumbers from "../functions/extractNumbers";
 
 // Tipo para campos de entrada comuns
 type KeysValidator =
     | 'text'
     | 'integer'
     | 'float'
+    | 'renavam'
     | 'email'
     | 'placa'
     | 'cpf'
@@ -54,13 +56,53 @@ const patterns: Record<KeysValidator, IValidator> = {
         message: "O formato do valor deve ser AAA0A00"
     },
     cpf: {
-        valid: (input) => /^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(input),
+        valid: (input) => {
+            if (!/^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(input))
+                return false;
+
+            const numbersCPF = extractNumbers(input)
+
+            if (numbersCPF.length != 11) return false
+
+            let firstSum = 0;
+            let seconSum = 0;
+            for (let i = 0, j = 10; i < 9; i++, j--)
+                firstSum += parseInt(numbersCPF[i]) * j;
+            let firstDigit = firstSum % 11
+            firstDigit = (firstDigit >= 2) ? 11 - firstDigit : 0
+
+            for (let i = 0, j = 11; i < 10; i++, j--)
+                seconSum += parseInt(numbersCPF[i]) * j;
+            let seconDigit = seconSum % 11
+            seconDigit = (seconDigit >= 2) ? 11 - seconDigit : 0
+
+            return (firstDigit.toString() == numbersCPF.charAt(9) && seconDigit.toString() == numbersCPF.charAt(10))
+        },
         semiValid: (input) => {
             const format = "NNN.NNN.NNN-NN"
             return validCustomFormat(format, input)
         },
         format: formatarCPF,
-        message: "O formato deve ser 000.000.000-00"
+        message: "O CPF informado não é válido"
+    },
+    renavam: {
+        valid: (input) => {
+            const numbers = extractNumbers(input)
+            let soma = 0
+            if (numbers.length != 11) return false;
+
+            const pesos = [3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+            for (let i = 0; i < 10; i++)
+                soma += pesos[i] * parseInt(numbers.charAt(i));
+            let digit = soma % 11
+            digit = ((digit >= 2) ? 11 - digit : 0)
+            return parseInt(numbers.charAt(10)) === digit
+        },
+        semiValid: (input) => {
+            const numbers = extractNumbers(input)
+            return numbers.length <= 11 && numbers.length != input.length
+        },
+        message: "A renavam informado não é válida"
     },
     cep: {
         valid: (input) => /^\d{5}-?\d{3}$/.test(input),
