@@ -12,7 +12,7 @@ COPY . .
 RUN npm run build
 
 # estágio de produção
-FROM nginx:1.24.0 as production-stage
+FROM nginx:1.24.0-alpine as production-stage
 COPY --from=build-stage /var/www/html/dist /usr/share/nginx/html
 COPY --from=build-stage /var/www/html/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 5173

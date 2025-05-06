@@ -25,7 +25,7 @@ services:
       - ger-vec
 
   redis:
-    image: redis:latest
+    image: redis:8.0.0-alpine
     container_name: redis-container
     expose:
       - "6379"
@@ -33,7 +33,7 @@ services:
       - ger-vec
 
   postgres:
-    image: postgres:latest
+    image: postgres:17-alpine
     container_name: postgres-container
     environment:
       POSTGRES_USER: postgres
@@ -47,7 +47,7 @@ services:
       - postgres-data:/var/lib/postgresql/data
 
   nginx:
-    image: nginx:1.24.0
+    image: nginx:1.24.0-alpine
     container_name: gateway-container
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf

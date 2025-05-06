@@ -31,7 +31,7 @@ services:
     command: ["npm", "run", "dev"]  # Substituindo o CMD para o serviço app
 
   redis:
-    image: redis:latest
+    image: redis:8.0.0-alpine
     container_name: redis-container
     expose:
       - "6379"  # Não é mapeado para o host, mas está acessível para outros containers na mesma rede
@@ -39,7 +39,7 @@ services:
       - ger-vec
 
   postgres:
-    image: postgres:latest
+    image: postgres:17-alpine
     container_name: postgres-container
     environment:
       POSTGRES_USER: postgres
