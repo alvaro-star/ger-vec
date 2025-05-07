@@ -38,7 +38,7 @@ class MarcaController extends Controller
         }
 
         $response = $queryBuilder->getByPageable($pageable);
-        return response()->json($response, 200);
+        return response()->json($response, 200)->header('Cache-Control', 'public, max-age=2');;
     }
 
     public function groupByPais()

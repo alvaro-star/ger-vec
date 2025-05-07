@@ -24,6 +24,8 @@ class UpdateRevisaoRequest extends FormRequest
         return [
             'data' => 'required|date',
             'quilometragem' => 'required|numeric|min:0',
+            'descricao' => 'string',
+            'observacoes' => 'string',
             'tipo' => 'required|string|max:50',
             'valor_total' => 'required|numeric|min:0',
             'garantia_meses' => 'required|numeric|min:0',

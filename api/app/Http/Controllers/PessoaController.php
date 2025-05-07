@@ -63,7 +63,7 @@ class PessoaController extends Controller
 
         $response = $queryBuilder->getByPageable($pageable);
         $this->calculateIdadeColection($response);
-        return response()->json($response, 200);
+        return response()->json($response, 200)->header('Cache-Control', 'public, max-age=2');
     }
 
     public function calculateIdadeColection(PageOutput $page)

@@ -126,7 +126,7 @@ class RevisaoController extends Controller
             $item->last_revisao = $item->last_revisao ?? '';
         }
 
-        return response()->json($response, 200);
+        return response()->json($response, 200)->header('Cache-Control', 'public, max-age=2');;
     }
 
     /**
@@ -149,7 +149,7 @@ class RevisaoController extends Controller
 
         $watcher = new CacheEntityRequest('revisoes');
         $watcher->updateElement();
-        return response()->json($reviso, 200);
+        return response()->json($reviso, 200)->header('Cache-Control', 'public, max-age=2');;
     }
 
     /**

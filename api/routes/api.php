@@ -19,6 +19,8 @@ Route::apiResource('pessoas', PessoaController::class);
 
 
 Route::get('/veiculos/statistics/sexo-marca/n_veiculos', [VeiculoController::class, 'nVeiculosBySexoAndMarca']);
+Route::get('/veiculos/placas', [VeiculoController::class, 'listPlacas']);
+
 Route::apiResource('veiculos', VeiculoController::class);
 
 Route::apiResource('revisoes', RevisaoController::class);

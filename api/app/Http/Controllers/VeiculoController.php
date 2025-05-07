@@ -8,7 +8,9 @@ use App\Http\Requests\StoreVeiculoRequest;
 use App\Http\Requests\UpdateVeiculoRequest;
 use App\Models\Marca;
 use App\Models\Pessoa;
+use Illuminate\Support\Facades\Redis;
 use App\Models\Revisao;
+use App\Utils\Redis\CacheRequest;
 use App\Utils\Redis\Entity\CacheEntityRequest;
 use App\Utils\TransformData;
 use Illuminate\Http\Request;
@@ -51,7 +53,25 @@ class VeiculoController extends Controller
 
 
         $response = $queryBuilder->getByPageable($pageable);
-        return response()->json($response, 200);
+        return response()->json($response, 200)->header('Cache-Control', 'public, max-age=2');
+    }
+
+    public function listPlacas(Request $request)
+    {
+        $cache = new CacheRequest($request);
+        $cache->loadFromCache();
+        $placas = null;
+        if ($cache->getObject() == null) {
+            $placas = Veiculo::select('placa')->orderBy('placa')->get();
+            $placas = $placas->map(function ($veiculo) {
+                return $veiculo->placa;
+            });
+            $cache->setObject($placas);
+            $cache->saveCache(1800);
+        } else {
+            $placas = $cache->getObject();
+        }
+        return response()->json($placas)->header('Cache-Control', 'public, max-age=3');
     }
 
     // Exibe a quantidade de veículos agrupados por marca

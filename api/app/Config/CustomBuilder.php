@@ -9,7 +9,7 @@ use App\Utils\Redis\Pageable\CachePageableRequest;
 
 class CustomBuilder extends Builder
 {
-    public CachePageableRequest|null $pageableCache = null;
+    public CachePageableRequest | null $pageableCache = null;
 
     public function getByPageable(PageInput $pageable): PageOutput
     {
@@ -33,7 +33,6 @@ class CustomBuilder extends Builder
         } else {
             $nElementos  = $clonedQuery->count();
         }
-
 
         return new PageOutput($pageable, $data, $nElementos);
     }

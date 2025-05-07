@@ -26,6 +26,8 @@ class StoreRevisaoRequest extends FormRequest
             'quilometragem' => 'required|numeric|min:0',
             'tipo' => 'required|string|max:50',
             'valor_total' => 'required|numeric|min:0',
+            'descricao' => 'string',
+            'observacoes' => 'string',
             'garantia_meses' => 'required|numeric|min:0',
             'placa' => 'required|exists:veiculos,placa',
         ];

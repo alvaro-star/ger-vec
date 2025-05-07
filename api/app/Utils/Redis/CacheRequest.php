@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Utils\Redis\CacheData\CacheWatcher;
 use Illuminate\Support\Facades\Redis;
 
-abstract class CacheRequest
+class CacheRequest
 {
     protected ?string $key;
     private mixed $object;
@@ -55,10 +55,10 @@ abstract class CacheRequest
     }
 
 
-    public function saveCache()
+    public function saveCache($expiration = 259200) // O tempo em segundos de 3 dias
     {
         $key  = $this->key;
         $value = serialize($this->getObject());
-        Redis::set($key, $value);
+        Redis::setex($key, $expiration, $value);
     }
 }

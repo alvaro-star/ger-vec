@@ -23,7 +23,6 @@ class CachePageableRequest extends CacheRequest
         $this->watchers = $watchers;
         $this->object = null;
 
-
         $this->loadFromCache();
     }
 
