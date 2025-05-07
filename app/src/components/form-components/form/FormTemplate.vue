@@ -16,7 +16,7 @@ defineProps<{
     <form class="p-3">
         <section class="pb-3">
             <div class="mx-auto max-w-screen">
-                <div class="p-5 bg-white relative border border-gray-300 sm:rounded overflow-hidden">
+                <div class="p-5 bg-white relative border border-gray-300 sm:rounded">
                     <h2 class="text-xl font-semibold mb-4">{{ header }}</h2>
                     <div class="border-b border-colorline"></div>
                     <div class="-mx-3 mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">

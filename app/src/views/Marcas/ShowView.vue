@@ -49,8 +49,6 @@ onMounted(fetchMarca)
         </template>
     </HeaderModule>
     <main class="min-h-[calc(100vh-56px)] pb-10">
-
-
         <Suspense>
             <template #default>
                 <div v-if="marca" class="container">

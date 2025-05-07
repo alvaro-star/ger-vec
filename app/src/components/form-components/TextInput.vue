@@ -14,6 +14,7 @@ const props = withDefaults(defineProps<{
   firstUppercase?: boolean;
   uppercase?: boolean;
   maxSize?: number;
+  disabled?: boolean
 }>(), {
   label: '',
   message: '',
@@ -23,6 +24,7 @@ const props = withDefaults(defineProps<{
   maxSize: undefined,
   firstUppercase: false,
   uppercase: false,
+  disabled: false
 });
 
 
@@ -54,5 +56,5 @@ const validTarget = (value: string) => {
 <template>
   <InputComponent v-model="model" :type="type" :label="label" :message="message" :placeholder="placeholder"
     :required="required" :max-size="maxSize" :show-max-size="maxSize !== undefined" :valid-target="validTarget"
-    :format-target="formatter" />
+    :format-target="formatter" :disabled="disabled" />
 </template>

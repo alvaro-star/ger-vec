@@ -8,6 +8,7 @@ import extractNumbers from "./functions/extractNumbers"
  */
 export const validCustomFormat = (format: string, input: string) => {
     if (format.length < input.length) return false
+
     for (let i = 0; i < input.length; i++) {
         switch (format[i]) {
             case "A":
@@ -97,9 +98,17 @@ export const formatarCelular = (numeros: string) => {
 }
 
 export const formatarLocalDateTime = (localDateTime: string): string => {
-    const [data, hora] = localDateTime.split('T');
-    return formatarLocalDate(data);
+    let [data, hora] = localDateTime.split('T');
+    let horaBreaked = hora.split(":")
+    return formatarLocalDate(data) + " - " + (horaBreaked[0] + "h:" + horaBreaked[1]) + "m";
 };
+
+// A funcao foi desenvolvida deivido a influencia do fuso horario da maquina e do servidor
+export const createDateByString = (localDate: string) => {
+    const [ano, mes, dia] = localDate.split('-').map(Number).map(Number)
+
+    return new Date(ano, mes - 1, dia)
+}
 
 export const formatarLocalDate = (localDate: string): string => {
     const [ano, mes, dia] = localDate.split('-').map(Number)
@@ -109,4 +118,12 @@ export const formatarLocalDate = (localDate: string): string => {
     const diaStr = String(data.getDate()).padStart(2, '0')
     const mesStr = String(data.getMonth() + 1).padStart(2, '0')
     return `${diaStr}/${mesStr}/${data.getFullYear()}`
+}
+
+export const formatarDateToStringDate = (data: Date | undefined): string => {
+    if (!data) return '';
+    const year = data.getFullYear();
+    const month = String(data.getMonth() + 1).padStart(2, '0');
+    const day = String(data.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }

@@ -1,12 +1,12 @@
 import CookieAccessToken from "@/cookies/CookieAccessToken"
 import CookieRefreshToken from "@/cookies/CookieRefreshToken"
 import CookieUserLogued from "@/cookies/CookieUsuarioLogued"
-import axios from "axios"
+import axios, { type AxiosInstance } from "axios"
 
 
 const APP_API_URL = import.meta.env.VITE_API_URL
 
-const api = axios.create({
+const api: AxiosInstance = axios.create({
     baseURL: APP_API_URL,
     headers: {
         'Content-Type': 'application/json',
@@ -47,5 +47,6 @@ api.interceptors.response.use(
         return Promise.reject(error)
     }
 )
+
 
 export default api

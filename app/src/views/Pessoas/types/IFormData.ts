@@ -4,5 +4,5 @@ export default interface IFormData {
     celular: string;
     cpf: string;
     sexo: string;
-    nascimento: string;
+    nascimento: Date | undefined;
 }

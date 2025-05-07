@@ -13,6 +13,7 @@ import api from '@/plugins/api';
 import { useAlertStore } from '@/stores/alertState';
 import type IMarca from '@/types/IMarca';
 import type IPageOutput from '@/types/IPageOutput';
+import type IVeiculo from '@/types/IVeiculo';
 import { onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -90,12 +91,12 @@ async function submitForm() {
             marca_id: form.marca,
         }
 
-        await api.post('/veiculos', formData);
+        const response = await api.post<IVeiculo>('/veiculos', formData);
 
         alertStore.setMessage('O veículo foi cadastrado com sucesso!', null);
         router.push({
-            name: 'pessoas.show',
-            params: { id: pessoaId },
+            name: 'revisoes.create',
+            query: { placa: response.data.placa },
             replace: true
         });
     } catch (erro: any) {

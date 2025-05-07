@@ -16,6 +16,19 @@ export function isDate(ng: string) {
     return /^\d{4}-\d{2}-\d{2}$/.test(ng);
 }
 
+
+export function calculateIdadeByDate(nascimento: Date) {
+    const now = new Date()
+    now.setHours(0, 0, 0, 0)
+    let diffAnos = now.getFullYear() - nascimento.getFullYear()
+
+    if (nascimento.getMonth() + 1 > now.getMonth() + 1)
+        diffAnos--;
+    else if (now.getMonth() + 1 == now.getMonth() + 1 && nascimento.getDate() > now.getDate())
+        diffAnos--;
+    return diffAnos
+}
+
 export function calculateIdade(data: string) {
     const [ano, mes, dia] = data.split("-").map(Number);
     const now = new Date()
@@ -29,11 +42,9 @@ export function calculateIdade(data: string) {
     return diffAnos
 }
 
-export function isDateInFuture(dateString: string) {
+export function isDateInFuture(inputDate: Date) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
-    const inputDate = new Date(dateString);
     inputDate.setHours(0, 0, 0, 0);
 
     return inputDate > today;

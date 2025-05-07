@@ -17,7 +17,7 @@ const props = withDefaults(defineProps<{
     restartSelectEdit?: boolean
     validTarget: (arg: string) => string
     formatTarget?: (arg: string) => string
-
+    disabled?: boolean
 }>(), {
     label: '',
     message: '',
@@ -29,7 +29,8 @@ const props = withDefaults(defineProps<{
     maxValue: undefined,
     showMaxSize: false,
     restartSelectEdit: false,
-    maxSize: 20
+    maxSize: 20,
+    disabled: false
 });
 
 
@@ -80,7 +81,6 @@ const updateValue = (event: Event) => {
     })
 }
 
-
 const focusWithin = ref(false);
 </script>
 
@@ -92,7 +92,7 @@ const focusWithin = ref(false);
         </label>
         <div :class="[' flex items-center transition duration-300 rounded w-full bg-inputBg text-gray-700',
             focusWithin ? (messageDefault !== '' ? 'ring-1 ring-red-500 border-red-600' : 'border ring-1 ring-blue-500 border-blue-600')
-                : (messageDefault !== '' ? 'border border-red-600' : 'border')
+                : (messageDefault !== '' ? 'border border-red-600' : 'border border-gray-900')
         ]">
 
             <p v-show="prefix" :class="['pl-4', messageDefault !== '' && 'text-red-700']">
@@ -100,7 +100,7 @@ const focusWithin = ref(false);
             </p>
 
             <input ref="inputRef" :type="type" v-model="value" @input="updateValue" @focus="focusWithin = true"
-                @blur="focusWithin = false" :placeholder="placeholder" :class="['appearance-none block w-full bg-transparent outline-none border-none ring-0 py-3 leading-tight',
+                @blur="focusWithin = false" :disabled="disabled" :placeholder="placeholder" :class="['appearance-none block w-full bg-transparent outline-none border-none ring-0 py-3 leading-tight',
                     prefix ? 'pl-2' : 'pl-4',
                     showMaxSize ? 'pr-1' : 'pr-4'
                 ]" />

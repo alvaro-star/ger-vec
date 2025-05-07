@@ -2,12 +2,13 @@
 import CloseModal from '@/components/CloseModal.vue';
 import HeaderModule from '@/components/data-table/HeaderModule.vue';
 import BackButton from '@/components/form-components/buttons/BackButton.vue';
+import DateInput from '@/components/form-components/DateInput.vue';
 import FormTemplate from '@/components/form-components/form/FormTemplate.vue';
 import NumberInput from '@/components/form-components/NumberInput.vue';
 import SelectInput from '@/components/form-components/SelectInput.vue';
 import TextInput from '@/components/form-components/TextInput.vue';
 import { tipo_revisao } from '@/data/options_selects';
-import { formatarFloat, formatarInteger } from '@/helpers/formatters';
+import { createDateByString, formatarDateToStringDate, formatarFloat, formatarInteger } from '@/helpers/formatters';
 import { validEmptyFieldsForm } from '@/helpers/functions/validFormData';
 import patterns from '@/helpers/regexp/patterns';
 import { isDateInFuture } from '@/helpers/validatorsFunctions';
@@ -20,11 +21,12 @@ import { useRoute, useRouter } from 'vue-router';
 const alertStore = useAlertStore();
 const router = useRouter();
 const route = useRoute();
+const placaVeiculo = ref<string | null>(null)
 
 const getIdByRoute = () => route.query.id || route.params.id;
 
 interface FormData {
-    data: string;
+    data: Date | undefined;
     quilometragem: string;
     tipo: string;
     descricao: string;
@@ -34,7 +36,7 @@ interface FormData {
 }
 
 const form = reactive<FormData>({
-    data: '',
+    data: undefined,
     quilometragem: '',
     tipo: '',
     descricao: '',
@@ -59,13 +61,16 @@ const fetchRevisao = async () => {
         form.valor_total = formatarFloat(form.valor_total.replace(".", ","), 2)
         form.observacoes = data.observacoes || '';
         form.descricao = data.descricao || '';
+        form.data = createDateByString(data.data)
+        if (data.veiculo)
+            placaVeiculo.value = data.veiculo.placa
     } catch (error) {
         console.error((error as Error).message);
     }
 };
 
 function validateForm(): boolean {
-    const requiredFields = ['data', 'quilometragem', 'tipo', 'valor_total', 'garantia_meses'];
+    const requiredFields = ['quilometragem', 'tipo', 'valor_total', 'garantia_meses'];
 
     const formErrors: Record<string, string> = validEmptyFieldsForm(form, requiredFields);
 
@@ -76,7 +81,10 @@ function validateForm(): boolean {
 
     }
 
-    if (isDateInFuture(form.data))
+
+    if (!form.data)
+        formErrors['data'] = 'O valor não deve estar em branco';
+    else if (isDateInFuture(form.data))
         formErrors['data'] = 'A data ainda não ocorreu';
 
     errors.value = formErrors;
@@ -149,13 +157,15 @@ onMounted(fetchRevisao);
     <main class="min-h-[calc(100vh-56px)] pb-10">
         <FormTemplate class="container" :create="false" :open-delete-modal="openDeleteModal" header="Dados da Revisão"
             @submit.prevent="submitForm" :cancelar-processo="cancelarEdicao">
-
-            <TextInput class="px-3" label="Data" v-model="form.data" :message="errors.data"
-                placeholder="Digite a data da revisão" type="date" :required="true" />
+            <TextInput type="placa" v-if="placaVeiculo" disabled class="px-3" label="Placa" v-model="placaVeiculo"
+                :message="errors.placa" uppercase placeholder="Placa do veículo" required :show-max-size="true"
+                :max-size="7" />
+            <DateInput class="w-full px-3" label="Data" placeholder="Digite a data da revisão" :message="errors.data"
+                v-model="form.data" required />
 
             <NumberInput class="px-3" label="Quilometragem" prefix="Km" v-model="form.quilometragem"
-                :message="errors.quilometragem" placeholder="Digite a quilometragem" type="float" :precision="2"
-                :required="true" :max-value="999999.99" />
+                :message="errors.quilometragem" placeholder="Digite a quilometragem" type="integer" :required="true"
+                :max-value="999999" />
 
             <SelectInput class="px-3" label="Tipo de Revisão" v-model="form.tipo" :options="tipo_revisao"
                 :message="errors.tipo" placeholder="Selecione o tipo" :required="true" :show-max-size="true" />

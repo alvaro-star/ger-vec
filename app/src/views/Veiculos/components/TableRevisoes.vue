@@ -6,8 +6,8 @@ import Pagination from '@/components/data-table/Pagination.vue'
 import Row from '@/components/data-table/Row.vue'
 import TableActions from '@/components/data-table/TableActions.vue'
 import PrimaryButton from '@/components/form-components/buttons/PrimaryButton.vue'
-import TextInput from '@/components/form-components/TextInput.vue'
-import { formatarFistLetter, formatarLocalDate } from '@/helpers/formatters'
+import DateInput from '@/components/form-components/DateInput.vue'
+import { formatarDateToStringDate, formatarFistLetter, formatarFloat, formatarInteger, formatarLocalDate } from '@/helpers/formatters'
 import api from '@/plugins/api'
 import type IColumn from '@/types/IColumn'
 import type IPageOutput from '@/types/IPageOutput'
@@ -19,8 +19,8 @@ const props = defineProps<{
     placa: string
     title: string
 }>()
-const dataInicio = ref<string>('')
-const dataFim = ref<string>('')
+const dataInicio = ref<Date>()
+const dataFim = ref<Date>()
 
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(10)
@@ -43,29 +43,22 @@ const errors = ref<Record<string, string>>({})
 
 const paginatedRecords = computed(() => rows.value)
 const fetchData = async () => {
-    let dataIniDate = null
-    let dataFimDate = null
+
     errors.value = {}
 
-    if (dataInicio.value !== '') {
-        dataIniDate = new Date(dataInicio.value)
-    }
-    if (dataFim.value !== '') {
-        dataFimDate = new Date(dataFim.value)
-    }
-
-    if (dataIniDate && dataFimDate && dataIniDate > dataFimDate) {
+    if (dataInicio.value && dataFim.value && dataInicio.value > dataFim.value) {
         errors.value = {
             dataFim: 'Valor inválido'
         }
         return
     }
+
     const params = {
         veiculo_id: props.id,
         page: currentPage.value,
         size: pageSize.value,
-        data_start: dataInicio.value,
-        data_end: dataFim.value,
+        data_start: formatarDateToStringDate(dataInicio.value),
+        data_end: formatarDateToStringDate(dataFim.value),
         sort: sort.value,
         asc: asc.value
     }
@@ -79,8 +72,8 @@ const fetchData = async () => {
         rows.value = data.content.map((item: IRevisao) => ({
             ...item,
             data: formatarLocalDate(item.data),
-            quilometragem: `${item.quilometragem} km`,
-            valor_total: `R$ ${item.valor_total}`,
+            quilometragem: formatarInteger(item.quilometragem.toString().replace(".", ",")) + ' km',
+            valor_total: "R$ " + formatarFloat(item.valor_total.toString().replace(".", ","), 2),
             garantia_meses: `${item.garantia_meses} meses`,
             routeName: 'revisoes.show',
         }))
@@ -126,9 +119,9 @@ onMounted(fetchData)
                     <TableActions :show-search="false" placeholder="" title="Lista de Revisões">
                         <div class="flex flex-col md:flex-row gap-2 items-center">
                             <p class="text-xl">Intervalo</p>
-                            <TextInput class="w-40" type="date" v-model="dataInicio" placeholder="Início" />
-                            <TextInput :message="errors.dataFim" class="w-40" type="date" v-model="dataFim"
-                                placeholder="Fim" />
+                            <DateInput class="w-40 flex-shrink-0" v-model="dataInicio" placeholder="Início" />
+                            <DateInput class="w-40 flex-shrink-0" v-model="dataFim" placeholder="Fim"
+                                :message="errors.dataFim" />
                             <div class="w-full flex justify-center">
                                 <button
                                     class="flex cursor-pointer items-center px-4 bg-customBackground h-11 rounded text-white font-semibold"

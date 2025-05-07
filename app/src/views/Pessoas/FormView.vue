@@ -2,14 +2,15 @@
 import CloseModal from '@/components/CloseModal.vue';
 import HeaderModule from '@/components/data-table/HeaderModule.vue';
 import BackButton from '@/components/form-components/buttons/BackButton.vue';
+import DateInput from '@/components/form-components/DateInput.vue';
 import FormTemplate from '@/components/form-components/form/FormTemplate.vue';
 import SelectInput from '@/components/form-components/SelectInput.vue';
 import TextInput from '@/components/form-components/TextInput.vue';
-import { formatarCelular, formatarCPF } from '@/helpers/formatters';
+import { createDateByString, formatarCelular, formatarCPF, formatarDateToStringDate } from '@/helpers/formatters';
 import extractNumbers from '@/helpers/functions/extractNumbers';
 import { validEmptyFieldsForm } from '@/helpers/functions/validFormData';
 import patterns from '@/helpers/regexp/patterns';
-import { calculateIdade, isDate } from '@/helpers/validatorsFunctions';
+import { calculateIdadeByDate } from '@/helpers/validatorsFunctions';
 import api from '@/plugins/api';
 import { useAlertStore } from '@/stores/alertState';
 import type IPessoa from '@/types/IPessoa';
@@ -28,7 +29,7 @@ const form = reactive<IFormData>({
     celular: '',
     cpf: '',
     sexo: '',
-    nascimento: ''
+    nascimento: undefined
 });
 
 const errors = ref<Record<string, string>>({});
@@ -39,11 +40,13 @@ const fetchPessoa = async () => {
     if (!id) return;
     try {
         const response = await api.get<IPessoa>(`/pessoas/${id}`);
+        console.log(response.data);
         form.nome = response.data.nome;
         form.celular = formatarCelular(response.data.celular);
         form.cpf = formatarCPF(response.data.cpf);
         form.sexo = response.data.is_masculino ? 'Masculino' : 'Feminino';
-        form.nascimento = response.data.nascimento.toString();
+
+        form.nascimento = createDateByString(response.data.nascimento);
     } catch (error) {
         console.error((error as Error).message);
     }
@@ -58,10 +61,10 @@ function validateForm(): boolean {
     let formErrors: Record<string, string> = validEmptyFieldsForm(form, requiredFields);
 
 
-    if (!isDate(form.nascimento))
+    if (!(form.nascimento))
         formErrors['nascimento'] = 'Insira uma data válido';
     else {
-        const idade = calculateIdade(form.nascimento)
+        const idade = calculateIdadeByDate(form.nascimento)
         if (idade < 18)
             formErrors['nascimento'] = 'Deve ter no mínimo 18 anos';
         if (idade > 100)
@@ -110,7 +113,8 @@ const submitForm = async () => {
             ...form,
             cpf: extractNumbers(form.cpf),
             celular: extractNumbers(form.celular),
-            sexo: form.sexo === 'Masculino' ? 'M' : 'F'
+            sexo: form.sexo === 'Masculino' ? 'M' : 'F',
+            nascimento: formatarDateToStringDate(form.nascimento)
         }
         if (id) {
             await updatePessoa(id, formData);
@@ -190,9 +194,9 @@ onMounted(() => {
                     <SelectInput class="w-full px-3" label="Sexo" v-model="form.sexo"
                         :options="['Masculino', 'Feminino']" :message="errors.sexo" placeholder="Selecione o sexo" />
 
-                    <TextInput required class="w-full px-3" label="Data Nascimento" v-model="form.nascimento"
-                        :message="errors.nascimento" not_format placeholder="Digite o seu ano de nascimento"
-                        type="date" />
+                    <DateInput class="w-full px-3" label="Data de Nascimento"
+                        placeholder="Digite o seu ano de nascimento" :message="errors.nascimento"
+                        v-model="form.nascimento" required />
                 </FormTemplate>
             </template>
             <template #fallback>

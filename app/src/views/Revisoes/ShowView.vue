@@ -20,7 +20,7 @@ const fetchRevisao = async () => {
     try {
         const response = await api.get(`/revisoes/${id}`);
         response.data.garantia_meses = formatarInteger(response.data.garantia_meses.replace(".", ","))
-        response.data.quilometragem = formatarFloat(response.data.quilometragem.replace(".", ","), 2)
+        response.data.quilometragem = formatarInteger(response.data.quilometragem.replace(".", ","))
         response.data.valor_total = formatarFloat(response.data.valor_total.replace(".", ","), 2)
         revisao.value = response.data;
     } catch (error) {
@@ -63,9 +63,7 @@ onMounted(fetchRevisao);
             <CampoShow titulo="Descrição" :valor="revisao.descricao" />
             <CampoShow titulo="Quilometragem" :valor="revisao.quilometragem + ' km'" />
             <CampoShow titulo="Garantia" :valor="revisao.garantia_meses + ' meses'" />
-            <CampoShow titulo="Valor">
-                R$ {{ revisao.valor_total }}
-            </CampoShow>
+            <CampoShow titulo="Valor">R$ {{ revisao.valor_total }}</CampoShow>
             <CampoShow titulo="Data" :valor="formatarLocalDate(revisao.data)" />
             <CampoShow titulo="Observacoes" :valor="revisao.observacoes" />
             <template #dates>

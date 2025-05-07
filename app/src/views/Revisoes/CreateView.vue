@@ -1,11 +1,14 @@
 <script lang="ts" setup>
 import HeaderModule from '@/components/data-table/HeaderModule.vue';
 import BackButton from '@/components/form-components/buttons/BackButton.vue';
+import DateInput from '@/components/form-components/DateInput.vue';
 import FormTemplate from '@/components/form-components/form/FormTemplate.vue';
 import NumberInput from '@/components/form-components/NumberInput.vue';
 import SelectInput from '@/components/form-components/SelectInput.vue';
 import TextInput from '@/components/form-components/TextInput.vue';
+import TextSelectInput from '@/components/form-components/TextSelectInput.vue';
 import { tipo_revisao } from '@/data/options_selects';
+import { formatarDateToStringDate } from '@/helpers/formatters';
 import { validEmptyFieldsForm } from '@/helpers/functions/validFormData';
 import patterns from '@/helpers/regexp/patterns';
 import { isDateInFuture } from '@/helpers/validatorsFunctions';
@@ -18,12 +21,12 @@ const alertStore = useAlertStore();
 
 const router = useRouter();
 const route = useRoute();
-const getIdByRoute = () => route.query.id || route.params.id;
+const placas = ref<string[]>([])
 
 const veiculoPlaca = route.query.placa;
 
 interface RevisaoFormData {
-    data: string;
+    data: Date | undefined;
     quilometragem: string;
     tipo: string;
     descricao: string;
@@ -34,7 +37,7 @@ interface RevisaoFormData {
 }
 
 const form = reactive<RevisaoFormData>({
-    data: '',
+    data: undefined,
     quilometragem: '',
     tipo: '',
     descricao: '',
@@ -47,12 +50,13 @@ const form = reactive<RevisaoFormData>({
 const errors = ref<Record<string, string>>({});
 const loading = ref(false);
 
+
 function voltar() {
     router.back();
 }
 
 function validateForm(): boolean {
-    const requiredFields = ['data', 'tipo', 'placa'];
+    const requiredFields = ['tipo', 'placa'];
 
     let formErrors: Record<string, string> = validEmptyFieldsForm(form, requiredFields);
 
@@ -64,28 +68,39 @@ function validateForm(): boolean {
 
         if (!patterns.float.valid(value))
             formErrors[field] = 'Insira um valor válido';
-
     }
-    if (isDateInFuture(form.data))
+
+    if (!form.data)
+        formErrors['data'] = 'O valor não deve estar em branco';
+    else if (isDateInFuture(form.data))
         formErrors['data'] = 'A data ainda não ocorreu';
 
     errors.value = formErrors;
     return Object.keys(formErrors).length === 0;
 }
 
+function formatForm(form: any) {
+    const formCopia = { ...form };
+
+    formCopia.valor_total = formCopia.valor_total === '' ? '0' : formCopia.valor_total;
+    formCopia.quilometragem = formCopia.quilometragem === '' ? '0' : formCopia.quilometragem;
+    formCopia.garantia_meses = formCopia.garantia_meses === '' ? '0' : formCopia.garantia_meses;
+    formCopia.data = formatarDateToStringDate(formCopia.data);
+
+    for (const field of ['quilometragem', 'valor_total', 'garantia_meses']) {
+        let numericValue = formCopia[field].replace(/\./g, '').replace(',', '.');
+        formCopia[field] = numericValue.toString();
+    }
+
+    return formCopia;
+}
+
 async function submitForm() {
     if (!validateForm()) return;
     loading.value = true;
     try {
-        if (form.valor_total == '') form.valor_total = '0'
-        if (form.quilometragem == '') form.quilometragem = '0'
-        if (form.garantia_meses == '') form.garantia_meses = '0'
-        for (const field of ["quilometragem", 'valor_total', 'garantia_meses']) {
-            let numericValue = (form as any)[field].replace(/\./g, "").replace(",", ".");
-            (form as any)[field] = numericValue.toString();
-        }
-
-        await api.post('/revisoes', form);
+        const formData = formatForm(form)
+        await api.post('/revisoes', formData);
         alertStore.setMessage('A revisão foi cadastrada com sucesso!', null);
         window.history.go(-1);
     } catch (erro: any) {
@@ -103,7 +118,17 @@ const cancelarCadastro = () => {
     router.back();
 }
 
+const fetchPlacas = async () => {
+    try {
+        const response = await api.get('/veiculos/placas');
+        placas.value = response.data || []
+    } catch (error) {
+        console.error('Erro ao buscar placas:', error);
+    }
+};
+
 onMounted(() => {
+    fetchPlacas()
     if (veiculoPlaca) form.placa = veiculoPlaca as string;
 })
 </script>
@@ -120,16 +145,15 @@ onMounted(() => {
     <main class="min-h-[calc(100vh-56px)] pb-10">
         <FormTemplate class="container" :create="true" header="Dados da Revisão" @submit.prevent="submitForm"
             :cancelar-processo="cancelarCadastro">
-            <TextInput type="placa" v-if="!veiculoPlaca" class="px-3" label="Placa" v-model="form.placa"
-                :message="errors.placa" uppercase placeholder="Digite a placa do veículo" required :show-max-size="true"
-                :max-size="7" />
+            <TextSelectInput v-model="form.placa" :disabled="(!!veiculoPlaca)" :options="placas" label="Placa"
+                class="px-3 flex-shrink-0" placeholder="Digite a placa do carro" required />
 
-            <TextInput class="px-3" label="Data" v-model="form.data" :message="errors.data"
-                placeholder="Digite a data da revisão" type="date" required />
+            <DateInput class="w-full px-3" label="Data" placeholder="Digite a data da revisão" :message="errors.data"
+                v-model="form.data" required />
 
             <NumberInput class="px-3" label="Quilometragem" prefix="Km" v-model="form.quilometragem"
-                :message="errors.quilometragem" placeholder="Digite a quilometragem" type="float" required
-                :max-value="999999.99" />
+                :message="errors.quilometragem" placeholder="Digite a quilometragem" type="integer" required
+                :max-value="999999" />
 
             <SelectInput class="px-3" label="Tipo de Revisão" v-model="form.tipo" :options="tipo_revisao"
                 :message="errors.tipo" placeholder="Selecione o tipo" required :show-max-size="true" />

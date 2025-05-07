@@ -14,8 +14,9 @@ type KeysValidator =
     | 'letter_only'
     | "letter_and_number_only"
     | 'phone'
+    | 'date'
 
-export type InputType = KeysValidator | 'date'
+export type InputType = KeysValidator
 
 interface IValidator {
     semiValid: (input: string) => boolean,
@@ -25,6 +26,14 @@ interface IValidator {
 }
 
 const patterns: Record<KeysValidator, IValidator> = {
+    date: {
+        valid: (input) => /^\d{1,3}\\(\d{3})*$/.test(input),
+        semiValid: (input) => {
+            let format = "NN/NN/NNNN"
+            return validCustomFormat(format, input)
+        },
+        message: 'Digite uma data valida'
+    },
     integer: {
         valid: (input) => /^\d{1,3}(\.\d{3})*$/.test(input),
         semiValid: (input) => /^\d*$/.test(input),
